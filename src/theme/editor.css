@@ -146,6 +146,7 @@ ul { padding: 0; list-style: none; }
 }
 
 .map-canvas canvas { display: block; touch-action: none; }
+.map-canvas .surface-editing { cursor: crosshair; }
 
 .viewport-fallback {
   position: absolute;

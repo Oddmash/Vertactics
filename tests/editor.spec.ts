@@ -108,7 +108,7 @@ test('renders and manipulates the same elevated terrain in both views', async ({
   expect(pageErrors).toEqual([]);
 });
 
-test('places and moves a hero across views, then undoes and redoes elevation changes', async ({ page }) => {
+test('places and moves a hero across views, then undoes and redoes elevation changes', async ({ page }, testInfo) => {
   const pageErrors: string[] = [];
   page.on('pageerror', (error) => pageErrors.push(error.message));
   await page.goto('/');
@@ -118,6 +118,7 @@ test('places and moves a hero across views, then undoes and redoes elevation cha
   const inspector = page.getByRole('complementary', { name: '지형 정보' });
   await expect(canvas).toBeVisible();
   await twoD.click();
+  await expect(canvas).toHaveAttribute('data-view-mode', '2d');
 
   const box = await canvas.boundingBox();
   if (!box) throw new Error('Canvas has no bounds');
@@ -128,6 +129,7 @@ test('places and moves a hero across views, then undoes and redoes elevation cha
   );
 
   await page.getByRole('button', { name: '배치 시작' }).click();
+  await expect(canvas).toHaveCSS('cursor', 'crosshair');
   await clickWorld(6, -8.6);
   await expect(page.getByText('배치할 지면을 클릭하세요.')).toBeVisible();
   await clickWorld(0, 0);
@@ -135,10 +137,17 @@ test('places and moves a hero across views, then undoes and redoes elevation cha
   await expect(inspector.getByText('0 u', { exact: true })).toBeVisible();
 
   await inspector.getByRole('button', { name: '이동', exact: true }).click();
+  await expect(canvas).toHaveCSS('cursor', 'crosshair');
   await clickWorld(-9.5, -5);
   await expect(inspector.getByText('+4 u')).toBeVisible();
+  const coordinates = inspector.locator('dl div').filter({ hasText: '좌표 (X, Y, Z)' }).locator('dd');
+  const worldPosition = await coordinates.innerText();
   await threeD.click();
+  await expect(canvas).toHaveAttribute('data-view-mode', '3d');
   await expect(inspector.getByText('+4 u')).toBeVisible();
+  await expect(inspector.getByText('공격팀')).toBeVisible();
+  await expect(coordinates).toHaveText(worldPosition);
+  await page.screenshot({ path: testInfo.outputPath('vertactics-hero-placement.png') });
 
   await page.getByRole('button', { name: '실행 취소', exact: true }).click();
   await expect(inspector.getByText('0 u', { exact: true })).toBeVisible();

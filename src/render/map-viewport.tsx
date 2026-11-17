@@ -1,5 +1,5 @@
-import { Canvas } from '@react-three/fiber';
-import { Component, useMemo } from 'react';
+import { Canvas, useThree } from '@react-three/fiber';
+import { Component, useLayoutEffect, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { BoxGeometry } from 'three';
 import { mapBounds, terrainBlocks } from '../domain/map';
@@ -27,6 +27,15 @@ class ViewportBoundary extends Component<{ children: ReactNode }, { failed: bool
     return this.state.failed ? <Fallback /> : this.props.children;
   }
 }
+
+const SurfaceCursor = ({ editing }: { editing: boolean }) => {
+  const canvas = useThree((state) => state.gl.domElement);
+  useLayoutEffect(() => {
+    canvas.classList.toggle('surface-editing', editing);
+    return () => canvas.classList.remove('surface-editing');
+  }, [canvas, editing]);
+  return null;
+};
 
 type Props = {
   map: MapDefinition;
@@ -71,6 +80,7 @@ const MapViewport = ({
         <directionalLight position={[-15, 24, 10]} intensity={1.5} />
         <directionalLight position={[18, 8, -15]} intensity={0.35} />
         <MapCamera mode={mode} bounds={bounds} reset={reset} />
+        <SurfaceCursor editing={Boolean(onEditSurface)} />
         <gridHelper
           position={[bounds.center[0], bounds.min[1] - 0.02, bounds.center[2]]}
           args={[gridSize, gridSize, tokens.color.axis, tokens.color.grid]}

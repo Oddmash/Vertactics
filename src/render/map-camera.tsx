@@ -74,6 +74,7 @@ const MapCamera = ({ mode, bounds, reset }: Props) => {
       controls.current.update();
     }
     camera.updateProjectionMatrix();
+    camera.updateMatrixWorld();
     invalidate();
   }, [bounds.center, camera, invalidate, reset, span]);
 
@@ -91,8 +92,9 @@ const MapCamera = ({ mode, bounds, reset }: Props) => {
       camera.fov = verticalFov * 180 / Math.PI;
     }
     camera.updateProjectionMatrix();
+    gl.domElement.dataset.viewMode = mode;
     invalidate();
-  }, [aspect, camera, invalidate, spanX, spanZ]);
+  }, [aspect, camera, gl, invalidate, mode, spanX, spanZ]);
 
   return null;
 };
