@@ -58,7 +58,7 @@ test('downloads nonblank PNGs from both active map cameras', async ({ page }) =>
   await page.goto('/');
   const canvas = page.getByTestId('viewport').locator('canvas');
   const captures: Buffer[] = [];
-  for (const [mode, name] of [['2d', '2D 탑다운'], ['3d', '3D 원근']]) {
+  for (const [mode, name] of [['2d', '2D 탑다운'], ['3d', '3D 원근']] as const) {
     await page.getByRole('button', { name }).click();
     await expect(canvas).toHaveAttribute('data-view-mode', mode);
     const pending = page.waitForEvent('download');
