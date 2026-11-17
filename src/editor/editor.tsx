@@ -1,3 +1,4 @@
+import { measureSegment } from '../domain/measurement';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import type { Annotation } from '../domain/annotation';
 import { rotateTerrain, snapTerrain } from '../domain/terrain-edit';
@@ -46,6 +47,14 @@ const Editor = () => {
   const { min, max } = useMemo(() => mapBounds(map.terrain), [map]);
   const [importMessage, setImportMessage] = useState('');
   const [mapEditing, setMapEditing] = useState(false);
+  const [measuring, setMeasuring] = useState(false);
+  const [measurement, setMeasurement] = useState<WorldPoint[]>([]);
+  const first = measurement[0];
+  const second = measurement[1];
+  const distance = first && second ? measureSegment(first, second) : null;
+  const measurementOverlay: Annotation[] = first ? [{
+    id: 'measurement-preview', kind: second ? 'line' : 'note', label: '측정', points: measurement,
+  }] : [];
   const [mapMessage, setMapMessage] = useState('');
   const [mapHistory, setMapHistory] = useState<Record<string, { past: MapDefinition[]; future: MapDefinition[] }>>({});
   const timeline = Object.hasOwn(mapHistory, mapId) ? mapHistory[mapId]! : { past: [], future: [] };
@@ -75,6 +84,7 @@ const Editor = () => {
     setAnnotationPick(null);
     setDragPreview(null);
     setHeroTool(next);
+    setMeasuring(false);
   }, []);
   const initialHistory = useMemo(() => createStrategyHistory(createStrategy('local-draft', mapId, '새 전략')), [mapId]);
   const [histories, setHistories] = useState<Record<string, StrategyHistory>>({});
@@ -86,6 +96,7 @@ const Editor = () => {
   const switchMap = (id: string) => {
     setTool(null);
     setMapMessage('');
+    setMeasurement([]);
     setLayerId('');
     setSelectedId(null);
     setSelectedHeroId(null);
@@ -216,6 +227,10 @@ const Editor = () => {
   }, [dispatch, locked, setTool, tool]);
 
   const editSurface = (position: WorldPoint) => {
+    if (measuring) {
+      setMeasurement((points) => points.length === 1 ? [...points, position] : [position]);
+      return;
+    }
     if (locked) return;
     if (annotationPick) { annotationPick.apply(position); return; }
     if (!tool) return;
@@ -232,7 +247,7 @@ const Editor = () => {
 
   return (
     <div className="editor" onKeyDown={(event) => {
-      if (event.key === 'Escape' && (tool || annotationPick)) {
+      if (event.key === 'Escape' && (tool || annotationPick || measuring)) {
         event.preventDefault();
         setTool(null);
         return;
@@ -341,6 +356,11 @@ const Editor = () => {
               <option value="">모든 층</option>
               {map.layers.map(({ id, name }) => <option key={id} value={id}>{name}</option>)}
             </select></label>}
+            <button type="button" className="reset-button" aria-pressed={measuring} onClick={() => {
+              setTool(null);
+              setMeasuring(!measuring);
+              if (!measuring) setMeasurement([]);
+            }}>거리 측정</button>
             <label><input type="checkbox" checked={snap} onChange={(event) => setSnap(event.target.checked)} /> 격자 스냅</label>
             <label><input type="checkbox" checked={locked} onChange={(event) => {
               setTool(null);
@@ -373,9 +393,9 @@ const Editor = () => {
               selectedHeroId={selectedHeroId}
               onSelect={selectTerrain}
               onSelectHero={selectHero}
-              annotations={!mapEditing && showAnnotations ? annotations : []}
+              annotations={[...(!mapEditing && showAnnotations ? annotations : []), ...measurementOverlay]}
               selectedAnnotationId={annotationId}
-              onEditSurface={!locked && ((tool && tool.kind !== 'drag') || annotationPick) ? editSurface : undefined}
+              onEditSurface={measuring || (!locked && ((tool && tool.kind !== 'drag') || annotationPick)) ? editSurface : undefined}
               onDragSurface={!locked && tool?.kind === 'drag' ? setDragPreview : undefined}
               onDropSurface={!locked && tool?.kind === 'drag' ? finishDrag : undefined}
             />
@@ -438,6 +458,14 @@ const Editor = () => {
               </>
             ) : <p className="empty-selection">지도 또는 지형 목록에서 블록을 선택하세요.</p>}
           </div>
+          {(measuring || first) && <section className="hero-tools" aria-label="측정 결과">
+            {distance ? <dl>
+              <div><dt>수평 거리</dt><dd>{formatNumber(distance.horizontal)} u</dd></div>
+              <div><dt>높이 차</dt><dd>{formatElevation(distance.rise)}</dd></div>
+              <div><dt>직선 거리</dt><dd>{formatNumber(distance.distance)} u</dd></div>
+            </dl> : <p>{first ? '두 번째 지점을 선택하세요.' : '첫 번째 지점을 선택하세요.'}</p>}
+            {first && <button type="button" className="reset-button" onClick={() => setMeasurement([])}>측정 지우기</button>}
+          </section>}
           {mapEditing ? <>
             <TerrainTools
               map={map}

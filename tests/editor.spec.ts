@@ -557,3 +557,31 @@ test('shows obstruction between hero positions', async ({ page }) => {
   await page.getByLabel('시야 확인 대상').selectOption({ index: 1 });
   await expect(page.getByText('시야: 북쪽 벽 · 충돌: 북쪽 벽')).toBeVisible();
 });
+
+test('measures height and distance across surfaces and keeps the result through view changes', async ({ page }) => {
+  await page.goto('/');
+  const canvas = page.getByTestId('viewport').locator('canvas');
+  await page.getByRole('button', { name: '2D 탑다운' }).click();
+  await expect(canvas).toHaveAttribute('data-view-mode', '2d');
+  await page.getByRole('checkbox', { name: '격자 스냅' }).check();
+  await page.getByRole('button', { name: '거리 측정', exact: true }).click();
+  await expect(canvas).toHaveCSS('cursor', 'crosshair');
+  const click = async (x: number, z: number) => {
+    const box = await canvas.boundingBox();
+    if (!box) throw new Error('Canvas has no bounds');
+    const units = Math.max(36 / box.width, 24 / box.height) * 1.22;
+    await page.mouse.click(box.x + box.width / 2 + x / units, box.y + box.height / 2 + z / units);
+  };
+  await click(0, 5);
+  const result = page.getByRole('region', { name: '측정 결과' });
+  await expect(result.getByText('두 번째 지점을 선택하세요.')).toBeVisible();
+  await click(7, 5);
+  await expect(result.getByText('7 u', { exact: true })).toBeVisible();
+  await expect(result.getByText('+2 u', { exact: true })).toBeVisible();
+  await expect(result.getByText('7.28 u', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: '3D 원근' }).click();
+  await expect(canvas).toHaveAttribute('data-view-mode', '3d');
+  await expect(result.getByText('7.28 u', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: '측정 지우기' }).click();
+  await expect(result.getByText('첫 번째 지점을 선택하세요.')).toBeVisible();
+});
