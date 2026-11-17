@@ -112,8 +112,9 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 
 ## Phase 7 · Strategy tools
 
-- [ ] 7.01 Model phases, timing, hero positions, abilities and durations
-- [ ] 7.02 Edit phases and share playback, pause, seeking and speed controls across views
+- [x] 7.01 Model phases, timing, hero positions, abilities and durations
+- [x] 7.02a Edit phases, capture hero poses, and schedule ability events
+- [ ] 7.02b Share playback, pause, seeking and speed controls across both views
 - [ ] 7.03 Verify interpolation, playback boundaries and restoration at an intermediate point
 - [ ] 7.04 Create, list, reopen, clone and delete strategies in IndexedDB
 - [ ] 7.05 Handle autosave, errors, close recovery, migration and corrupt documents
@@ -177,3 +178,4 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 | Spatial boundaries | 55 unit tests and 25 Chromium scenarios passed. Verified wall boundaries, clear door openings, stair seams and the blocked and open sections of the training map stairs. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44047549788) |
 | Sightline CPU timing | One eye-level ray and three exposure rays per observation, 1,000 warm-ups and 5,000 seeded pairs per case. Local arm64 with Node.js 24.14.0. P95 was 0.002 ms for Courtyard (4 blocks), 0.008 ms for Elevation Lab (21), 0.011 ms for King's Row Point A (39), and 0.318 ms for a synthetic 32-copy Point A layout (1,248). The sample measures domain CPU time. Defer BVH for the current maps and remeasure if live updates or larger maps are introduced. |
 | Sightline inputs and visibility layers | 56 unit tests and 26 Chromium scenarios passed. Hero placements supply eye-height endpoints. Segment intersection uses the full terrain map with independent sight and collision flags, including when a layer is hidden. Viewport picking uses Three.js; sightline analysis uses the validated terrain geometry. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44048791767) · [Screenshot](https://github.com/qtaghdi/Vertactics/actions/runs/44048791767/artifacts/14312971060) |
+| Strategy timeline editing | 58 unit tests and 27 Chromium scenarios passed. Validated timed events and IDs, placement dependencies, phase edits, undo, and restoring phases from a browser draft. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44049905226) |
