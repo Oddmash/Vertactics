@@ -1,6 +1,6 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import Editor from './editor/editor';
+import App from './app';
 import './theme';
 import './theme/editor.css';
 
@@ -9,6 +9,6 @@ if (!root) throw new Error('Application root is missing');
 
 createRoot(root).render(
   <StrictMode>
-    <Editor />
+    <App />
   </StrictMode>,
 );
