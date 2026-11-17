@@ -11,9 +11,9 @@ import type { Annotation } from '../domain/annotation';
 import MapAnnotations from './map-annotations';
 import SurfaceDrag from './surface-drag';
 import { Canvas, useThree } from '@react-three/fiber';
-import { Component, useLayoutEffect, useMemo } from 'react';
+import { Component, useEffect, useLayoutEffect, useMemo } from 'react';
 import type { ReactNode } from 'react';
-import { BoxGeometry } from 'three';
+import { BoxGeometry, BufferAttribute, BufferGeometry, EdgesGeometry } from 'three';
 import { mapBounds, terrainBlocks, visibleTerrainForLayer } from '../domain/map';
 import type { MapDefinition, WorldPoint } from '../domain/map';
 import type { HeroPlacement } from '../domain/strategy';
@@ -23,6 +23,34 @@ import type { ViewMode } from './map-camera';
 
 const unitBox = new BoxGeometry();
 const ramps = { '+x': rampGeometry('+x'), '-x': rampGeometry('-x'), '+z': rampGeometry('+z'), '-z': rampGeometry('-z') };
+const outlineVertices = (geometry: BufferGeometry) => {
+  const edges = new EdgesGeometry(geometry);
+  const positions = edges.getAttribute('position').array.slice();
+  edges.dispose();
+  return positions;
+};
+const boxOutline = outlineVertices(unitBox);
+const rampOutlines = {
+  '+x': outlineVertices(ramps['+x']), '-x': outlineVertices(ramps['-x']),
+  '+z': outlineVertices(ramps['+z']), '-z': outlineVertices(ramps['-z']),
+};
+
+const terrainOutlines = (terrain: ReturnType<typeof terrainBlocks>[]) => {
+  const blocks = terrain.flat();
+  const vertices = blocks.map((block) => block.slope ? rampOutlines[block.slope] : boxOutline);
+  const positions = new Float32Array(vertices.reduce((length, outline) => length + outline.length, 0));
+  let offset = 0;
+  blocks.forEach(({ center, size }, index) => {
+    const outline = vertices[index]!;
+    for (let vertex = 0; vertex < outline.length; vertex += 3) {
+      positions[offset++] = center[0] + outline[vertex]! * size[0];
+      positions[offset++] = center[1] + outline[vertex + 1]! * size[1];
+      positions[offset++] = center[2] + outline[vertex + 2]! * size[2];
+    }
+  });
+  return positions;
+};
+
 const skipRaycast = () => undefined;
 
 const Fallback = () => {
@@ -86,6 +114,9 @@ const MapViewport = ({
     terrain,
     blocks: terrainBlocks(terrain),
   })), [map, layerId]);
+  const outlineGeometry = useMemo(() => new BufferGeometry().setAttribute('position',
+    new BufferAttribute(terrainOutlines(blocks.map((entry) => entry.blocks)), 3)), [blocks]);
+  useEffect(() => () => outlineGeometry.dispose(), [outlineGeometry]);
   const gridSize = Math.ceil(Math.max(
     bounds.max[0] - bounds.min[0],
     bounds.max[2] - bounds.min[2],
@@ -126,6 +157,7 @@ const MapViewport = ({
                   key={index}
                   position={block.center}
                   scale={block.size}
+                  geometry={geometry}
                   userData={{ terrain, block }}
                   onClick={(event) => {
                     if (event.delta > 4 || onDragSurface) return;
@@ -139,23 +171,21 @@ const MapViewport = ({
                     onSelect(terrain.id, event.shiftKey || event.metaKey || event.ctrlKey);
                   }}
                 >
-                  {block.slope ? <primitive object={geometry} attach="geometry" /> : <boxGeometry />}
                   <meshStandardMaterial
                     color={terrain.material ?? tokens.color[terrain.kind]}
                     roughness={0.92}
                     emissive={tokens.color.accent}
                     emissiveIntensity={selectedTerrainIds.has(terrain.id) ? 0.26 : 0}
                   />
-                  <lineSegments raycast={skipRaycast}>
-                    <edgesGeometry args={[geometry]} />
-                    <lineBasicMaterial color={tokens.color.app} transparent opacity={0.48} />
-                  </lineSegments>
                 </mesh>
               );
             })}
           </group>
         ))}
         </group>
+        {outlineGeometry.getAttribute('position').count > 0 && <lineSegments geometry={outlineGeometry} raycast={skipRaycast}>
+          <lineBasicMaterial color={tokens.color.app} transparent opacity={0.48} />
+        </lineSegments>}
         {abilities.map((ability) => ability.visible && <MapAbilityPreview
           key={ability.id} settings={ability} position={ability.position} heading={ability.heading}
         />)}
