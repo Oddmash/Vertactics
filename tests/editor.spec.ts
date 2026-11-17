@@ -107,3 +107,46 @@ test('renders and manipulates the same elevated terrain in both views', async ({
   await expect(inspector.getByText('+2 u')).toBeVisible();
   expect(pageErrors).toEqual([]);
 });
+
+test('places and moves a hero across views, then undoes and redoes elevation changes', async ({ page }) => {
+  await page.goto('/');
+  const twoD = page.getByRole('button', { name: '2D 탑다운' });
+  const threeD = page.getByRole('button', { name: '3D 원근' });
+  const canvas = page.getByTestId('viewport').locator('canvas');
+  const inspector = page.getByRole('complementary', { name: '지형 정보' });
+  await expect(canvas).toBeVisible();
+  await twoD.click();
+
+  const box = await canvas.boundingBox();
+  if (!box) throw new Error('Canvas has no bounds');
+  const unitsPerPixel = Math.max(36 / box.width, 24 / box.height) * 1.22;
+  const clickWorld = (x: number, z: number) => page.mouse.click(
+    box.x + box.width / 2 + x / unitsPerPixel,
+    box.y + box.height / 2 + z / unitsPerPixel,
+  );
+
+  await page.getByRole('button', { name: '배치 시작' }).click();
+  await clickWorld(6, -8.6);
+  await expect(page.getByText('배치할 지면을 클릭하세요.')).toBeVisible();
+  await clickWorld(0, 0);
+  await expect(inspector.getByText('트레이서')).toBeVisible();
+  await expect(inspector.getByText('0 u', { exact: true })).toBeVisible();
+
+  await inspector.getByRole('button', { name: '이동', exact: true }).click();
+  await clickWorld(-9.5, -5);
+  await expect(inspector.getByText('+4 u')).toBeVisible();
+  await threeD.click();
+  await expect(inspector.getByText('+4 u')).toBeVisible();
+
+  await page.getByRole('button', { name: '실행 취소', exact: true }).click();
+  await expect(inspector.getByText('0 u', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: '다시 실행', exact: true }).click();
+  await expect(inspector.getByText('+4 u')).toBeVisible();
+
+  await inspector.getByRole('button', { name: '45° 회전' }).click();
+  await expect(inspector.getByText('45°', { exact: true })).toBeVisible();
+  await inspector.getByRole('button', { name: '팀 전환' }).click();
+  await expect(inspector.getByText('수비팀')).toBeVisible();
+  await inspector.getByRole('button', { name: '삭제' }).click();
+  await expect(page.getByRole('list', { name: '배치한 영웅' })).toHaveCount(0);
+});

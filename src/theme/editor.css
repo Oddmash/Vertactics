@@ -205,3 +205,31 @@ ul { padding: 0; list-style: none; }
   .viewport-toolbar { flex-wrap: wrap; }
   .viewport { min-height: 370px; }
 }
+
+.hero-tools {
+  display: grid;
+  gap: var(--space-md);
+  padding: var(--space-lg);
+  border-top: 1px solid var(--color-border);
+}
+
+.hero-tools h2 { font-size: 13px; }
+.hero-tools form, .pending-edit { display: grid; gap: var(--space-sm); }
+.hero-tools label { display: flex; align-items: center; justify-content: space-between; gap: var(--space-sm); font-size: 12px; }
+.hero-tools select {
+  padding: 6px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-app);
+  color: var(--color-text);
+  font: inherit;
+}
+.hero-tools select:focus-visible { outline: 2px solid var(--color-accent); }
+.hero-tools .terrain-list { padding: 0; }
+.hero-actions { display: flex; flex-wrap: wrap; gap: var(--space-xs); }
+.hero-actions .reset-button { min-height: 30px; padding: 4px 7px; }
+.inspector-body .hero-actions { margin-top: var(--space-md); }
+.hero-actions button:disabled { opacity: 0.5; cursor: default; }
+.pending-edit p { color: var(--color-accent); font-size: 12px; }
+.team-attack { background: var(--team-attack); border-radius: 0; }
+.team-defense { background: var(--team-defense); border-radius: 50%; }

@@ -3,7 +3,8 @@ import { Component, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { BoxGeometry } from 'three';
 import { mapBounds, terrainBlocks } from '../domain/map';
-import type { MapDefinition } from '../domain/map';
+import type { MapDefinition, WorldPoint } from '../domain/map';
+import type { HeroPlacement } from '../domain/strategy';
 import tokens from '../theme/tokens.json';
 import MapCamera from './map-camera';
 import type { ViewMode } from './map-camera';
@@ -32,9 +33,15 @@ type Props = {
   reset: number;
   selectedId: string | null;
   onSelect: (id: string | null) => void;
+  heroes: HeroPlacement[];
+  selectedHeroId: string | null;
+  onSelectHero: (id: string) => void;
+  onEditSurface?: (position: WorldPoint) => void;
 };
 
-const MapViewport = ({ map, mode, reset, selectedId, onSelect }: Props) => {
+const MapViewport = ({
+  map, mode, reset, selectedId, onSelect, heroes, selectedHeroId, onSelectHero, onEditSurface,
+}: Props) => {
   const bounds = useMemo(() => mapBounds(map.terrain), [map]);
   const blocks = useMemo(() => map.terrain.map((terrain) => ({
     terrain,
@@ -56,7 +63,7 @@ const MapViewport = ({ map, mode, reset, selectedId, onSelect }: Props) => {
         flat
         gl={{ antialias: true }}
         fallback={<Fallback />}
-        onPointerMissed={() => onSelect(null)}
+        onPointerMissed={() => { if (!onEditSurface) onSelect(null); }}
       >
         <color attach="background" args={[tokens.color.viewport]} />
         <ambientLight intensity={1.15} />
@@ -77,6 +84,12 @@ const MapViewport = ({ map, mode, reset, selectedId, onSelect }: Props) => {
                 onClick={(event) => {
                   if (event.delta > 4) return;
                   event.stopPropagation();
+                  if (onEditSurface) {
+                    if (terrain.kind !== 'wall' && event.face && event.face.normal.y > 0.5) {
+                      onEditSurface([event.point.x, center[1] + size[1] / 2, event.point.z]);
+                    }
+                    return;
+                  }
                   onSelect(terrain.id);
                 }}
               >
@@ -93,6 +106,31 @@ const MapViewport = ({ map, mode, reset, selectedId, onSelect }: Props) => {
                 </lineSegments>
               </mesh>
             ))}
+          </group>
+        ))}
+        {heroes.map(({ id, position, yaw, team }) => (
+          <group
+            key={id}
+            position={position}
+            rotation={[0, -yaw * Math.PI / 180, 0]}
+            onClick={(event) => {
+              if (event.delta > 4 || onEditSurface) return;
+              event.stopPropagation();
+              onSelectHero(id);
+            }}
+          >
+            <mesh position={[0, 0.25, 0]}>
+              <cylinderGeometry args={[0.65, 0.76, 0.46, team === 'attack' ? 4 : 20]} />
+              <meshStandardMaterial
+                color={tokens.team[team]}
+                emissive={tokens.team[team]}
+                emissiveIntensity={id === selectedHeroId ? 0.6 : 0}
+              />
+            </mesh>
+            <mesh position={[0, 0.46, -0.75]} rotation={[-Math.PI / 2, 0, 0]}>
+              <coneGeometry args={[0.3, 0.7, 3]} />
+              <meshBasicMaterial color={tokens.team[team]} />
+            </mesh>
           </group>
         ))}
       </Canvas>
