@@ -147,7 +147,7 @@ test('places and moves a hero across views, then undoes and redoes elevation cha
   await threeD.click();
   await expect(canvas).toHaveAttribute('data-view-mode', '3d');
   await expect(inspector.getByText('+4 u')).toBeVisible();
-  await expect(inspector.getByText('공격팀')).toBeVisible();
+  await expect(inspector.getByRole('list', { name: '배치한 영웅' }).getByText('공격팀', { exact: true })).toBeVisible();
   await expect(coordinates).toHaveText(worldPosition);
   await page.screenshot({ path: testInfo.outputPath('vertactics-hero-placement.png') });
 
@@ -326,7 +326,7 @@ test('picks stacked floors and places and selects heroes in both views', async (
   await clickTopDown(5, 9);
   await expect(inspector.getByRole('heading', { name: '중앙 바닥' })).toBeVisible();
   await clickTopDown(0, -5.5);
-  await expect(inspector.getByRole('heading', { name: '트레이서' })).toBeVisible();
+  await expect(inspector.getByRole('heading', { name: '트레이서', exact: true })).toBeVisible();
 
   await page.getByRole('button', { name: '3D 원근' }).click();
   await expect(canvas).toHaveAttribute('data-view-mode', '3d');
@@ -619,7 +619,7 @@ test('shows the selected hero role, official source and abilities', async ({ pag
   await expect(canvas).toHaveCSS('cursor', 'crosshair');
   await canvas.click();
   const inspector = page.getByRole('complementary', { name: '지형 정보' });
-  await expect(inspector.getByRole('heading', { name: '아나' })).toBeVisible();
+  await expect(inspector.getByRole('heading', { name: '아나', exact: true })).toBeVisible();
   await inspector.getByText('영웅 정보 · 지원', { exact: true }).click();
   await expect(inspector.getByText('Sleep Dart', { exact: true }).and(inspector.locator('li'))).toBeVisible();
   await expect(inspector.getByRole('link', { name: 'Blizzard 영웅 정보' })).toHaveAttribute(
