@@ -4,7 +4,7 @@
 
 See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [the development guide](development.md). Check an item when its stated scope has been verified. Track implementation, browser behavior, CI and deployment separately.
 
-**Current phase** Phase 4. Extend terrain types, map editing controls, and layer management.
+**Current phase** Phase 4. Continue with ramps, map schema migration, and the first objective of King’s Row.
 
 ## Phase 1 · Project setup
 
@@ -64,13 +64,15 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 
 - [x] 4.01 Add metadata, verification states, map registration and selection
 - [x] 4.02 Add layers and selection and visibility rules for non-active floors
-- [ ] 4.03 Support ramps, buildings, columns, railings, openings and drop zones
-- [ ] 4.04 Add terrain rotation, materials, walkability, collision and sight blockers
+- [x] 4.03a Add buildings, columns, railings, doorway openings, and drop-zone markers
+- [ ] 4.03b Model walkable ramps and their sloped surfaces
+- [x] 4.04a Add rotation, material, and walkability controls with validated collision and sight flags
+- [ ] 4.04b Consume collision and sight flags in spatial analysis
 - [x] 4.05 Share the renderer between map editing and tactical planning
 - [x] 4.06a Create and open maps and add, delete and duplicate blocks
-- [ ] 4.06b Select multiple objects
+- [x] 4.06b Select multiple objects
 - [x] 4.07a Edit terrain dimensions and type
-- [ ] 4.07b Verify position and layer reassignment, then add rotation, snapping and layer definition management
+- [x] 4.07b Edit positions and layer assignments, rotate and snap terrain, and manage layer definitions
 - [x] 4.08a Support undo and redo, validated JSON import and export, and immediate preview
 - [ ] 4.08b Migrate map documents across schema versions
 - [ ] 4.09 Record acceptable references for the first objective of King's Row
@@ -141,3 +143,5 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 | Routes and markers | 24 unit tests and four Chromium scenarios passed. Verified route waypoint editing and undo, marker creation, note editing, and switching views. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44030502710) |
 | Editor controls | 26 unit tests and five Chromium scenarios passed. Verified grid snapping on platforms and stairs, edit lock, keyboard shortcuts and layer visibility. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44031144923) |
 | Phase 3 and map editing | 28 unit tests and nine Chromium scenarios passed. Verified stacked surface picking, 2D and 3D hero editing, a single history entry per drag, map switching and JSON transfer, and block editing with undo and redo. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44032978306) |
+| Layer and multi-selection editing | 30 unit tests and 11 Chromium scenarios passed. Verified layer creation, renaming and deletion, rotation, grid snapping, and batched duplication and undo. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44033821083) |
+| Terrain structures | 31 unit tests and 11 Chromium scenarios passed. Doorway geometry preserves an opening and map JSON validates terrain properties. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44034026109) |
