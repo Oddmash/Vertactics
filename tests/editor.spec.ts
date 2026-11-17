@@ -96,7 +96,7 @@ test('renders and manipulates the same elevated terrain in both views', async ({
   await expect(inspector.getByText('중앙 바닥')).toBeVisible();
   await clickWorld(6, -8.6);
   await expect(inspector.getByText('북쪽 벽')).toBeVisible();
-  await clickWorld(-9.5, 2.5);
+  await clickWorld(-9.5, 2.9375);
   await expect(inspector.getByText('서쪽 계단')).toBeVisible();
   await clickWorld(10.5, 6);
   await expect(inspector.getByText('동쪽 고지대')).toBeVisible();
