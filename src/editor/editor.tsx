@@ -1,3 +1,4 @@
+import useWorkspaceRecovery from './use-workspace-recovery';
 import TimelinePlaybackControls from './timeline-playback-controls';
 import useTimelinePlayback from './use-timeline-playback';
 import { sampleTimeline, timelineDuration } from '../domain/timeline-playback';
@@ -104,6 +105,10 @@ const Editor = () => {
   const initialHistory = useMemo(() => createStrategyHistory(createStrategy('local-draft', mapId, '새 전략')), [mapId]);
   const [histories, setHistories] = useState<Record<string, StrategyHistory>>({});
   const history = Object.hasOwn(histories, mapId) ? histories[mapId]! : initialHistory;
+  const [workspaceRevision, setWorkspaceRevision] = useState(0);
+  const markWorkspaceChanged = useCallback(() => setWorkspaceRevision((value) => value + 1), []);
+  const draft: StrategyDraft = { version: 1, map, strategy: history.present };
+  const recovery = useWorkspaceRecovery(draft, workspaceRevision);
   const durationMs = timelineDuration(history.present.timeline);
   const [playback, setPlayback] = useTimelinePlayback(durationMs);
   const frame = playback ? sampleTimeline(history.present, playback.timeMs) : null;
@@ -119,11 +124,12 @@ const Editor = () => {
   }, [setPlayback]);
   const dispatch = useCallback((action: StrategyAction) => {
     setPlayback(null);
+    markWorkspaceChanged();
     setHistories((current) => ({
       ...current,
       [mapId]: reduceStrategyHistory(Object.hasOwn(current, mapId) ? current[mapId]! : initialHistory, action),
     }));
-  }, [initialHistory, mapId, setPlayback]);
+  }, [initialHistory, mapId, markWorkspaceChanged, setPlayback]);
   const switchMap = (id: string) => {
     setTool(null);
     setMapMessage('');
@@ -169,9 +175,11 @@ const Editor = () => {
     }
     setCatalogue((current) => current.some((item) => item.id === imported.id) ? current : [...current, imported]);
     switchMap(imported.id);
+    markWorkspaceChanged();
     setImportMessage('');
   };
   const replaceMap = (next: MapDefinition) => {
+    markWorkspaceChanged();
     setCatalogue((current) => current.map((item) => item.id === next.id ? next : item));
   };
   const updateTerrain = (terrain: unknown[], nextId: string | null, layers = map.layers) => {
@@ -223,6 +231,7 @@ const Editor = () => {
     });
     setCatalogue((current) => [...current, created]);
     switchMap(id);
+    markWorkspaceChanged();
     setMapEditing(true);
   };
   const copyTerrain = (terrain?: Terrain) => {
@@ -394,7 +403,26 @@ const Editor = () => {
             onRedo={() => { setTool(null); dispatch({ type: 'redo' }); }}
             onCancel={() => setTool(null)}
           />}
-          <StrategyDraftTools draft={{ version: 1, map, strategy: history.present }} onRestore={restoreDraft} />
+          <StrategyDraftTools draft={draft} onRestore={restoreDraft} />
+          <section className="hero-tools" aria-label="작업 복구">
+            {recovery.saved ? <>
+              <p>이전 작업 · {recovery.saved.map.name}</p>
+              <p>복구하면 해당 지도의 편집 내용이 복구본으로 바뀝니다.</p>
+              <div className="hero-actions">
+                <button type="button" className="reset-button" onClick={() => {
+                  const saved = recovery.restore();
+                  if (saved) restoreDraft(saved);
+                }}>이전 작업 복구</button>
+                <button type="button" className="reset-button" onClick={recovery.discard}>복구본 지우기</button>
+              </div>
+            </> : <p role="status">{{
+              idle: recovery.unreadable ? '이전 작업 데이터를 읽을 수 없습니다.' : '편집 내용은 이 브라우저에 자동 저장됩니다.',
+              pending: '작업 자동 저장 중',
+              saved: '작업을 자동 저장했습니다.',
+              error: '작업을 자동 저장할 수 없습니다. 전략 저장을 사용할 수 있습니다.',
+            }[recovery.status]}</p>}
+            {recovery.saved && recovery.status === 'error' && <p role="status">복구본을 지울 수 없습니다.</p>}
+          </section>
           {!mapEditing && <StrategyTimelineTools key={mapId} strategy={history.present} locked={locked}
             onChange={(timeline) => { setTool(null); dispatch({ type: 'set-timeline', timeline }); }}
           />}
