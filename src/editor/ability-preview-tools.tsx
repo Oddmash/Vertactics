@@ -1,3 +1,4 @@
+import { useLocale } from '../ui/locale';
 import { useState } from 'react';
 import { abilityShapes, isAbilityDuration, maxAbilityDurationSeconds, minAbilityDurationSeconds } from '../domain/ability-preview';
 import type { AbilityPreviewSettings, AbilityShape } from '../domain/ability-preview';
@@ -16,11 +17,12 @@ type Props = {
 };
 
 const AbilityPreviewTools = ({ abilities, preview, placementDisabled, onPlace, onPreview }: Props) => {
+  const { t } = useLocale();
   const [shape, setShape] = useState<AbilityShape>(preview?.shape ?? 'circle');
 
   return (
     <details className="hero-tools">
-      <summary>능력 범위 미리보기</summary>
+      <summary>{t('능력 범위 미리보기')}</summary>
       <form onSubmit={(event) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
@@ -37,36 +39,36 @@ const AbilityPreviewTools = ({ abilities, preview, placementDisabled, onPlace, o
         if (durationSeconds !== undefined && !isAbilityDuration(durationSeconds)) return;
         onPreview({ abilityId: ability.id, shape, range, width, angle, direction, verification: 'custom', durationSeconds });
       }}>
-        <label>능력 <select name="ability" aria-label="능력" defaultValue={preview?.abilityId}>
+        <label>{t('능력') + ' '}<select name="ability" aria-label={t('능력')} defaultValue={preview?.abilityId}>
           {abilities.map(({ id, name }) => <option key={id} value={id}>{name}</option>)}
         </select></label>
-        <label>형태 <select name="shape" aria-label="미리보기 형태" value={shape} onChange={(event) => {
+        <label>{t('형태') + ' '}<select name="shape" aria-label={t('미리보기 형태')} value={shape} onChange={(event) => {
           const next = abilityShapes.find((value) => value === event.target.value);
           if (next) setShape(next);
         }}>
-          {abilityShapes.map((value) => <option key={value} value={value}>{labels[value]}</option>)}
+          {abilityShapes.map((value) => <option key={value} value={value}>{t(labels[value])}</option>)}
         </select></label>
-        <label>범위 (u) <input name="range" type="number" min="0.1" max="1000" step="any" required defaultValue={preview?.range ?? 5} /></label>
-        {(shape === 'rectangle' || shape === 'area') && <label>폭 (u) <input
+        <label>{t('범위 (u)') + ' '}<input name="range" type="number" min="0.1" max="1000" step="any" required defaultValue={preview?.range ?? 5} /></label>
+        {(shape === 'rectangle' || shape === 'area') && <label>{t('폭 (u)') + ' '}<input
           name="width" type="number" min="0.1" max="1000" step="any" required defaultValue={preview?.width ?? 4}
         /></label>}
-        {shape === 'area' && <label>지속 시간 (초) <input name="duration" type="number"
+        {shape === 'area' && <label>{t('지속 시간 (초)') + ' '}<input name="duration" type="number"
           min={minAbilityDurationSeconds} max={maxAbilityDurationSeconds} step="any" defaultValue={preview?.durationSeconds}
         /></label>}
-        {shape === 'cone' && <label>부채꼴 각도 <input
+        {shape === 'cone' && <label>{t('부채꼴 각도') + ' '}<input
           name="angle" type="number" min="1" max="360" step="any" required defaultValue={preview?.angle ?? 60}
         /></label>}
-        <label>영웅 기준 방향 (°) <input name="direction" type="number" min="-360" max="360" step="any"
+        <label>{t('영웅 기준 방향 (°)') + ' '}<input name="direction" type="number" min="-360" max="360" step="any"
           required defaultValue={preview?.direction ?? 0}
         /></label>
-        <button type="submit" className="reset-button">범위 표시</button>
+        <button type="submit" className="reset-button">{t('범위 표시')}</button>
       </form>
-      <p>사용자 설정 · 지도 단위 (u)</p>
+      <p>{t('사용자 설정 · 지도 단위 (u)')}</p>
       {preview && <div className="hero-actions">
-        <span role="status">{abilities.find(({ id }) => id === preview.abilityId)?.name} · {preview.range} u{preview.durationSeconds !== undefined && ` · ${preview.durationSeconds}초`}</span>
+        <span role="status">{abilities.find(({ id }) => id === preview.abilityId)?.name} · {preview.range} u{preview.durationSeconds !== undefined && t(' · {0}초', preview.durationSeconds)}</span>
         <button className="reset-button" type="button" disabled={placementDisabled}
-          onClick={() => onPlace(preview)}>지도에 배치</button>
-        <button className="reset-button" type="button" onClick={() => onPreview(undefined)}>범위 숨기기</button>
+          onClick={() => onPlace(preview)}>{t('지도에 배치')}</button>
+        <button className="reset-button" type="button" onClick={() => onPreview(undefined)}>{t('범위 숨기기')}</button>
       </div>}
     </details>
   );

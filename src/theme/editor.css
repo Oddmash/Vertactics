@@ -355,3 +355,14 @@ ul { padding: 0; list-style: none; }
   .editor :where(input:not([type=checkbox], [type=radio]), select) { min-height: var(--size-touch); }
   .editor .view-options label { min-height: var(--size-touch); }
 }
+
+.locale-picker {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: var(--space-xs);
+  font-size: 12px;
+}
+
+.locale-picker select { min-height: var(--size-control); }
+.fan-notice { color: var(--color-muted); }
