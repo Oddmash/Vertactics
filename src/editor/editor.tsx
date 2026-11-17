@@ -1,3 +1,4 @@
+import { downloadFile, fileStem } from './download-file';
 import StrategyFileTools from './strategy-file-tools';
 import useWorkspaceRecovery from './use-workspace-recovery';
 import TimelinePlaybackControls from './timeline-playback-controls';
@@ -61,6 +62,18 @@ const Editor = () => {
   const map = catalogue.find((item) => item.id === mapId)!;
   const { min, max } = useMemo(() => mapBounds(map.terrain), [map]);
   const [importMessage, setImportMessage] = useState('');
+  const captureViewport = useRef<(() => Promise<Blob>) | null>(null);
+  const [imageMessage, setImageMessage] = useState('');
+  const saveViewport = async () => {
+    setImageMessage('');
+    try {
+      const capture = captureViewport.current;
+      if (!capture) throw new Error('Map canvas not ready');
+      downloadFile(await capture(), `${fileStem(map.id)}-${heroView ? 'hero' : mode}.png`);
+    } catch {
+      setImageMessage('지도 화면을 PNG로 저장할 수 없습니다.');
+    }
+  };
   const [mapEditing, setMapEditing] = useState(false);
   const [probeTool, setProbeTool] = useState<'distance' | 'sight' | null>(null);
   const measuring = probeTool === 'distance';
@@ -458,8 +471,10 @@ const Editor = () => {
                 : <button className="reset-button" type="button" onClick={() => setReset((value) => value + 1)}>
                   시점 초기화
                 </button>}
+              <button className="reset-button" type="button" onClick={() => void saveViewport()}>지도 PNG 저장</button>
             </div>
           </div>
+          {imageMessage && <p role="status">{imageMessage}</p>}
           <div className="view-options" role="group" aria-label="편집 및 표시 설정">
             {map.layers && <label>표시 층 <select value={layerId} onChange={(event) => {
               setLayerId(event.target.value);
@@ -515,6 +530,7 @@ const Editor = () => {
             <MapViewport
               key={mapId}
               map={map}
+              capture={captureViewport}
               layerId={layerId}
               mode={mode}
               heroView={heroView}
