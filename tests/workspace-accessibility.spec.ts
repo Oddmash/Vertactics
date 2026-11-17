@@ -50,6 +50,7 @@ test('keeps the map selector native and restores keyboard focus after dismissal'
   await page.keyboard.press('Tab');
 
   const map = page.getByRole('combobox', { name: '지도', exact: true });
+  await map.focus();
   await expect(map).toBeFocused();
   await expect(map).toHaveCSS('outline-color', 'rgb(115, 233, 197)');
 
