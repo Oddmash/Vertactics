@@ -1,3 +1,4 @@
+import { isWorldPoint } from './map';
 import type { WorldPoint } from './map';
 
 export const abilityShapes = ['circle', 'sphere', 'cone', 'line', 'rectangle', 'vector', 'area'] as const;
@@ -11,6 +12,42 @@ export type AbilityPreviewSettings = {
   angle: number;
   direction: number;
   verification: 'custom';
+};
+
+export type AbilityPlacement = AbilityPreviewSettings & {
+  id: string;
+  heroId: string;
+  position: WorldPoint;
+  heading: number;
+  visible: boolean;
+};
+
+const inRange = (value: unknown, min: number, max: number): value is number =>
+  typeof value === 'number' && value >= min && value <= max;
+
+const hasText = (value: unknown): value is string =>
+  typeof value === 'string' && value.trim().length > 0;
+
+export const parseAbilityPlacements = (value: unknown): AbilityPlacement[] => {
+  if (!Array.isArray(value)) throw new Error('Invalid abilities');
+  const ids = new Set<string>();
+  return Array.from(value, (item: unknown, index) => {
+    if (typeof item !== 'object' || item === null || Array.isArray(item)) {
+      throw new Error(`Invalid abilities[${index}]`);
+    }
+    const { id, heroId, abilityId, shape, range, width, angle, direction, verification, position, heading, visible } =
+      item as Record<string, unknown>;
+    const abilityShape = abilityShapes.find((candidate) => candidate === shape);
+    if (!hasText(id) || ids.has(id) || !hasText(heroId) || !hasText(abilityId) || !abilityShape ||
+      !inRange(range, 0.1, 1000) || !inRange(width, 0.1, 1000) || !inRange(angle, 1, 360) ||
+      !inRange(direction, -360, 360) || verification !== 'custom' || !isWorldPoint(position) ||
+      (typeof heading !== 'number' || heading < 0 || !(heading < 360)) || typeof visible !== 'boolean') {
+      throw new Error(`Invalid or duplicate abilities[${index}]`);
+    }
+    ids.add(id);
+    return { id, heroId, abilityId, shape: abilityShape, range, width, angle, direction, verification,
+      position: [...position], heading, visible };
+  });
 };
 
 export const abilityPolylines = (

@@ -1,3 +1,5 @@
+import { parseAbilityPlacements } from './ability-preview';
+import type { AbilityPlacement } from './ability-preview';
 import { parseAnnotations } from './annotation';
 import type { Annotation } from './annotation';
 import { isWorldPoint } from './map';
@@ -21,6 +23,7 @@ export type StrategyDocument = {
   title: string;
   heroes: HeroPlacement[];
   annotations: Annotation[];
+  abilities: AbilityPlacement[];
 };
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -54,6 +57,7 @@ export const parseStrategy = (value: unknown): StrategyDocument => {
   }
 
   return { schemaVersion: 1, id: value.id, mapId: value.mapId, title: value.title, heroes,
+    abilities: parseAbilityPlacements(value.abilities === undefined ? [] : value.abilities),
     annotations: parseAnnotations(value.annotations === undefined ? [] : value.annotations),
   };
 };

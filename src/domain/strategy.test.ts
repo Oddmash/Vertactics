@@ -7,7 +7,7 @@ const placement = { id: 'p1', heroId: 'tracer', team: 'attack', position: [-9.5,
 describe('strategy documents', () => {
   it('creates an empty versioned strategy linked to a map', () => {
     expect(empty).toEqual({
-      schemaVersion: 1, id: 'strategy-1', mapId: 'elevation-lab', title: 'First plan', heroes: [], annotations: [],
+      schemaVersion: 1, id: 'strategy-1', mapId: 'elevation-lab', title: 'First plan', heroes: [], annotations: [], abilities: [],
     });
   });
 
@@ -51,5 +51,25 @@ describe('strategy annotations', () => {
     expect(parseStrategy({ ...empty, annotations: [route] }).annotations).toEqual([route]);
     expect(() => parseStrategy({ ...empty, annotations: [route, route] })).toThrow(/duplicate/);
     expect(() => parseStrategy({ ...empty, annotations: [{ ...route, kind: 'note' }] })).toThrow(/point count/);
+  });
+});
+
+describe('strategy abilities', () => {
+  const ability = {
+    id: 'ability-1', heroId: 'tracer', abilityId: 'blink', shape: 'vector', range: 8,
+    width: 1, angle: 60, direction: 0, verification: 'custom', position: [2, 4, 6], heading: 90, visible: true,
+  };
+
+  it('round-trips an independent ability and initializes legacy documents', () => {
+    const document = { ...empty, abilities: [ability] };
+    expect(parseStrategy(JSON.parse(JSON.stringify(document)))).toEqual(document);
+    expect(parseStrategy({ ...empty, abilities: undefined }).abilities).toEqual([]);
+  });
+
+  it('rejects duplicate ids, invalid geometry and unrecognized provenance', () => {
+    expect(() => parseStrategy({ ...empty, abilities: [ability, ability] })).toThrow(/abilities/);
+    for (const patch of [{ width: Infinity }, { heading: NaN }, { position: [0, 0] }, { verification: 'verified' }]) {
+      expect(() => parseStrategy({ ...empty, abilities: [{ ...ability, ...patch }] })).toThrow(/abilities/);
+    }
   });
 });
