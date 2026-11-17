@@ -44,3 +44,27 @@ test('supports keyboard mode changes and preserves browser context menus outside
   await summary.press('Enter');
   await expect(page.getByText('Esc로 도구를 취소하거나 재생을 종료합니다.')).toBeVisible();
 });
+
+test('keeps the map selector native and restores keyboard focus after dismissal', async ({ page }) => {
+  await page.goto('./');
+  await page.keyboard.press('Tab');
+
+  const map = page.getByRole('combobox', { name: '지도', exact: true });
+  await map.focus();
+  await expect(map).toBeFocused();
+  await expect(map).toHaveCSS('outline-color', 'rgb(115, 233, 197)');
+
+  const supportsPicker = await map.evaluate(() =>
+    CSS.supports('appearance: base-select') && CSS.supports('selector(::picker(select))'));
+  if (supportsPicker) {
+    await map.press('Space');
+    await expect(map).toHaveCSS('appearance', 'base-select');
+    await expect.poll(() => map.evaluate((select) => select.matches(':open'))).toBe(true);
+    await page.keyboard.press('Escape');
+    await expect.poll(() => map.evaluate((select) => select.matches(':open'))).toBe(false);
+    await expect(map).toBeFocused();
+  }
+
+  await map.selectOption('kings-row-a');
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('왕의 길');
+});

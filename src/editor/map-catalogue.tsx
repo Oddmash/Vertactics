@@ -1,3 +1,4 @@
+import { Button } from '../ui/controls';
 import { useRef } from 'react';
 import owkrCatalogue from '../domain/owkr-catalogue.json';
 import { useLocale } from '../ui/locale';
@@ -22,14 +23,14 @@ const MapCatalogue = ({ onSelect }: { onSelect: (id: string) => void }) => {
 
   return (
     <>
-      <button type="button" className="reset-button" onClick={() => dialog.current?.showModal()}>
+      <Button type="button" className="reset-button" onClick={() => dialog.current?.showModal()}>
         {t('전장 목록')}
-      </button>
+      </Button>
       <dialog ref={dialog} className="map-library panel" aria-labelledby="map-library-title"
         onKeyDown={(event) => event.stopPropagation()}>
         <div className="panel-heading">
           <h2 id="map-library-title">{t('전장 목록')}</h2>
-          <button type="button" className="reset-button" onClick={() => dialog.current?.close()}>{t('닫기')}</button>
+          <Button type="button" className="reset-button" onClick={() => dialog.current?.close()}>{t('닫기')}</Button>
         </div>
         <div className="map-library-body">
           {Object.entries(modeNames).map(([mode, name]) => (
@@ -46,8 +47,8 @@ const MapCatalogue = ({ onSelect }: { onSelect: (id: string) => void }) => {
                         <small>{t(editorMapId ? 'A 거점 근사 지도' : '지형 준비 중')}</small>
                       </div>
                       {editorMapId && (
-                        <button type="button" className="reset-button" onClick={() => selectMap(editorMapId)}
-                          aria-label={t('{0} 열기', name)}>{t('열기')}</button>
+                        <Button type="button" className="reset-button" onClick={() => selectMap(editorMapId)}
+                          aria-label={t('{0} 열기', name)}>{t('열기')}</Button>
                       )}
                     </li>
                   );

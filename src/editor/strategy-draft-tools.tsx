@@ -1,3 +1,4 @@
+import { Button, Input } from '../ui/controls';
 import { useLocale } from '../ui/locale';
 import { useState } from 'react';
 import { deleteStrategyDraft, listStrategyDrafts, saveStrategyDraft } from '../storage/strategy-draft';
@@ -63,13 +64,13 @@ const StrategyDraftTools = ({ draft, onRestore }: Props) => {
         const submitter = (event.nativeEvent as SubmitEvent).submitter;
         void save(title, submitter?.getAttribute('value') === 'new' ? undefined : existingId);
       }}>
-        <label className="strategy-name">{t('전략 이름') + ' '}<input name="title" maxLength={80} required
+        <label className="strategy-name">{t('전략 이름') + ' '}<Input name="title" maxLength={80} required
           defaultValue={existingId ? active?.title : draft.strategy.id === 'local-draft' ? t(draft.strategy.title) : draft.strategy.title} />
         </label>
         <div className="hero-actions">
-          <button type="submit" className="reset-button" disabled={busy}>{t('전략 저장')}</button>
-          {existingId && <button type="submit" className="reset-button" value="new" disabled={busy}>{t('새 이름으로 저장')}</button>}
-          <button type="button" className="reset-button" disabled={busy} onClick={() => void load()}>{t('저장본 확인')}</button>
+          <Button type="submit" className="reset-button" disabled={busy}>{t('전략 저장')}</Button>
+          {existingId && <Button type="submit" className="reset-button" value="new" disabled={busy}>{t('새 이름으로 저장')}</Button>}
+          <Button type="button" className="reset-button" disabled={busy} onClick={() => void load()}>{t('저장본 확인')}</Button>
         </div>
       </form>
       {message && <p role="status">{t(message)}</p>}
@@ -77,14 +78,14 @@ const StrategyDraftTools = ({ draft, onRestore }: Props) => {
         {drafts.map(({ id, draft: item, updatedAt }) => {
           const updated = new Date(updatedAt);
           return <li key={id}>
-          <button type="button" className="terrain-button saved-strategy" disabled={busy} aria-pressed={selectedId === id}
+          <Button type="button" className="terrain-button saved-strategy" disabled={busy} aria-pressed={selectedId === id}
             onClick={() => { setSelectedId(id); setDeleting(false); }}>
             <span>{item.strategy.title}</span>
             <small>{t(item.map.name)}</small>
             {updatedAt > 0 && Number.isFinite(updated.getTime()) && (
               <small><time dateTime={updated.toISOString()}>{formatDate.format(updated)}</time></small>
             )}
-          </button>
+          </Button>
         </li>;
         })}
       </ul>}
@@ -92,34 +93,34 @@ const StrategyDraftTools = ({ draft, onRestore }: Props) => {
         <p>{t(selected.draft.map.name)} · {selected.draft.strategy.title}</p>
         <p>{t('복원하면 같은 지도의 현재 편집 내용을 저장본으로 바꿉니다.')}</p>
         <div className="hero-actions">
-          <button type="button" className="reset-button" disabled={busy} onClick={() => {
+          <Button type="button" className="reset-button" disabled={busy} onClick={() => {
             onRestore(selected.draft);
             setActive({ id: selected.id, mapId: selected.draft.map.id, strategyId: selected.draft.strategy.id,
               title: selected.draft.strategy.title });
             setSelectedId(undefined);
             setMessage('저장된 전략을 복원했습니다.');
-          }}>{t('전략 복원')}</button>
-          <button type="button" className="reset-button" disabled={busy} onClick={() => void run(async () => {
+          }}>{t('전략 복원')}</Button>
+          <Button type="button" className="reset-button" disabled={busy} onClick={() => void run(async () => {
             const duplicate = await saveStrategyDraft(selected.draft, t('{0} 복제', selected.draft.strategy.title));
             setDrafts((current) => [duplicate, ...(current ?? [])]);
             setSelectedId(duplicate.id);
             setDeleting(false);
             setMessage('전략을 복제했습니다.');
-          }, t('전략을 복제할 수 없습니다.'))}>{t('전략 복제')}</button>
-          <button type="button" className="reset-button" disabled={busy} onClick={() => setDeleting(true)}>{t('전략 삭제')}</button>
-          <button type="button" className="reset-button" disabled={busy}
-            onClick={() => { setSelectedId(undefined); setDeleting(false); }}>{t('복원 취소')}</button>
+          }, t('전략을 복제할 수 없습니다.'))}>{t('전략 복제')}</Button>
+          <Button type="button" className="reset-button" disabled={busy} onClick={() => setDeleting(true)}>{t('전략 삭제')}</Button>
+          <Button type="button" className="reset-button" disabled={busy}
+            onClick={() => { setSelectedId(undefined); setDeleting(false); }}>{t('복원 취소')}</Button>
         </div>
         {deleting && <div className="hero-actions">
-          <button type="button" className="reset-button" disabled={busy} onClick={() => void run(async () => {
+          <Button type="button" className="reset-button" disabled={busy} onClick={() => void run(async () => {
             await deleteStrategyDraft(selected.id);
             setDrafts((current) => current?.filter(({ id }) => id !== selected.id));
             if (active?.id === selected.id) setActive(undefined);
             setSelectedId(undefined);
             setDeleting(false);
             setMessage('저장된 전략을 삭제했습니다.');
-          }, t('전략을 삭제할 수 없습니다.'))}>{t('삭제 확인')}</button>
-          <button type="button" className="reset-button" disabled={busy} onClick={() => setDeleting(false)}>{t('삭제 취소')}</button>
+          }, t('전략을 삭제할 수 없습니다.'))}>{t('삭제 확인')}</Button>
+          <Button type="button" className="reset-button" disabled={busy} onClick={() => setDeleting(false)}>{t('삭제 취소')}</Button>
         </div>}
       </div>}
     </section>

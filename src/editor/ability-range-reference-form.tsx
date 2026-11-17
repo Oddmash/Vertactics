@@ -1,3 +1,4 @@
+import { Button, Disclosure, Input, Select } from '../ui/controls';
 import { useLocale } from '../ui/locale';
 import { parseAbilityRangeReference } from '../domain/ability-preview';
 import type { AbilityPlacement, AbilityRangeReference } from '../domain/ability-preview';
@@ -18,7 +19,7 @@ const AbilityRangeReferenceForm = ({ ability, locked, onReference }: Props) => {
   const reference = ability.rangeReference;
 
   return (
-    <details>
+    <Disclosure>
       <summary>{t('게임 거리 참고값')}</summary>
       <dl>
         <div><dt>{t('지도 도형 범위')}</dt><dd>{t('사용자 설정 ·') + ' '}{ability.range} u</dd></div>
@@ -40,20 +41,20 @@ const AbilityRangeReferenceForm = ({ ability, locked, onReference }: Props) => {
         if (JSON.stringify(next) !== JSON.stringify(reference)) onReference(next);
       }}>
         <fieldset className="edit-controls" disabled={locked}>
-          <label>{t('참고값 유형') + ' '}<select aria-label={t('참고값 유형')} name="reference-status" defaultValue={reference?.status ?? 'estimated'}>
+          <label>{t('참고값 유형') + ' '}<Select aria-label={t('참고값 유형')} name="reference-status" defaultValue={reference?.status ?? 'estimated'}>
             <option value="estimated">{t(labels.estimated)}</option>
             <option value="measured">{t(labels.measured)}</option>
-          </select></label>
-          <label>{t('게임 거리 (m)') + ' '}<input type="number" name="meters" min="0.01" max="1000" step="any"
+          </Select></label>
+          <label>{t('게임 거리 (m)') + ' '}<Input type="number" name="meters" min="0.01" max="1000" step="any"
             defaultValue={reference?.meters} required /></label>
-          <label>{t('게임 버전') + ' '}<input name="game-version" maxLength={80} pattern={'.*\\S.*'}
+          <label>{t('게임 버전') + ' '}<Input name="game-version" maxLength={80} pattern={'.*\\S.*'}
             defaultValue={reference?.gameVersion} required /></label>
-          <label>{t('출처') + ' '}<input name="source" maxLength={300} pattern={'.*\\S.*'} defaultValue={reference?.source} required /></label>
-          <button type="submit" className="reset-button">{t('참고값 저장')}</button>
-          {reference && <button type="button" className="reset-button" onClick={() => onReference(undefined)}>{t('참고값 지우기')}</button>}
+          <label>{t('출처') + ' '}<Input name="source" maxLength={300} pattern={'.*\\S.*'} defaultValue={reference?.source} required /></label>
+          <Button type="submit" className="reset-button">{t('참고값 저장')}</Button>
+          {reference && <Button type="button" className="reset-button" onClick={() => onReference(undefined)}>{t('참고값 지우기')}</Button>}
         </fieldset>
       </form>
-    </details>
+    </Disclosure>
   );
 };
 

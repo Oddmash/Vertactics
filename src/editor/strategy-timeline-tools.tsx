@@ -1,3 +1,4 @@
+import { Button, Input, Select } from '../ui/controls';
 import { useLocale } from '../ui/locale';
 import { useState } from 'react';
 import type { StrategyDocument } from '../domain/strategy';
@@ -31,19 +32,19 @@ const StrategyTimelineTools = ({ strategy, locked, onChange }: Props) => {
   return (
     <section className="hero-tools" aria-labelledby="timeline-title">
       <h2 id="timeline-title">{t('전술 단계')}</h2>
-      <button type="button" className="reset-button" disabled={locked} onClick={() => {
+      <Button type="button" className="reset-button" disabled={locked} onClick={() => {
         const id = crypto.randomUUID();
         onChange([...timeline, { id, label: t('단계 {0}', timeline.length + 1), durationMs: 5000, poses: [], events: [] }]);
         setSelectedId(id);
         setMessage('');
-      }}>{t('단계 추가')}</button>
+      }}>{t('단계 추가')}</Button>
       {selected && <>
-        <label>{t('현재 단계') + ' '}<select aria-label={t('현재 단계')} value={selected.id} onChange={(event) => {
+        <label>{t('현재 단계') + ' '}<Select aria-label={t('현재 단계')} value={selected.id} onChange={(event) => {
           setSelectedId(event.target.value);
           setMessage('');
         }}>
           {timeline.map((phase, index) => <option key={phase.id} value={phase.id}>{index + 1}. {phase.label}</option>)}
-        </select></label>
+        </Select></label>
         <fieldset className="edit-controls" disabled={locked}>
           <form key={JSON.stringify([selected.id, selected.label, selected.durationMs])} onSubmit={(event) => {
             event.preventDefault();
@@ -57,14 +58,14 @@ const StrategyTimelineTools = ({ strategy, locked, onChange }: Props) => {
             }
             update({ ...selected, label, durationMs });
           }}>
-            <label>{t('단계 이름') + ' '}<input name="label" defaultValue={selected.label} maxLength={80} required /></label>
-            <label>{t('단계 길이 (초)') + ' '}<input name="duration" type="number" min="0.001" max="86400" step="0.001"
+            <label>{t('단계 이름') + ' '}<Input name="label" defaultValue={selected.label} maxLength={80} required /></label>
+            <label>{t('단계 길이 (초)') + ' '}<Input name="duration" type="number" min="0.001" max="86400" step="0.001"
               defaultValue={selected.durationMs / 1000} required /></label>
-            <button type="submit" className="reset-button">{t('단계 설정 적용')}</button>
+            <Button type="submit" className="reset-button">{t('단계 설정 적용')}</Button>
           </form>
-          <button type="button" className="reset-button" disabled={heroes.length === 0} onClick={() => update({
+          <Button type="button" className="reset-button" disabled={heroes.length === 0} onClick={() => update({
             ...selected, poses: heroes.map(({ id, position, yaw }) => ({ heroPlacementId: id, position, yaw })),
-          })}>{t('현재 영웅 위치 기록')}</button>
+          })}>{t('현재 영웅 위치 기록')}</Button>
           <p>{t('기록한 영웅') + ' '}{selected.poses.length}{t('명')}</p>
           {abilities.length > 0 && <form key={selected.id} onSubmit={(event) => {
             event.preventDefault();
@@ -82,26 +83,26 @@ const StrategyTimelineTools = ({ strategy, locked, onChange }: Props) => {
               id: crypto.randomUUID(), abilityPlacementId, offsetMs, durationMs,
             }] });
           }}>
-            <label>{t('배치한 능력') + ' '}<select name="ability" aria-label={t('이벤트에 사용할 능력')} required>
+            <label>{t('배치한 능력') + ' '}<Select name="ability" aria-label={t('이벤트에 사용할 능력')} required>
               {Array.from(abilityLabels, ([id, label]) => <option key={id} value={id}>{label}</option>)}
-            </select></label>
-            <label>{t('이벤트 시작 (초)') + ' '}<input name="offset" type="number" min="0" step="0.001" defaultValue="0" required /></label>
-            <label>{t('이벤트 길이 (초)') + ' '}<input name="event-duration" type="number" min="0.001" step="0.001" defaultValue="1" required /></label>
-            <button type="submit" className="reset-button">{t('능력 이벤트 추가')}</button>
+            </Select></label>
+            <label>{t('이벤트 시작 (초)') + ' '}<Input name="offset" type="number" min="0" step="0.001" defaultValue="0" required /></label>
+            <label>{t('이벤트 길이 (초)') + ' '}<Input name="event-duration" type="number" min="0.001" step="0.001" defaultValue="1" required /></label>
+            <Button type="submit" className="reset-button">{t('능력 이벤트 추가')}</Button>
           </form>}
           {selected.events.length > 0 && <ul aria-label={t('단계 능력 이벤트')}>
             {selected.events.map((event, index) => <li key={event.id}>
               <span>{abilityLabels.get(event.abilityPlacementId)} · {event.offsetMs / 1000}{t('초 ·') + ' '}{event.durationMs / 1000}{t('초 동안')}</span>
-              <button type="button" className="reset-button"
+              <Button type="button" className="reset-button"
                 onClick={() => update({ ...selected, events: selected.events.filter(({ id }) => id !== event.id) })}
-              >{t('이벤트') + ' '}{index + 1}{' ' + t('삭제')}</button>
+              >{t('이벤트') + ' '}{index + 1}{' ' + t('삭제')}</Button>
             </li>)}
           </ul>}
-          <button type="button" className="reset-button" onClick={() => {
+          <Button type="button" className="reset-button" onClick={() => {
             onChange(timeline.filter(({ id }) => id !== selected.id));
             setSelectedId('');
             setMessage('');
-          }}>{t('현재 단계 삭제')}</button>
+          }}>{t('현재 단계 삭제')}</Button>
         </fieldset>
       </>}
       {message && <p role="status">{t(message)}</p>}

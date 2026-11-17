@@ -1,3 +1,4 @@
+import { Select } from './controls';
 import { useLocale } from './locale';
 
 const LocalePicker = () => {
@@ -7,10 +8,10 @@ const LocalePicker = () => {
   return (
     <label className="locale-picker">
       {label}
-      <select value={locale} onChange={(event) => setLocale(event.target.value === 'en' ? 'en' : 'ko')}>
+      <Select value={locale} onChange={(event) => setLocale(event.target.value === 'en' ? 'en' : 'ko')}>
         <option value="ko" lang="ko">한국어</option>
         <option value="en" lang="en">English</option>
-      </select>
+      </Select>
     </label>
   );
 };
