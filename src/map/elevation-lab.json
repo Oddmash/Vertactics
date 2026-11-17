@@ -2,6 +2,7 @@
   "schemaVersion": 1,
   "id": "elevation-lab",
   "name": "고저차 테스트 맵",
+  "metadata": { "verification": "synthetic" },
   "layers": [{ "id": "ground", "name": "지상" }, { "id": "upper", "name": "상층 통로" }],
   "terrain": [
     { "id": "court", "layerId": "ground", "name": "중앙 바닥", "kind": "floor", "origin": [-18, -0.65, -12], "size": [36, 0.65, 24] },

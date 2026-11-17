@@ -1,13 +1,14 @@
-import { useReducer, useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import type { Annotation } from '../domain/annotation';
 import AnnotationTools from './annotation-tools';
 import type { SurfacePick } from './annotation-tools';
-import { mapBounds, terrainKinds, topElevation, visibleTerrainForLayer } from '../domain/map';
-import type { TerrainKind, WorldPoint } from '../domain/map';
+import { mapBounds, terrainKinds, parseMap, topElevation, visibleTerrainForLayer } from '../domain/map';
+import type { MapDefinition, TerrainKind, WorldPoint } from '../domain/map';
 import { createStrategy } from '../domain/strategy';
 import type { Team } from '../domain/strategy';
 import { createStrategyHistory, reduceStrategyHistory } from '../domain/strategy-history';
-import { sampleMap } from '../map';
+import type { StrategyAction, StrategyHistory } from '../domain/strategy-history';
+import { maps } from '../map';
 import type { ViewMode } from '../render/map-camera';
 import MapViewport from '../render/map-viewport';
 import HeroTools, { heroName, teamNames } from './hero-tools';
@@ -23,7 +24,6 @@ const kindNames: Record<TerrainKind, string> = {
 };
 const viewNames: Record<ViewMode, string> = { '2d': '2D 탑다운', '3d': '3D 원근' };
 const viewportModes = ['2d', '3d'] as const;
-const { min, max } = mapBounds(sampleMap.terrain);
 
 const formatNumber = (value: number) => new Intl.NumberFormat('ko-KR', {
   maximumFractionDigits: 2,
@@ -31,10 +31,16 @@ const formatNumber = (value: number) => new Intl.NumberFormat('ko-KR', {
 const formatElevation = (value: number) => `${value > 0 ? '+' : ''}${formatNumber(value)} u`;
 
 const Editor = () => {
+  const [catalogue, setCatalogue] = useState(maps);
+  const [mapId, setMapId] = useState(maps[0]!.id);
+  const map = catalogue.find((item) => item.id === mapId)!;
+  const { min, max } = useMemo(() => mapBounds(map.terrain), [map]);
+  const [importMessage, setImportMessage] = useState('');
+  const importRequest = useRef(0);
   const [mode, setMode] = useState<ViewMode>('3d');
   const [reset, setReset] = useState(0);
   const [layerId, setLayerId] = useState('');
-  const visibleTerrain = visibleTerrainForLayer(sampleMap.terrain, layerId);
+  const visibleTerrain = visibleTerrainForLayer(map.terrain, layerId);
   const [snap, setSnap] = useState(false);
   const [locked, setLocked] = useState(false);
   const [showHeroes, setShowHeroes] = useState(true);
@@ -52,8 +58,40 @@ const Editor = () => {
     setDragPreview(null);
     setHeroTool(next);
   };
-  const [history, dispatch] = useReducer(reduceStrategyHistory, sampleMap.id, (mapId) =>
-    createStrategyHistory(createStrategy('local-draft', mapId, '새 전략')));
+  const initialHistory = useMemo(() => createStrategyHistory(createStrategy('local-draft', mapId, '새 전략')), [mapId]);
+  const [histories, setHistories] = useState<Record<string, StrategyHistory>>({});
+  const history = Object.hasOwn(histories, mapId) ? histories[mapId]! : initialHistory;
+  const dispatch = (action: StrategyAction) => setHistories((current) => ({
+    ...current,
+    [mapId]: reduceStrategyHistory(Object.hasOwn(current, mapId) ? current[mapId]! : initialHistory, action),
+  }));
+  const switchMap = (id: string) => {
+    setTool(null);
+    setLayerId('');
+    setSelectedId(null);
+    setSelectedHeroId(null);
+    setAnnotationId(null);
+    setMapId(id);
+  };
+  const importMap = async (file: File) => {
+    const request = ++importRequest.current;
+    let imported: MapDefinition;
+    try {
+      if (file.size > 1_000_000) throw new Error();
+      imported = parseMap(JSON.parse(await file.text()));
+    } catch {
+      if (request === importRequest.current) setImportMessage('지도 JSON을 읽을 수 없습니다.');
+      return;
+    }
+    if (request !== importRequest.current) return;
+    if (catalogue.some((item) => item.id === imported.id)) {
+      setImportMessage('같은 ID의 지도가 이미 있습니다.');
+      return;
+    }
+    setCatalogue((current) => current.some((item) => item.id === imported.id) ? current : [...current, imported]);
+    switchMap(imported.id);
+    setImportMessage('');
+  };
   const { heroes, annotations } = history.present;
   const selected = visibleTerrain.find(({ id }) => id === selectedId);
   const selectedHero = heroes.find(({ id }) => id === selectedHeroId);
@@ -127,6 +165,19 @@ const Editor = () => {
           <span className="brand-mark" aria-hidden="true">V</span>
           Vertactics
         </div>
+        <div className="map-catalogue">
+          <label>지도 <select value={mapId} onChange={(event) => switchMap(event.target.value)}>
+            {catalogue.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
+          </select></label>
+          <label>지도 JSON 가져오기 <input type="file" accept=".json,application/json" onChange={(event) => {
+            const file = event.target.files?.[0];
+            event.target.value = '';
+            if (file) void importMap(file);
+          }} /></label>
+          <a className="reset-button" download={`${map.id}.json`}
+            href={`data:application/json;charset=utf-8,${encodeURIComponent(JSON.stringify(map, null, 2))}`}>지도 JSON 저장</a>
+          {importMessage && <span role="status">{importMessage}</span>}
+        </div>
       </header>
       <main className="workspace">
         <aside className="terrain-panel panel" aria-labelledby="terrain-title">
@@ -167,8 +218,9 @@ const Editor = () => {
         <section className="view-panel panel" aria-labelledby="view-title">
           <div className="viewport-toolbar">
             <div>
-              <h1 id="view-title">{sampleMap.name}</h1>
-              <p className="world-size">{max[0] - min[0]} × {max[2] - min[2]} u</p>
+              <h1 id="view-title">{map.name}</h1>
+              <p className="world-size">
+                {map.metadata?.verification === 'verified' ? '검증됨' : map.metadata?.verification === 'synthetic' ? '가상 지도' : '미검증'} · {max[0] - min[0]} × {max[2] - min[2]} u</p>
             </div>
             <div className="viewport-actions">
               <div className="mode-switch" role="group" aria-label="지도 보기">
@@ -190,12 +242,12 @@ const Editor = () => {
             </div>
           </div>
           <div className="view-options" role="group" aria-label="편집 및 표시 설정">
-            {sampleMap.layers && <label>표시 층 <select value={layerId} onChange={(event) => {
+            {map.layers && <label>표시 층 <select value={layerId} onChange={(event) => {
               setLayerId(event.target.value);
               selectTerrain(null);
             }}>
               <option value="">모든 층</option>
-              {sampleMap.layers.map(({ id, name }) => <option key={id} value={id}>{name}</option>)}
+              {map.layers.map(({ id, name }) => <option key={id} value={id}>{name}</option>)}
             </select></label>}
             <label><input type="checkbox" checked={snap} onChange={(event) => setSnap(event.target.checked)} /> 격자 스냅</label>
             <label><input type="checkbox" checked={locked} onChange={(event) => {
@@ -217,7 +269,8 @@ const Editor = () => {
             onPointerLeave={(event) => { if (tool?.kind === 'drag' && event.buttons === 1) setTool(null); }}
           >
             <MapViewport
-              map={sampleMap}
+              key={mapId}
+              map={map}
               layerId={layerId}
               mode={mode}
               reset={reset}

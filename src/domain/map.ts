@@ -26,12 +26,17 @@ export type Terrain = Box | Stairs;
 
 export type MapLayer = { id: string; name: string };
 
+export const verificationStates = ['synthetic', 'unverified', 'verified'] as const;
+export type MapVerification = (typeof verificationStates)[number];
+export type MapMetadata = { verification: MapVerification; source?: string };
+
 export type MapDefinition = {
   schemaVersion: 1;
   id: string;
   name: string;
   terrain: Terrain[];
   layers?: MapLayer[];
+  metadata?: MapMetadata;
 };
 
 export type TerrainBlock = { center: WorldPoint; size: WorldPoint };
@@ -88,7 +93,22 @@ export const parseMap = (value: unknown): MapDefinition => {
   if (layerIds.size !== layers.length || terrain.some(({ layerId }) => layerId !== undefined && !layerIds.has(layerId))) {
     throw new Error('Duplicate or unknown map layer ID');
   }
-  return { schemaVersion: 1, id: value.id, name: value.name, terrain, ...(layers.length ? { layers } : {}) };
+  const metadata = value.metadata;
+  let parsedMetadata: MapMetadata | undefined;
+  if (metadata !== undefined) {
+    if (!isRecord(metadata)) throw new Error('Invalid map metadata');
+    const verification = verificationStates.find((state) => state === metadata.verification);
+    const source = metadata.source;
+    if (!verification || (source !== undefined && !isName(source)) || (verification === 'verified' && !source)) {
+      throw new Error('Invalid verification status or source');
+    }
+    parsedMetadata = { verification, ...(source === undefined ? {} : { source }) };
+  }
+  return {
+    schemaVersion: 1, id: value.id, name: value.name, terrain,
+    ...(layers.length ? { layers } : {}),
+    ...(parsedMetadata ? { metadata: parsedMetadata } : {}),
+  };
 };
 
 const blockAt = ([x, y, z]: WorldPoint, size: WorldPoint): TerrainBlock => ({

@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "id": "courtyard",
+  "name": "훈련장 안뜰",
+  "metadata": { "verification": "synthetic" },
+  "terrain": [
+    { "id": "floor", "name": "안뜰 바닥", "kind": "floor", "origin": [-12, -0.5, -9], "size": [24, 0.5, 18] },
+    { "id": "north-wall", "name": "북쪽 벽", "kind": "wall", "origin": [-10, 0, -7], "size": [20, 3, 0.8] },
+    { "id": "deck", "name": "동쪽 고지대", "kind": "platform", "origin": [4, 0, -4], "size": [6, 2, 8] },
+    { "id": "stairs", "name": "고지대 계단", "kind": "stairs", "origin": [0, 0, -2], "size": [4, 2, 4], "steps": 5, "risesToward": "+x" }
+  ]
+}

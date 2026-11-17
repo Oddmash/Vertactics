@@ -350,20 +350,21 @@ test('commits a continuous hero drag as one undoable edit', async ({ page }) => 
   await page.getByRole('button', { name: '2D 탑다운' }).click();
   await expect(canvas).toHaveAttribute('data-view-mode', '2d');
   await page.getByRole('checkbox', { name: '격자 스냅' }).check();
-  const box = await canvas.boundingBox();
-  if (!box) throw new Error('Canvas has no bounds');
-  const scale = Math.max(36 / box.width, 24 / box.height) * 1.22;
-  const screen = (x: number, z: number): [number, number] =>
-    [box.x + box.width / 2 + x / scale, box.y + box.height / 2 + z / scale];
+  const screen = async (x: number, z: number): Promise<[number, number]> => {
+    const current = await canvas.boundingBox();
+    if (!current) throw new Error('Canvas has no bounds');
+    const units = Math.max(36 / current.width, 24 / current.height) * 1.22;
+    return [current.x + current.width / 2 + x / units, current.y + current.height / 2 + z / units];
+  };
   await page.getByRole('button', { name: '배치 시작' }).click();
   await expect(canvas).toHaveCSS('cursor', 'crosshair');
-  await page.mouse.click(...screen(0, 1));
+  await page.mouse.click(...await screen(0, 1));
   await expect(inspector.getByText('0, 0, 1', { exact: true })).toBeVisible();
   await inspector.getByRole('button', { name: '드래그 이동' }).click();
   await expect(canvas).toHaveCSS('cursor', 'crosshair');
-  await page.mouse.move(...screen(0, 1));
+  await page.mouse.move(...await screen(0, 1));
   await page.mouse.down();
-  const [x, y] = screen(7, 5);
+  const [x, y] = await screen(7, 5);
   await page.mouse.move(x, y, { steps: 12 });
   await expect(inspector.getByText('0, 0, 1', { exact: true })).toBeVisible();
   await page.mouse.up();
@@ -372,4 +373,39 @@ test('commits a continuous hero drag as one undoable edit', async ({ page }) => 
   await expect(inspector.getByText('0, 0, 1', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: '다시 실행', exact: true }).click();
   await expect(inspector.getByText('7, 2, 5', { exact: true })).toBeVisible();
+});
+
+test('switches maps without losing plans and registers validated JSON', async ({ page }) => {
+  await page.goto('/');
+  const catalogue = page.getByLabel('지도', { exact: true });
+  const canvas = page.getByTestId('viewport').locator('canvas');
+  const placements = page.getByRole('list', { name: '배치한 영웅' });
+  await page.getByRole('button', { name: '2D 탑다운' }).click();
+  await expect(canvas).toHaveAttribute('data-view-mode', '2d');
+  await page.getByRole('button', { name: '배치 시작' }).click();
+  await expect(canvas).toHaveCSS('cursor', 'crosshair');
+  const box = await canvas.boundingBox();
+  if (!box) throw new Error('Canvas has no bounds');
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+  await expect(placements.getByRole('listitem')).toHaveCount(1);
+  await catalogue.selectOption('courtyard');
+  await expect(page.getByRole('heading', { name: '훈련장 안뜰' })).toBeVisible();
+  await expect(placements).toHaveCount(0);
+  await catalogue.selectOption('elevation-lab');
+  await expect(placements.getByRole('listitem')).toHaveCount(1);
+
+  const input = page.getByLabel('지도 JSON 가져오기');
+  await input.setInputFiles({ name: 'broken.json', mimeType: 'application/json', buffer: Buffer.from('{}') });
+  await expect(page.getByText('지도 JSON을 읽을 수 없습니다.')).toBeVisible();
+  await input.setInputFiles({
+    name: 'custom.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify({
+      schemaVersion: 1, id: 'custom', name: '사용자 지도',
+      terrain: [{ id: 'base', name: '바닥', kind: 'floor', origin: [-4, -1, -4], size: [8, 1, 8] }],
+    })),
+  });
+  await expect(catalogue).toHaveValue('custom');
+  await expect(page.getByRole('heading', { name: '사용자 지도' })).toBeVisible();
+  const download = page.waitForEvent('download');
+  await page.getByRole('link', { name: '지도 JSON 저장' }).click();
+  expect((await download).suggestedFilename()).toBe('custom.json');
 });
