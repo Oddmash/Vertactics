@@ -112,7 +112,7 @@ jobs:
           APPLICATION_RESULT: ${{ needs.application.result }}
           COMPATIBILITY_RESULT: ${{ needs.compatibility.result }}
         run: |
-          case "$SCOPE_RESULT:$RUN_APPLICATION:$APPLICATION_RESULT" in
+          case "$SCOPE_RESULT:$RUN_APPLICATION:$APPLICATION_RESULT:$COMPATIBILITY_RESULT" in
             success:true:success:success) echo 'Application checks passed.' ;;
             success:false:skipped:skipped) echo 'Documentation-only diff passed.' ;;
             *) echo 'Required checks did not pass.'; exit 1 ;;
