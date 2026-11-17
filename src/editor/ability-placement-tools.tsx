@@ -1,3 +1,4 @@
+import { isAbilityDuration, maxAbilityDurationSeconds, minAbilityDurationSeconds } from '../domain/ability-preview';
 import type { AbilityPlacement } from '../domain/ability-preview';
 import { getHero } from '../domain/hero-catalogue';
 
@@ -38,7 +39,25 @@ const AbilityPlacementTools = ({ items, selectedId, locked, pending, onSelect, o
         <dl>
           <div><dt>능력 좌표 (X, Y, Z)</dt><dd>{selected.position.map((axis) => Number(axis.toFixed(2))).join(', ')}</dd></div>
           <div><dt>능력 방향</dt><dd>{(selected.heading + selected.direction + 360) % 360}°</dd></div>
+          {selected.shape === 'area' && <div><dt>지속 시간</dt>
+            <dd>{selected.durationSeconds === undefined ? '미설정' : `${selected.durationSeconds}초`}</dd>
+          </div>}
         </dl>
+        {selected.shape === 'area' && <form key={JSON.stringify([selected.id, selected.durationSeconds])} onSubmit={(event) => {
+          event.preventDefault();
+          const duration = new FormData(event.currentTarget).get('duration');
+          const durationSeconds = duration ? Number(duration) : undefined;
+          if (durationSeconds === selected.durationSeconds ||
+            (durationSeconds !== undefined && !isAbilityDuration(durationSeconds))) return;
+          onUpdate({ ...selected, durationSeconds });
+        }}>
+          <fieldset className="edit-controls" disabled={locked}>
+            <label>배치한 영역 지속 시간 (초) <input name="duration" type="number"
+              min={minAbilityDurationSeconds} max={maxAbilityDurationSeconds} step="any" defaultValue={selected.durationSeconds}
+            /></label>
+            <button type="submit" className="reset-button">지속 시간 적용</button>
+          </fieldset>
+        </form>}
         <fieldset className="hero-actions edit-controls" disabled={locked}>
           <button type="button" className="reset-button" onClick={() => onMove(selected)}>능력 이동</button>
           <button type="button" className="reset-button"
