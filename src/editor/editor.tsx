@@ -56,9 +56,12 @@ const formatElevation = (value: number) => `${value > 0 ? '+' : ''}${formatNumbe
 const exposureLabels = { blocked: '완전 차단', partial: '부분 노출', clear: '개방' };
 const sampleLabels = { lower: '하단', middle: '중단', upper: '상단' };
 
-const Editor = () => {
-  const [catalogue, setCatalogue] = useState(maps);
-  const [mapId, setMapId] = useState(maps[0]!.id);
+const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
+  const [catalogue, setCatalogue] = useState(() => {
+    if (!initialDraft) return maps;
+    return [...maps.filter((item) => item.id !== initialDraft.map.id), initialDraft.map];
+  });
+  const [mapId, setMapId] = useState(initialDraft?.map.id ?? maps[0]!.id);
   const map = catalogue.find((item) => item.id === mapId)!;
   const { min, max } = useMemo(() => mapBounds(map.terrain), [map]);
   const [importMessage, setImportMessage] = useState('');
@@ -117,7 +120,8 @@ const Editor = () => {
   const [annotationPick, setAnnotationPick] = useState<SurfacePick | null>(null);
   const [annotationId, setAnnotationId] = useState<string | null>(null);
   const initialHistory = useMemo(() => createStrategyHistory(createStrategy('local-draft', mapId, '새 전략')), [mapId]);
-  const [histories, setHistories] = useState<Record<string, StrategyHistory>>({});
+  const [histories, setHistories] = useState<Record<string, StrategyHistory>>(() =>
+    initialDraft ? { [initialDraft.map.id]: createStrategyHistory(initialDraft.strategy) } : {});
   const history = Object.hasOwn(histories, mapId) ? histories[mapId]! : initialHistory;
   const [workspaceRevision, setWorkspaceRevision] = useState(0);
   const markWorkspaceChanged = useCallback(() => setWorkspaceRevision((value) => value + 1), []);

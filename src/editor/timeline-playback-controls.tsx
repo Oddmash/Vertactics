@@ -8,9 +8,10 @@ type Props = {
   onSeek: (time: number) => void;
   onSpeed: (speed: number) => void;
   onExit: () => void;
+  exitLabel?: string;
 };
 
-const TimelinePlaybackControls = ({ durationMs, phaseLabel, timeMs, playing, speed, onToggle, onSeek, onSpeed, onExit }: Props) => (
+const TimelinePlaybackControls = ({ durationMs, phaseLabel, timeMs, playing, speed, onToggle, onSeek, onSpeed, onExit, exitLabel = '편집으로 돌아가기' }: Props) => (
   <section className="view-options" aria-label="전략 재생">
     <button type="button" className="reset-button" onClick={onToggle}>{playing ? '일시정지' : '재생'}</button>
     <label>재생 위치 <input aria-label="재생 위치" type="range" min={0} max={durationMs} step={1}
@@ -20,7 +21,7 @@ const TimelinePlaybackControls = ({ durationMs, phaseLabel, timeMs, playing, spe
     <label>재생 속도 <select aria-label="재생 속도" value={speed} onChange={(event) => onSpeed(Number(event.target.value))}>
       <option value={0.5}>0.5×</option><option value={1}>1×</option><option value={2}>2×</option>
     </select></label>
-    <button type="button" className="reset-button" onClick={onExit}>편집으로 돌아가기</button>
+    <button type="button" className="reset-button" onClick={onExit}>{exitLabel}</button>
   </section>
 );
 
