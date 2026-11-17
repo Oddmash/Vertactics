@@ -1,3 +1,5 @@
+import type { Annotation } from '../domain/annotation';
+import MapAnnotations from './map-annotations';
 import { Canvas, useThree } from '@react-three/fiber';
 import { Component, useLayoutEffect, useMemo } from 'react';
 import type { ReactNode } from 'react';
@@ -45,12 +47,15 @@ type Props = {
   onSelect: (id: string | null) => void;
   heroes: HeroPlacement[];
   selectedHeroId: string | null;
+  annotations: Annotation[];
+  selectedAnnotationId: string | null;
   onSelectHero: (id: string) => void;
   onEditSurface?: (position: WorldPoint) => void;
 };
 
 const MapViewport = ({
   map, mode, reset, selectedId, onSelect, heroes, selectedHeroId, onSelectHero, onEditSurface,
+  annotations, selectedAnnotationId,
 }: Props) => {
   const bounds = useMemo(() => mapBounds(map.terrain), [map]);
   const blocks = useMemo(() => map.terrain.map((terrain) => ({
@@ -120,6 +125,7 @@ const MapViewport = ({
             ))}
           </group>
         ))}
+        <MapAnnotations items={annotations} selectedId={selectedAnnotationId} />
         {heroes.map(({ id, position, yaw, team }) => (
           <group
             key={id}

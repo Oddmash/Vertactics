@@ -234,3 +234,10 @@ ul { padding: 0; list-style: none; }
 .pending-edit p { color: var(--color-accent); font-size: 12px; }
 .team-attack { background: var(--team-attack); border-radius: 0; }
 .team-defense { background: var(--team-defense); border-radius: 50%; }
+
+.annotation-swatch { background: var(--color-annotation); }
+.annotation-properties { display: grid; gap: var(--space-sm); min-width: 0; }
+.annotation-properties input { width: 100%; min-width: 0; }
+.annotation-properties ol { margin: 0; padding-left: var(--space-lg); font-size: 12px; }
+.annotation-properties li { margin-block: var(--space-xs); }
+.annotation-tools .terrain-button span:nth-child(2) { overflow-wrap: anywhere; }

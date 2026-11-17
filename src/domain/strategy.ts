@@ -1,3 +1,5 @@
+import { parseAnnotations } from './annotation';
+import type { Annotation } from './annotation';
 import { isWorldPoint } from './map';
 import type { WorldPoint } from './map';
 
@@ -18,6 +20,7 @@ export type StrategyDocument = {
   mapId: string;
   title: string;
   heroes: HeroPlacement[];
+  annotations: Annotation[];
 };
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -50,7 +53,9 @@ export const parseStrategy = (value: unknown): StrategyDocument => {
     throw new Error('Duplicate placement id');
   }
 
-  return { schemaVersion: 1, id: value.id, mapId: value.mapId, title: value.title, heroes };
+  return { schemaVersion: 1, id: value.id, mapId: value.mapId, title: value.title, heroes,
+    annotations: parseAnnotations(value.annotations === undefined ? [] : value.annotations),
+  };
 };
 
 export const createStrategy = (id: string, mapId: string, title: string): StrategyDocument =>

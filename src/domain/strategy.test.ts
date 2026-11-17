@@ -7,7 +7,7 @@ const placement = { id: 'p1', heroId: 'tracer', team: 'attack', position: [-9.5,
 describe('strategy documents', () => {
   it('creates an empty versioned strategy linked to a map', () => {
     expect(empty).toEqual({
-      schemaVersion: 1, id: 'strategy-1', mapId: 'elevation-lab', title: 'First plan', heroes: [],
+      schemaVersion: 1, id: 'strategy-1', mapId: 'elevation-lab', title: 'First plan', heroes: [], annotations: [],
     });
   });
 
@@ -37,5 +37,19 @@ describe('strategy documents', () => {
     { yaw: NaN },
   ])('rejects invalid placement inputs %j', (patch) => {
     expect(() => parseStrategy({ ...empty, heroes: [{ ...placement, ...patch }] })).toThrow(/heroes\[0\]/);
+  });
+});
+
+describe('strategy annotations', () => {
+  it('defaults older v1 documents to an empty annotation collection', () => {
+    expect(parseStrategy({ schemaVersion: 1, id: 'old', mapId: 'elevation-lab', title: 'Old', heroes: [] }).annotations)
+      .toEqual([]);
+  });
+
+  it('preserves route elevations and rejects malformed shapes', () => {
+    const route = { id: 'r1', kind: 'route', label: 'Flank', points: [[0, 0, 0], [2, 4, 6]] };
+    expect(parseStrategy({ ...empty, annotations: [route] }).annotations).toEqual([route]);
+    expect(() => parseStrategy({ ...empty, annotations: [route, route] })).toThrow(/duplicate/);
+    expect(() => parseStrategy({ ...empty, annotations: [{ ...route, kind: 'note' }] })).toThrow(/point count/);
   });
 });

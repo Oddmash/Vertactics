@@ -1,4 +1,7 @@
 import { useReducer, useState } from 'react';
+import type { Annotation } from '../domain/annotation';
+import AnnotationTools from './annotation-tools';
+import type { SurfacePick } from './annotation-tools';
 import { mapBounds, terrainKinds, topElevation } from '../domain/map';
 import type { TerrainKind, WorldPoint } from '../domain/map';
 import { createStrategy } from '../domain/strategy';
@@ -32,10 +35,16 @@ const Editor = () => {
   const [reset, setReset] = useState(0);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedHeroId, setSelectedHeroId] = useState<string | null>(null);
-  const [tool, setTool] = useState<EditTool | null>(null);
+  const [tool, setHeroTool] = useState<EditTool | null>(null);
+  const [annotationPick, setAnnotationPick] = useState<SurfacePick | null>(null);
+  const [annotationId, setAnnotationId] = useState<string | null>(null);
+  const setTool = (next: EditTool | null) => {
+    setAnnotationPick(null);
+    setHeroTool(next);
+  };
   const [history, dispatch] = useReducer(reduceStrategyHistory, sampleMap.id, (mapId) =>
     createStrategyHistory(createStrategy('local-draft', mapId, '새 전략')));
-  const { heroes } = history.present;
+  const { heroes, annotations } = history.present;
   const selected = sampleMap.terrain.find(({ id }) => id === selectedId);
   const selectedHero = heroes.find(({ id }) => id === selectedHeroId);
 
@@ -49,7 +58,18 @@ const Editor = () => {
     setSelectedHeroId(id);
   };
 
+  const selectAnnotation = (id: string) => {
+    setTool(null);
+    setAnnotationId(id);
+  };
+
+  const saveAnnotation = (annotation: Annotation) => {
+    dispatch({ type: 'set-annotation', annotation });
+    selectAnnotation(annotation.id);
+  };
+
   const editSurface = (position: WorldPoint) => {
+    if (annotationPick) { annotationPick.apply(position); return; }
     if (!tool) return;
     if (tool.kind === 'place') {
       const id = crypto.randomUUID();
@@ -140,7 +160,9 @@ const Editor = () => {
               selectedHeroId={selectedHeroId}
               onSelect={selectTerrain}
               onSelectHero={selectHero}
-              onEditSurface={tool ? editSurface : undefined}
+              annotations={annotations}
+              selectedAnnotationId={annotationId}
+              onEditSurface={tool || annotationPick ? editSurface : undefined}
             />
             <span className="view-label" aria-hidden="true">{viewNames[mode]}</span>
             {mode === '2d' && <span className="north-label" aria-label="위쪽은 북쪽">↑ N</span>}
@@ -188,6 +210,15 @@ const Editor = () => {
               </>
             ) : <p className="empty-selection">지도 또는 지형 목록에서 블록을 선택하세요.</p>}
           </div>
+          <AnnotationTools
+            items={annotations}
+            selected={annotations.find((item) => item.id === annotationId)}
+            pending={annotationPick}
+            onSelect={selectAnnotation}
+            onSave={saveAnnotation}
+            onPick={(pick) => { setHeroTool(null); setAnnotationPick(pick); }}
+            onRemove={(id) => { setAnnotationPick(null); dispatch({ type: 'remove-annotation', id }); }}
+          />
           <div className="legend">
             <h3>범례</h3>
             <ul>
