@@ -1,3 +1,5 @@
+import { useLocale } from '../ui/locale';
+import LocalePicker from '../ui/locale-picker';
 import { useRef, useState } from 'react';
 import type { StrategyDraft } from '../storage/strategy-draft';
 import MapViewport from '../render/map-viewport';
@@ -8,6 +10,7 @@ import TimelinePlaybackControls from './timeline-playback-controls';
 import useTimelinePlayback from './use-timeline-playback';
 
 const SharedStrategyView = ({ draft, onDuplicate }: { draft: StrategyDraft; onDuplicate: () => void }) => {
+  const { t } = useLocale();
   const { map, strategy } = draft;
   const [mode, setMode] = useState<ViewMode>('3d');
   const [reset, setReset] = useState(0);
@@ -21,23 +24,25 @@ const SharedStrategyView = ({ draft, onDuplicate }: { draft: StrategyDraft; onDu
   return (
     <div className="editor">
       <header className="app-header">
-        <span className="brand">Vertactics</span>
-        <span>읽기 전용 전략</span>
-        <button type="button" className="reset-button" onClick={onDuplicate}>편집용 복제</button>
+        <span className="brand"><img className="brand-mark" src="favicon.png" alt="" width={30} height={30} />Vertactics</span>
+        <span>{t('읽기 전용 전략')}</span>
+        <LocalePicker />
+        <small className="fan-notice">{t('Vertactics는 Blizzard Entertainment와 제휴하지 않은 Overwatch 팬 프로젝트입니다.')}</small>
+        <button type="button" className="reset-button" onClick={onDuplicate}>{t('편집용 복제')}</button>
       </header>
       <main className="workspace shared-workspace">
         <section className="view-panel panel" aria-labelledby="shared-title">
           <div className="viewport-toolbar">
-            <div><h1 id="shared-title">{strategy.title}</h1><p>{map.name}</p></div>
+            <div><h1 id="shared-title">{strategy.title}</h1><p>{t(map.name)}</p></div>
             <div className="viewport-actions">
-              <div className="mode-switch" role="group" aria-label="지도 보기">
-                <button type="button" aria-label="2D 탑다운" aria-pressed={mode === '2d'} onClick={() => setMode('2d')}>2D</button>
-                <button type="button" aria-label="3D 원근" aria-pressed={mode === '3d'} onClick={() => setMode('3d')}>3D</button>
+              <div className="mode-switch" role="group" aria-label={t('지도 보기')}>
+                <button type="button" aria-label={t('2D 탑다운')} aria-pressed={mode === '2d'} onClick={() => setMode('2d')}>2D</button>
+                <button type="button" aria-label={t('3D 원근')} aria-pressed={mode === '3d'} onClick={() => setMode('3d')}>3D</button>
               </div>
-              <button type="button" className="reset-button" onClick={() => setReset((value) => value + 1)}>시점 초기화</button>
+              <button type="button" className="reset-button" onClick={() => setReset((value) => value + 1)}>{t('시점 초기화')}</button>
               <button type="button" className="reset-button" onClick={() =>
                 downloadFile(new Blob([JSON.stringify(draft)], { type: 'application/json' }), `${stem}-strategy.json`)
-              }>전략 JSON 내보내기</button>
+              }>{t('전략 JSON 내보내기')}</button>
               <button type="button" className="reset-button" onClick={() => {
                 const take = capture.current;
                 setMessage('');
@@ -46,15 +51,15 @@ const SharedStrategyView = ({ draft, onDuplicate }: { draft: StrategyDraft; onDu
                   () => setMessage('지도 화면을 PNG로 저장할 수 없습니다.'),
                 );
                 else setMessage('지도 화면을 PNG로 저장할 수 없습니다.');
-              }}>지도 PNG 저장</button>
+              }}>{t('지도 PNG 저장')}</button>
             </div>
           </div>
-          {message && <p role="status">{message}</p>}
+          {message && <p role="status">{t(message)}</p>}
           {durationMs > 0 && (playback
             ? <TimelinePlaybackControls durationMs={durationMs} phaseLabel={frame?.phaseLabel ?? ''}
               timeMs={playback.timeMs} playing={playback.playing} speed={playback.speed}
-              onToggle={toggle} onSeek={seek} onSpeed={changeSpeed} onExit={stop} exitLabel="재생 종료" />
-            : <div className="view-options"><button type="button" className="reset-button" onClick={start}>전략 재생</button></div>)}
+              onToggle={toggle} onSeek={seek} onSpeed={changeSpeed} onExit={stop} exitLabel={t('재생 종료')} />
+            : <div className="view-options"><button type="button" className="reset-button" onClick={start}>{t('전략 재생')}</button></div>)}
           <div className="viewport" data-testid="viewport">
             <MapViewport map={map} capture={capture} mode={mode} reset={reset} layerId="" snap={false}
               selectedTerrainIds={new Set()} selectedHeroId={null} selectedAnnotationId={null}
