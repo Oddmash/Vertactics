@@ -10,9 +10,10 @@ type Props = {
   mode: ViewMode;
   bounds: ReturnType<typeof mapBounds>;
   reset: number;
+  pointerEditing: boolean;
 };
 
-const MapCamera = ({ mode, bounds, reset }: Props) => {
+const MapCamera = ({ mode, bounds, reset, pointerEditing }: Props) => {
   const { gl, set, get, invalidate, size } = useThree();
   const controls = useRef<OrbitControls | null>(null);
   const camera = useMemo(() => {
@@ -55,6 +56,10 @@ const MapCamera = ({ mode, bounds, reset }: Props) => {
       if (get().camera === camera) set({ camera: previousCamera });
     };
   }, [camera, get, gl, invalidate, mode, set, span]);
+
+  useLayoutEffect(() => {
+    if (controls.current) controls.current.enabled = !pointerEditing;
+  }, [camera, pointerEditing, span]);
 
   useLayoutEffect(() => {
     const target = new Vector3(...bounds.center);

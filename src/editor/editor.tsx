@@ -1,4 +1,4 @@
-import { useReducer, useState } from 'react';
+import { useReducer, useRef, useState } from 'react';
 import type { Annotation } from '../domain/annotation';
 import AnnotationTools from './annotation-tools';
 import type { SurfacePick } from './annotation-tools';
@@ -13,7 +13,7 @@ import MapViewport from '../render/map-viewport';
 import HeroTools, { heroName, teamNames } from './hero-tools';
 import type { SampleHero } from './hero-tools';
 
-type EditTool = { kind: 'place'; heroId: SampleHero; team: Team } | { kind: 'move'; id: string };
+type EditTool = { kind: 'place'; heroId: SampleHero; team: Team } | { kind: 'move' | 'drag'; id: string };
 
 const kindNames: Record<TerrainKind, string> = {
   floor: '바닥',
@@ -42,10 +42,14 @@ const Editor = () => {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedHeroId, setSelectedHeroId] = useState<string | null>(null);
   const [tool, setHeroTool] = useState<EditTool | null>(null);
+  const [dragPreview, setDragPreview] = useState<WorldPoint | null>(null);
+  const dragPoint = useRef<WorldPoint | null>(null);
   const [annotationPick, setAnnotationPick] = useState<SurfacePick | null>(null);
   const [annotationId, setAnnotationId] = useState<string | null>(null);
   const setTool = (next: EditTool | null) => {
     setAnnotationPick(null);
+    dragPoint.current = null;
+    setDragPreview(null);
     setHeroTool(next);
   };
   const [history, dispatch] = useReducer(reduceStrategyHistory, sampleMap.id, (mapId) =>
@@ -72,6 +76,19 @@ const Editor = () => {
   const saveAnnotation = (annotation: Annotation) => {
     dispatch({ type: 'set-annotation', annotation });
     selectAnnotation(annotation.id);
+  };
+
+  const previewDrag = (position: WorldPoint | null) => {
+    dragPoint.current = position;
+    setDragPreview(position);
+  };
+
+  const finishDrag = () => {
+    if (tool?.kind !== 'drag') return;
+    if (dragPoint.current && !locked) {
+      dispatch({ type: 'update', id: tool.id, patch: { position: dragPoint.current } });
+    }
+    setTool(null);
   };
 
   const editSurface = (position: WorldPoint) => {
@@ -137,7 +154,7 @@ const Editor = () => {
             heroes={heroes}
             locked={locked || !showHeroes}
             selectedId={selectedHeroId}
-            pendingMessage={tool?.kind === 'place' ? '배치할 지면을 클릭하세요.' : tool ? '이동할 지면을 클릭하세요.' : ''}
+            pendingMessage={tool?.kind === 'place' ? '배치할 지면을 클릭하세요.' : tool?.kind === 'drag' ? '지도에서 누른 채 끌어 이동하세요.' : tool ? '이동할 지면을 클릭하세요.' : ''}
             canUndo={!locked && history.past.length > 0}
             canRedo={!locked && history.future.length > 0}
             onPlace={(heroId, team) => setTool({ kind: 'place', heroId, team })}
@@ -194,21 +211,28 @@ const Editor = () => {
               setShowAnnotations(event.target.checked);
             }} /> 마커 표시</label>
           </div>
-          <div className="viewport" data-testid="viewport">
+          <div className="viewport" data-testid="viewport"
+            onPointerUp={finishDrag}
+            onPointerCancel={() => { if (tool?.kind === 'drag') setTool(null); }}
+            onPointerLeave={(event) => { if (tool?.kind === 'drag' && event.buttons === 1) setTool(null); }}
+          >
             <MapViewport
               map={sampleMap}
               layerId={layerId}
               mode={mode}
               reset={reset}
               selectedId={selectedId}
-              heroes={showHeroes ? heroes : []}
+              heroes={showHeroes ? heroes.map((hero) =>
+                tool?.kind === 'drag' && hero.id === tool.id && dragPreview ? { ...hero, position: dragPreview } : hero
+              ) : []}
               snap={snap}
               selectedHeroId={selectedHeroId}
               onSelect={selectTerrain}
               onSelectHero={selectHero}
               annotations={showAnnotations ? annotations : []}
               selectedAnnotationId={annotationId}
-              onEditSurface={!locked && (tool || annotationPick) ? editSurface : undefined}
+              onEditSurface={!locked && ((tool && tool.kind !== 'drag') || annotationPick) ? editSurface : undefined}
+              onDragSurface={!locked && tool?.kind === 'drag' ? previewDrag : undefined}
             />
             <span className="view-label" aria-hidden="true">{viewNames[mode]}</span>
             {mode === '2d' && <span className="north-label" aria-label="위쪽은 북쪽">↑ N</span>}
@@ -232,6 +256,7 @@ const Editor = () => {
                 </dl>
                 <fieldset className="hero-actions edit-controls" disabled={locked || !showHeroes}>
                   <button className="reset-button" type="button" onClick={() => setTool({ kind: 'move', id: selectedHero.id })}>이동</button>
+                  <button className="reset-button" type="button" onClick={() => setTool({ kind: 'drag', id: selectedHero.id })}>드래그 이동</button>
                   <button className="reset-button" type="button" onClick={() => dispatch({
                     type: 'update', id: selectedHero.id, patch: { yaw: (selectedHero.yaw + 45) % 360 },
                   })}>45° 회전</button>
@@ -263,7 +288,7 @@ const Editor = () => {
             pending={annotationPick}
             onSelect={selectAnnotation}
             onSave={saveAnnotation}
-            onPick={(pick) => { setHeroTool(null); setAnnotationPick(pick); }}
+            onPick={(pick) => { setTool(null); setAnnotationPick(pick); }}
             onRemove={(id) => { setAnnotationPick(null); dispatch({ type: 'remove-annotation', id }); }}
           />
           <div className="legend">

@@ -342,3 +342,34 @@ test('picks stacked floors and places and selects heroes in both views', async (
   await clickPerspective(-3, 0, 3);
   await expect(inspector.getByText('-3, 0, 3', { exact: true })).toBeVisible();
 });
+
+test('commits a continuous hero drag as one undoable edit', async ({ page }) => {
+  await page.goto('/');
+  const canvas = page.getByTestId('viewport').locator('canvas');
+  const inspector = page.getByRole('complementary', { name: '지형 정보' });
+  await page.getByRole('button', { name: '2D 탑다운' }).click();
+  await expect(canvas).toHaveAttribute('data-view-mode', '2d');
+  await page.getByRole('checkbox', { name: '격자 스냅' }).check();
+  const box = await canvas.boundingBox();
+  if (!box) throw new Error('Canvas has no bounds');
+  const scale = Math.max(36 / box.width, 24 / box.height) * 1.22;
+  const screen = (x: number, z: number): [number, number] =>
+    [box.x + box.width / 2 + x / scale, box.y + box.height / 2 + z / scale];
+  await page.getByRole('button', { name: '배치 시작' }).click();
+  await expect(canvas).toHaveCSS('cursor', 'crosshair');
+  await page.mouse.click(...screen(0, 1));
+  await expect(inspector.getByText('0, 0, 1', { exact: true })).toBeVisible();
+  await inspector.getByRole('button', { name: '드래그 이동' }).click();
+  await expect(canvas).toHaveCSS('cursor', 'crosshair');
+  await page.mouse.move(...screen(0, 1));
+  await page.mouse.down();
+  const [x, y] = screen(7, 5);
+  await page.mouse.move(x, y, { steps: 12 });
+  await expect(inspector.getByText('0, 0, 1', { exact: true })).toBeVisible();
+  await page.mouse.up();
+  await expect(inspector.getByText('7, 2, 5', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: '실행 취소', exact: true }).click();
+  await expect(inspector.getByText('0, 0, 1', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: '다시 실행', exact: true }).click();
+  await expect(inspector.getByText('7, 2, 5', { exact: true })).toBeVisible();
+});

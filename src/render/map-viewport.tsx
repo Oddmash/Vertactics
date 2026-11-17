@@ -4,6 +4,7 @@ import MapAnnotations from './map-annotations';
 import { Canvas, useThree } from '@react-three/fiber';
 import { Component, useLayoutEffect, useMemo } from 'react';
 import type { ReactNode } from 'react';
+import type { ThreeEvent } from '@react-three/fiber';
 import { BoxGeometry } from 'three';
 import { mapBounds, terrainBlocks, visibleTerrainForLayer } from '../domain/map';
 import type { MapDefinition, WorldPoint } from '../domain/map';
@@ -54,11 +55,12 @@ type Props = {
   layerId: string;
   onSelectHero: (id: string) => void;
   onEditSurface?: (position: WorldPoint) => void;
+  onDragSurface?: (position: WorldPoint | null) => void;
 };
 
 const MapViewport = ({
   map, mode, reset, selectedId, onSelect, heroes, selectedHeroId, onSelectHero, onEditSurface,
-  annotations, selectedAnnotationId, snap, layerId,
+  annotations, selectedAnnotationId, snap, layerId, onDragSurface,
 }: Props) => {
   const bounds = useMemo(() => mapBounds(map.terrain), [map]);
   const blocks = useMemo(() => visibleTerrainForLayer(map.terrain, layerId).map((terrain) => ({
@@ -81,52 +83,63 @@ const MapViewport = ({
         flat
         gl={{ antialias: true }}
         fallback={<Fallback />}
-        onPointerMissed={() => { if (!onEditSurface) onSelect(null); }}
+        onPointerMissed={() => { if (!onEditSurface && !onDragSurface) onSelect(null); }}
       >
         <color attach="background" args={[tokens.color.viewport]} />
         <ambientLight intensity={1.15} />
         <directionalLight position={[-15, 24, 10]} intensity={1.5} />
         <directionalLight position={[18, 8, -15]} intensity={0.35} />
-        <MapCamera mode={mode} bounds={bounds} reset={reset} />
-        <SurfaceCursor editing={Boolean(onEditSurface)} />
+        <MapCamera mode={mode} bounds={bounds} reset={reset} pointerEditing={Boolean(onDragSurface)} />
+        <SurfaceCursor editing={Boolean(onEditSurface || onDragSurface)} />
         <gridHelper
           position={[bounds.center[0], bounds.min[1] - 0.02, bounds.center[2]]}
           args={[gridSize, gridSize, tokens.color.axis, tokens.color.grid]}
         />
         {blocks.map(({ terrain, blocks }) => (
           <group key={terrain.id}>
-            {blocks.map(({ center, size }, index) => (
-              <mesh
-                key={index}
-                position={center}
-                scale={size}
-                onClick={(event) => {
-                  if (event.delta > 4) return;
-                  event.stopPropagation();
-                  if (onEditSurface) {
-                    const top = center[1] + size[1] / 2;
-                    if (terrain.kind !== 'wall' && Math.abs(event.point.y - top) < 0.0001) {
-                      const point: WorldPoint = [event.point.x, top, event.point.z];
-                      onEditSurface(snap ? snapSurfacePoint(point, center, size) : point);
+            {blocks.map(({ center, size }, index) => {
+              const readSurface = ({ point: hit }: Pick<ThreeEvent<MouseEvent>, 'point'>): WorldPoint | null => {
+                const top = center[1] + size[1] / 2;
+                if (terrain.kind === 'wall' || Math.abs(hit.y - top) >= 0.0001) return null;
+                const point: WorldPoint = [hit.x, top, hit.z];
+                return snap ? snapSurfacePoint(point, center, size) : point;
+              };
+              return (
+                <mesh
+                  key={index}
+                  position={center}
+                  scale={size}
+                  onPointerOut={onDragSurface && ((event) => { if (event.buttons === 1) onDragSurface(null); })}
+                  onPointerMove={onDragSurface && ((event) => {
+                    if (event.buttons !== 1) return;
+                    event.stopPropagation();
+                    onDragSurface(readSurface(event));
+                  })}
+                  onClick={(event) => {
+                    if (event.delta > 4 || onDragSurface) return;
+                    event.stopPropagation();
+                    if (onEditSurface) {
+                      const point = readSurface(event);
+                      if (point) onEditSurface(point);
+                      return;
                     }
-                    return;
-                  }
-                  onSelect(terrain.id);
-                }}
-              >
-                <boxGeometry />
-                <meshStandardMaterial
-                  color={tokens.color[terrain.kind]}
-                  roughness={0.92}
-                  emissive={tokens.color.accent}
-                  emissiveIntensity={selectedId === terrain.id ? 0.26 : 0}
-                />
-                <lineSegments raycast={skipRaycast}>
-                  <edgesGeometry args={[unitBox]} />
-                  <lineBasicMaterial color={tokens.color.app} transparent opacity={0.48} />
-                </lineSegments>
-              </mesh>
-            ))}
+                    onSelect(terrain.id);
+                  }}
+                >
+                  <boxGeometry />
+                  <meshStandardMaterial
+                    color={tokens.color[terrain.kind]}
+                    roughness={0.92}
+                    emissive={tokens.color.accent}
+                    emissiveIntensity={selectedId === terrain.id ? 0.26 : 0}
+                  />
+                  <lineSegments raycast={skipRaycast}>
+                    <edgesGeometry args={[unitBox]} />
+                    <lineBasicMaterial color={tokens.color.app} transparent opacity={0.48} />
+                  </lineSegments>
+                </mesh>
+              );
+            })}
           </group>
         ))}
         <MapAnnotations items={annotations} selectedId={selectedAnnotationId} />
@@ -136,7 +149,7 @@ const MapViewport = ({
             position={position}
             rotation={[0, -yaw * Math.PI / 180, 0]}
             onClick={(event) => {
-              if (event.delta > 4 || onEditSurface) return;
+              if (event.delta > 4 || onEditSurface || onDragSurface) return;
               event.stopPropagation();
               onSelectHero(id);
             }}
