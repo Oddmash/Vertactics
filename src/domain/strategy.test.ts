@@ -7,7 +7,7 @@ const placement = { id: 'p1', heroId: 'tracer', team: 'attack', position: [-9.5,
 describe('strategy documents', () => {
   it('creates an empty versioned strategy linked to a map', () => {
     expect(empty).toEqual({
-      schemaVersion: 1, id: 'strategy-1', mapId: 'elevation-lab', title: 'First plan', heroes: [], annotations: [], abilities: [],
+      schemaVersion: 1, id: 'strategy-1', mapId: 'elevation-lab', title: 'First plan', heroes: [], annotations: [], abilities: [], timeline: [],
     });
   });
 
@@ -83,6 +83,24 @@ describe('strategy abilities', () => {
         expect(() => parseStrategy({ ...empty, abilities: [{ ...ability, rangeReference: { ...rangeReference, ...patch } }] }))
           .toThrow(/range reference/);
       }
+    }
+  });
+
+  it('round-trips phases, poses and timed events on a strategy', () => {
+    const phase = { id: 'phase-1', label: 'Approach', durationMs: 5000,
+      poses: [{ heroPlacementId: placement.id, position: [3, 4, 5], yaw: 180 }],
+      events: [{ id: 'event-1', abilityPlacementId: ability.id, offsetMs: 3500, durationMs: 1500 }],
+    };
+    const strategy = { ...empty, heroes: [placement], abilities: [ability] };
+    expect(parseStrategy({ ...strategy, timeline: [phase] }).timeline).toEqual([phase]);
+    expect(parseStrategy({ ...strategy, timeline: undefined }).timeline).toEqual([]);
+    for (const timeline of [
+      [{ ...phase, durationMs: 4999 }],
+      [{ ...phase, poses: [{ ...phase.poses[0], heroPlacementId: 'missing' }] }],
+      [{ ...phase, events: [{ ...phase.events[0], abilityPlacementId: 'missing' }] }],
+      [phase, { ...phase, id: 'another-phase' }],
+    ]) {
+      expect(() => parseStrategy({ ...strategy, timeline })).toThrow(/timeline/);
     }
   });
 

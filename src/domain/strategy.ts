@@ -1,3 +1,5 @@
+import { parseStrategyTimeline } from './strategy-timeline';
+import type { StrategyPhase } from './strategy-timeline';
 import { parseAbilityPlacements } from './ability-preview';
 import type { AbilityPlacement } from './ability-preview';
 import { parseAnnotations } from './annotation';
@@ -26,6 +28,7 @@ export type StrategyDocument = {
   heroes: HeroPlacement[];
   annotations: Annotation[];
   abilities: AbilityPlacement[];
+  timeline: StrategyPhase[];
 };
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -54,12 +57,15 @@ export const parseStrategy = (value: unknown): StrategyDocument => {
   }
 
   const heroes = Array.from(value.heroes, parseHero);
-  if (new Set(heroes.map(({ id }) => id)).size !== heroes.length) {
+  const heroIds = new Set(heroes.map(({ id }) => id));
+  if (heroIds.size !== heroes.length) {
     throw new Error('Duplicate placement id');
   }
 
-  return { schemaVersion: 1, id: value.id, mapId: value.mapId, title: value.title, heroes,
-    abilities: parseAbilityPlacements(value.abilities === undefined ? [] : value.abilities),
+  const abilities = parseAbilityPlacements(value.abilities === undefined ? [] : value.abilities);
+  const abilityIds = new Set(abilities.map(({ id }) => id));
+  return { schemaVersion: 1, id: value.id, mapId: value.mapId, title: value.title, heroes, abilities,
+    timeline: parseStrategyTimeline(value.timeline === undefined ? [] : value.timeline, heroIds, abilityIds),
     annotations: parseAnnotations(value.annotations === undefined ? [] : value.annotations),
   };
 };
