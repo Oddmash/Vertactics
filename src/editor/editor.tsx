@@ -31,7 +31,11 @@ import HeroTools, { roleNames, teamNames } from './hero-tools';
 import { getHero, heroName } from '../domain/hero-catalogue';
 import type { CatalogueHero } from '../domain/hero-catalogue';
 
-type EditTool = { kind: 'place'; heroId: CatalogueHero; team: Team } | { kind: 'move' | 'drag'; id: string };
+type SurfaceTool =
+  | { kind: 'place'; heroId: CatalogueHero; team: Team }
+  | { kind: 'move' | 'drag'; id: string }
+  | { kind: 'distance' | 'sight' }
+  | { kind: 'ability' | 'annotation'; pick: SurfacePick };
 
 const kindNames: Record<TerrainKind, string> = {
   floor: '바닥',
@@ -78,9 +82,11 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
     }
   };
   const [mapEditing, setMapEditing] = useState(false);
-  const [probeTool, setProbeTool] = useState<'distance' | 'sight' | null>(null);
-  const measuring = probeTool === 'distance';
-  const sightPicking = probeTool === 'sight';
+  const [tool, setSurfaceTool] = useState<SurfaceTool | null>(null);
+  const measuring = tool?.kind === 'distance';
+  const sightPicking = tool?.kind === 'sight';
+  const abilityPick = tool?.kind === 'ability' ? tool.pick : null;
+  const annotationPick = tool?.kind === 'annotation' ? tool.pick : null;
   const [sightPoints, setSightPoints] = useState<WorldPoint[]>([]);
   const [sightFirst, sightSecond] = sightPoints;
   const [measurement, setMeasurement] = useState<WorldPoint[]>([]);
@@ -113,11 +119,8 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
   };
   const selectedTerrainIds = new Set(selectedId ? [selectedId, ...additionalTerrain] : additionalTerrain);
   const [selectedHeroId, setSelectedHeroId] = useState<string | null>(null);
-  const [tool, setHeroTool] = useState<EditTool | null>(null);
   const [dragPreview, setDragPreview] = useState<WorldPoint | null>(null);
-  const [abilityPick, setAbilityPick] = useState<SurfacePick | null>(null);
   const [selectedAbilityId, setSelectedAbilityId] = useState<string | null>(null);
-  const [annotationPick, setAnnotationPick] = useState<SurfacePick | null>(null);
   const [annotationId, setAnnotationId] = useState<string | null>(null);
   const initialHistory = useMemo(() => createStrategyHistory(createStrategy('local-draft', mapId, '새 전략')), [mapId]);
   const [histories, setHistories] = useState<Record<string, StrategyHistory>>(() =>
@@ -130,16 +133,19 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
   const durationMs = timelineDuration(history.present.timeline);
   const [playback, setPlayback] = useTimelinePlayback(durationMs);
   const frame = playback ? sampleTimeline(history.present, playback.timeMs) : null;
-  const setTool = useCallback((next: EditTool | null) => {
-    setAnnotationPick(null);
-    setAbilityPick(null);
+  const changeSurfaceTool = useCallback((next: SurfaceTool | null) => {
+    setSurfaceTool(next);
     setDragPreview(null);
-    setHeroTool(next);
-    setPlayback(null);
-    setProbeTool(null);
-    setHeroViewId(undefined);
     setSightPoints((points) => points.length === 2 ? points : []);
+  }, []);
+  const leavePresentation = useCallback(() => {
+    setPlayback(null);
+    setHeroViewId(undefined);
   }, [setPlayback]);
+  const activateTool = useCallback((next: SurfaceTool | null) => {
+    changeSurfaceTool(next);
+    leavePresentation();
+  }, [changeSurfaceTool, leavePresentation]);
   const dispatch = useCallback((action: StrategyAction) => {
     setPlayback(null);
     markWorkspaceChanged();
@@ -149,7 +155,7 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
     }));
   }, [initialHistory, mapId, markWorkspaceChanged, setPlayback]);
   const switchMap = (id: string) => {
-    setTool(null);
+    activateTool(null);
     setMapMessage('');
     setMeasurement([]);
     setSightPoints([]);
@@ -295,7 +301,7 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
   };
 
   const selectAnnotation = (id: string) => {
-    setTool(null);
+    activateTool(null);
     setAnnotationId(id);
   };
 
@@ -305,21 +311,20 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
   };
 
   const saveAbility = (ability: AbilityPlacement) => {
-    setTool(null);
+    activateTool(null);
     dispatch({ type: 'set-ability', ability });
     setSelectedAbilityId(ability.id);
   };
 
   const pickAbilitySurface = (hint: string, apply: SurfacePick['apply']) => {
-    setTool(null);
-    setAbilityPick({ hint, apply });
+    activateTool({ kind: 'ability', pick: { hint, apply } });
   };
 
   const finishDrag = useCallback((position: WorldPoint | null) => {
     if (tool?.kind !== 'drag') return;
     if (position && !locked) dispatch({ type: 'update', id: tool.id, patch: { position } });
-    setTool(null);
-  }, [dispatch, locked, setTool, tool]);
+    changeSurfaceTool(null);
+  }, [changeSurfaceTool, dispatch, locked, tool]);
 
   const editSurface = (position: WorldPoint) => {
     if (measuring) {
@@ -338,18 +343,18 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
       const id = crypto.randomUUID();
       dispatch({ type: 'place', hero: { id, heroId: tool.heroId, team: tool.team, position, yaw: 0 } });
       selectHero(id);
-    } else {
+    } else if (tool.kind === 'move') {
       dispatch({ type: 'update', id: tool.id, patch: { position } });
       selectHero(tool.id);
     }
-    setTool(null);
+    changeSurfaceTool(null);
   };
 
   return (
     <div className="editor" onKeyDown={(event) => {
-      if (event.key === 'Escape' && (frame || heroView || tool || annotationPick || abilityPick || probeTool)) {
+      if (event.key === 'Escape' && (frame || heroView || tool)) {
         event.preventDefault();
-        setTool(null);
+        activateTool(null);
         return;
       }
       if (mapEditing || locked || event.defaultPrevented || event.altKey ||
@@ -358,7 +363,7 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
       const key = event.key.toLowerCase();
       if (key !== 'z' && key !== 'y') return;
       event.preventDefault();
-      setTool(null);
+      activateTool(null);
       dispatch({ type: key === 'y' || event.shiftKey ? 'redo' : 'undo' });
     }}>
       <header className="app-header">
@@ -372,7 +377,7 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
           </select></label>
           <button type="button" className="reset-button" onClick={createMap}>새 지도</button>
           <button type="button" className="reset-button" aria-pressed={mapEditing} onClick={() => {
-            setTool(null);
+            activateTool(null);
             selectTerrain(null);
             setMapEditing((current) => !current);
           }}>지도 편집 모드</button>
@@ -399,7 +404,7 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
                   type="button"
                   className="terrain-button"
                   aria-pressed={selectedTerrainIds.has(terrain.id)}
-                  onClick={(event) => { setTool(null); selectTerrain(terrain.id, event.shiftKey || event.metaKey || event.ctrlKey); }}
+                  onClick={(event) => { activateTool(null); selectTerrain(terrain.id, event.shiftKey || event.metaKey || event.ctrlKey); }}
                 >
                   <span className={`terrain-swatch ${terrain.kind}`} aria-hidden="true" />
                   <span>{terrain.name}</span>
@@ -412,14 +417,14 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
             heroes={heroes}
             locked={locked || !showHeroes}
             selectedId={selectedHeroId}
-            pendingMessage={tool?.kind === 'place' ? '배치할 지면을 클릭하세요.' : tool?.kind === 'drag' ? '지도에서 누른 채 끌어 이동하세요.' : tool ? '이동할 지면을 클릭하세요.' : ''}
+            pendingMessage={tool?.kind === 'place' ? '배치할 지면을 클릭하세요.' : tool?.kind === 'drag' ? '지도에서 누른 채 끌어 이동하세요.' : tool?.kind === 'move' ? '이동할 지면을 클릭하세요.' : ''}
             canUndo={!locked && history.past.length > 0}
             canRedo={!locked && history.future.length > 0}
-            onPlace={(heroId, team) => setTool({ kind: 'place', heroId, team })}
-            onSelect={(id) => { setTool(null); selectHero(id); }}
-            onUndo={() => { setTool(null); dispatch({ type: 'undo' }); }}
-            onRedo={() => { setTool(null); dispatch({ type: 'redo' }); }}
-            onCancel={() => setTool(null)}
+            onPlace={(heroId, team) => activateTool({ kind: 'place', heroId, team })}
+            onSelect={(id) => { activateTool(null); selectHero(id); }}
+            onUndo={() => { activateTool(null); dispatch({ type: 'undo' }); }}
+            onRedo={() => { activateTool(null); dispatch({ type: 'redo' }); }}
+            onCancel={() => activateTool(null)}
           />}
           <StrategyDraftTools draft={draft} onRestore={restoreDraft} />
           <StrategyFileTools draft={draft} onImport={(imported) => {
@@ -446,7 +451,7 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
             {recovery.saved && recovery.status === 'error' && <p role="status">복구본을 지울 수 없습니다.</p>}
           </section>
           {!mapEditing && <StrategyTimelineTools key={mapId} strategy={history.present} locked={locked}
-            onChange={(timeline) => { setTool(null); dispatch({ type: 'set-timeline', timeline }); }}
+            onChange={(timeline) => { activateTool(null); dispatch({ type: 'set-timeline', timeline }); }}
           />}
         </aside>
         <section className="view-panel panel" aria-labelledby="view-title">
@@ -488,32 +493,30 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
               {map.layers.map(({ id, name }) => <option key={id} value={id}>{name}</option>)}
             </select></label>}
             <button type="button" className="reset-button" aria-pressed={measuring} onClick={() => {
-              setTool(null);
-              setProbeTool(measuring ? null : 'distance');
+              activateTool(measuring ? null : { kind: 'distance' });
               if (!measuring) setMeasurement([]);
             }}>거리 측정</button>
             <button type="button" className="reset-button" aria-pressed={sightPicking} onClick={() => {
-              setTool(null);
-              setProbeTool(sightPicking ? null : 'sight');
+              activateTool(sightPicking ? null : { kind: 'sight' });
               if (!sightPicking || !sightSecond) setSightPoints([]);
             }}>지점 간 시야</button>
             <label><input type="checkbox" checked={snap} onChange={(event) => setSnap(event.target.checked)} /> 격자 스냅</label>
             <label><input type="checkbox" checked={locked} onChange={(event) => {
-              setTool(null);
+              activateTool(null);
               setLocked(event.target.checked);
             }} /> 편집 잠금</label>
             <label><input type="checkbox" checked={showHeroes} onChange={(event) => {
-              setTool(null);
+              activateTool(null);
               setShowHeroes(event.target.checked);
             }} /> 영웅 표시</label>
             <label><input type="checkbox" checked={showAnnotations} onChange={(event) => {
-              setTool(null);
+              activateTool(null);
               setShowAnnotations(event.target.checked);
             }} /> 마커 표시</label>
           </div>
           {!mapEditing && durationMs > 0 && (!playback
             ? <div className="view-options"><button type="button" className="reset-button" onClick={() => {
-              setTool(null);
+              activateTool(null);
               setPlayback({ timeMs: 0, playing: true, speed: 1 });
             }}>전략 재생</button></div>
             : <TimelinePlaybackControls durationMs={durationMs} phaseLabel={frame?.phaseLabel ?? ''}
@@ -528,8 +531,8 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
               onExit={() => setPlayback(null)}
             />)}
           <div className="viewport" data-testid="viewport"
-            onPointerCancel={() => { if (tool?.kind === 'drag') setTool(null); }}
-            onPointerLeave={(event) => { if (tool?.kind === 'drag' && event.buttons === 1) setTool(null); }}
+            onPointerCancel={() => { if (tool?.kind === 'drag') changeSurfaceTool(null); }}
+            onPointerLeave={(event) => { if (tool?.kind === 'drag' && event.buttons === 1) changeSurfaceTool(null); }}
           >
             <MapViewport
               key={mapId}
@@ -555,7 +558,7 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
               onSelectHero={(id) => { if (!frame) selectHero(id); }}
               annotations={[...(!mapEditing && showAnnotations ? annotations : []), ...measurementOverlay, ...sightOverlay]}
               selectedAnnotationId={annotationId}
-              onEditSurface={probeTool || (!locked && ((tool && tool.kind !== 'drag') || annotationPick || abilityPick)) ? editSurface : undefined}
+              onEditSurface={measuring || sightPicking || (!locked && tool && tool.kind !== 'drag') ? editSurface : undefined}
               onDragSurface={!locked && tool?.kind === 'drag' ? setDragPreview : undefined}
               onDropSurface={!locked && tool?.kind === 'drag' ? finishDrag : undefined}
             />
@@ -609,7 +612,7 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
                 />}
                 {heroes.length > 1 && <div className="spatial-probe">
                   <label>시야 확인 대상 <select aria-label="시야 확인 대상" value={sightTarget?.id ?? ''} onChange={(event) => {
-                    setTool(null);
+                    activateTool(null);
                     setSightPoints([]);
                     setSightTargetId(event.target.value);
                   }}>
@@ -634,12 +637,12 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
                   </>}
                 </div>}
                 {showHeroes && <button className="reset-button" type="button" aria-pressed={Boolean(heroView)} onClick={() => {
-                  setTool(null);
+                  activateTool(null);
                   if (!heroView) setHeroViewId(selectedHero.id);
                 }}>영웅 시점</button>}
                 <fieldset className="hero-actions edit-controls" disabled={locked || !showHeroes}>
-                  <button className="reset-button" type="button" onClick={() => setTool({ kind: 'move', id: selectedHero.id })}>이동</button>
-                  <button className="reset-button" type="button" onClick={() => setTool({ kind: 'drag', id: selectedHero.id })}>드래그 이동</button>
+                  <button className="reset-button" type="button" onClick={() => activateTool({ kind: 'move', id: selectedHero.id })}>이동</button>
+                  <button className="reset-button" type="button" onClick={() => activateTool({ kind: 'drag', id: selectedHero.id })}>드래그 이동</button>
                   <button className="reset-button" type="button" onClick={() => dispatch({
                     type: 'update', id: selectedHero.id, patch: { yaw: (selectedHero.yaw + 45) % 360 },
                   })}>45° 회전</button>
@@ -647,7 +650,7 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
                     type: 'update', id: selectedHero.id, patch: { team: selectedHero.team === 'attack' ? 'defense' : 'attack' },
                   })}>팀 전환</button>
                   <button className="reset-button" type="button" onClick={() => {
-                    setTool(null);
+                    activateTool(null);
                     dispatch({ type: 'remove', id: selectedHero.id });
                   }}>삭제</button>
                 </fieldset>
@@ -714,12 +717,12 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
               selectedId={selectedAbilityId}
               locked={locked}
               pending={abilityPick?.hint}
-              onSelect={(id) => { setTool(null); setSelectedAbilityId(id); }}
+              onSelect={(id) => { activateTool(null); setSelectedAbilityId(id); }}
               onMove={(ability) => pickAbilitySurface('능력을 이동할 지면을 선택하세요.', (position) =>
                 saveAbility({ ...ability, position }))}
               onUpdate={saveAbility}
-              onRemove={(id) => { setTool(null); dispatch({ type: 'remove-ability', id }); }}
-              onCancel={() => setTool(null)}
+              onRemove={(id) => { activateTool(null); dispatch({ type: 'remove-ability', id }); }}
+              onCancel={() => activateTool(null)}
             />}
             <AnnotationTools
               items={annotations}
@@ -728,8 +731,11 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
               pending={annotationPick}
               onSelect={selectAnnotation}
               onSave={saveAnnotation}
-              onPick={(pick) => { setTool(null); setAnnotationPick(pick); }}
-              onRemove={(id) => { setAnnotationPick(null); dispatch({ type: 'remove-annotation', id }); }}
+              onPick={(pick) => activateTool(pick ? { kind: 'annotation', pick } : null)}
+              onRemove={(id) => {
+                if (annotationPick) changeSurfaceTool(null);
+                dispatch({ type: 'remove-annotation', id });
+              }}
             />
           </>}
           <div className="legend">
