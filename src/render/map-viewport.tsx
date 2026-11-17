@@ -110,6 +110,11 @@ const MapViewport = ({
                   position={center}
                   scale={size}
                   onPointerOut={onDragSurface && ((event) => { if (event.buttons === 1) onDragSurface(null); })}
+                  onPointerUp={onDragSurface && ((event) => {
+                    if (event.button !== 0) return;
+                    event.stopPropagation();
+                    onDragSurface(readSurface(event));
+                  })}
                   onPointerMove={onDragSurface && ((event) => {
                     if (event.buttons !== 1) return;
                     event.stopPropagation();
