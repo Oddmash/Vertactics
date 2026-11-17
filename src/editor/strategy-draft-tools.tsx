@@ -51,7 +51,7 @@ const StrategyDraftTools = ({ draft, onRestore }: Props) => {
 
   return (
     <section className="hero-tools" aria-labelledby="strategy-draft-title">
-      <h2 id="strategy-draft-title">로컬 전략</h2>
+      <h2 id="strategy-draft-title" tabIndex={-1}>로컬 전략</h2>
       <form key={JSON.stringify([draft.map.id, draft.strategy.id, existingId, active?.title])} onSubmit={(event) => {
         event.preventDefault();
         const title = String(new FormData(event.currentTarget).get('title')).trim();

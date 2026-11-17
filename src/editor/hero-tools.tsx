@@ -25,7 +25,7 @@ const HeroTools = ({
   heroes, locked, selectedId, pendingMessage, canUndo, canRedo, onPlace, onSelect, onUndo, onRedo, onCancel,
 }: Props) => (
   <section className="hero-tools" aria-labelledby="hero-tools-title">
-    <h2 id="hero-tools-title">영웅 배치</h2>
+    <h2 id="hero-tools-title" tabIndex={-1}>영웅 배치</h2>
     <form onSubmit={(event) => {
       event.preventDefault();
       const data = new FormData(event.currentTarget);
