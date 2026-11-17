@@ -719,3 +719,41 @@ test('preserves and edits a custom area duration across map views', async ({ pag
   await page.getByRole('button', { name: '실행 취소', exact: true }).click();
   await expect(placed.getByText('8초', { exact: true })).toBeVisible();
 });
+
+test('shows the source and status of a game distance reference separately from map units', async ({ page }, testInfo) => {
+  await page.goto('/');
+  const canvas = page.getByTestId('viewport').locator('canvas');
+  const placed = page.getByRole('region', { name: '배치한 능력' });
+  await page.getByRole('button', { name: '2D 탑다운' }).click();
+  await expect(canvas).toHaveAttribute('data-view-mode', '2d');
+  await page.getByRole('button', { name: '배치 시작' }).click();
+  await expect(canvas).toHaveCSS('cursor', 'crosshair');
+  await canvas.click();
+  await page.getByText('능력 범위 미리보기', { exact: true }).click();
+  await page.getByRole('button', { name: '범위 표시', exact: true }).click();
+  await page.getByRole('button', { name: '지도에 배치' }).click();
+  await expect(canvas).toHaveCSS('cursor', 'crosshair');
+  const box = await canvas.boundingBox();
+  if (!box) throw new Error('Canvas has no bounds');
+  const unitsPerPixel = Math.max(36 / box.width, 24 / box.height) * 1.22;
+  await page.mouse.click(box.x + box.width / 2 - 4 / unitsPerPixel, box.y + box.height / 2);
+
+  await placed.getByText('게임 거리 참고값', { exact: true }).click();
+  await placed.getByLabel('게임 거리 (m)', { exact: true }).fill('8.5');
+  await placed.getByRole('textbox', { name: '게임 버전' }).fill('Test build');
+  await placed.getByRole('textbox', { name: '출처' }).fill('Test reference notes');
+  await placed.getByRole('button', { name: '참고값 저장' }).click();
+  await expect(placed.getByText('사용자 추정 · 8.5 m', { exact: true })).toBeVisible();
+  await expect(placed.getByText('사용자 설정 · 5 u', { exact: true })).toBeVisible();
+  await placed.getByLabel('참고값 유형', { exact: true }).selectOption('measured');
+  await placed.getByRole('button', { name: '참고값 저장' }).click();
+  await page.getByRole('button', { name: '3D 원근' }).click();
+  await expect(canvas).toHaveAttribute('data-view-mode', '3d');
+  await expect(placed.getByText('사용자 실측 · 8.5 m', { exact: true })).toBeVisible();
+  await expect(placed.getByRole('definition').filter({ hasText: 'Test reference notes' })).toBeVisible();
+  await page.screenshot({ path: testInfo.outputPath('ability-range-reference-3d.png') });
+  await placed.getByRole('button', { name: '참고값 지우기' }).click();
+  await expect(placed.getByText('사용자 실측 · 8.5 m', { exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: '실행 취소', exact: true }).click();
+  await expect(placed.getByText('사용자 실측 · 8.5 m', { exact: true })).toBeVisible();
+});

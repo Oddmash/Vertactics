@@ -4,6 +4,13 @@ import type { WorldPoint } from './map';
 export const abilityShapes = ['circle', 'sphere', 'cone', 'line', 'rectangle', 'vector', 'area'] as const;
 export type AbilityShape = (typeof abilityShapes)[number];
 
+export type AbilityRangeReference = {
+  status: 'measured' | 'estimated';
+  meters: number;
+  source: string;
+  gameVersion: string;
+};
+
 export type AbilityPreviewSettings = {
   abilityId: string;
   shape: AbilityShape;
@@ -13,6 +20,7 @@ export type AbilityPreviewSettings = {
   direction: number;
   verification: 'custom';
   durationSeconds?: number;
+  rangeReference?: AbilityRangeReference;
 };
 
 export type AbilityPlacement = AbilityPreviewSettings & {
@@ -35,6 +43,18 @@ export const isAbilityDuration = (value: unknown): value is number =>
 const hasText = (value: unknown): value is string =>
   typeof value === 'string' && value.trim().length > 0;
 
+export const parseAbilityRangeReference = (value: unknown): AbilityRangeReference => {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    throw new Error('Invalid ability range reference');
+  }
+  const { status, meters, source, gameVersion } = value as Record<string, unknown>;
+  if ((status !== 'measured' && status !== 'estimated') || !inRange(meters, 0.01, 1000) ||
+    !hasText(source) || source.length > 300 || !hasText(gameVersion) || gameVersion.length > 80) {
+    throw new Error('Invalid ability range reference');
+  }
+  return { status, meters, source: source.trim(), gameVersion: gameVersion.trim() };
+};
+
 export const parseAbilityPlacements = (value: unknown): AbilityPlacement[] => {
   if (!Array.isArray(value)) throw new Error('Invalid abilities');
   const ids = new Set<string>();
@@ -42,8 +62,8 @@ export const parseAbilityPlacements = (value: unknown): AbilityPlacement[] => {
     if (typeof item !== 'object' || item === null || Array.isArray(item)) {
       throw new Error(`Invalid abilities[${index}]`);
     }
-    const { id, heroId, abilityId, shape, range, width, angle, direction, verification, durationSeconds, position, heading, visible } =
-      item as Record<string, unknown>;
+    const { id, heroId, abilityId, shape, range, width, angle, direction, verification, durationSeconds,
+      position, heading, visible, rangeReference } = item as Record<string, unknown>;
     const abilityShape = abilityShapes.find((candidate) => candidate === shape);
     if (!hasText(id) || ids.has(id) || !hasText(heroId) || !hasText(abilityId) || !abilityShape ||
       !inRange(range, 0.1, 1000) || !inRange(width, 0.1, 1000) || !inRange(angle, 1, 360) ||
@@ -54,6 +74,7 @@ export const parseAbilityPlacements = (value: unknown): AbilityPlacement[] => {
     }
     ids.add(id);
     return { id, heroId, abilityId, shape: abilityShape, range, width, angle, direction, verification,
+      ...(rangeReference === undefined ? {} : { rangeReference: parseAbilityRangeReference(rangeReference) }),
       ...(durationSeconds === undefined ? {} : { durationSeconds }), position: [...position], heading, visible };
   });
 };

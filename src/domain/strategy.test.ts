@@ -74,6 +74,18 @@ describe('strategy abilities', () => {
     }
   });
 
+  it('keeps game distance references separate from custom map units', () => {
+    for (const status of ['measured', 'estimated']) {
+      const rangeReference = { status, meters: 7, source: 'Practice range notes', gameVersion: 'Test version' };
+      expect(parseStrategy({ ...empty, abilities: [{ ...ability, rangeReference }] }).abilities)
+        .toEqual([{ ...ability, rangeReference }]);
+      for (const patch of [{ source: ' ' }, { meters: Infinity }, { gameVersion: '' }, { status: 'official' }]) {
+        expect(() => parseStrategy({ ...empty, abilities: [{ ...ability, rangeReference: { ...rangeReference, ...patch } }] }))
+          .toThrow(/range reference/);
+      }
+    }
+  });
+
   it('rejects duplicate ids, invalid geometry and unrecognized provenance', () => {
     expect(() => parseStrategy({ ...empty, abilities: [ability, ability] })).toThrow(/abilities/);
     for (const patch of [{ width: Infinity }, { heading: NaN }, { position: [0, 0] }, { verification: 'verified' }]) {

@@ -1,3 +1,4 @@
+import AbilityRangeReferenceForm from './ability-range-reference-form';
 import { isAbilityDuration, maxAbilityDurationSeconds, minAbilityDurationSeconds } from '../domain/ability-preview';
 import type { AbilityPlacement } from '../domain/ability-preview';
 import { getHero } from '../domain/hero-catalogue';
@@ -68,6 +69,9 @@ const AbilityPlacementTools = ({ items, selectedId, locked, pending, onSelect, o
           </button>
           <button type="button" className="reset-button" onClick={() => onRemove(selected.id)}>능력 삭제</button>
         </fieldset>
+        <AbilityRangeReferenceForm key={selected.id} ability={selected} locked={locked}
+          onReference={(rangeReference) => onUpdate({ ...selected, rangeReference })}
+        />
       </>}
     </section>
   );
