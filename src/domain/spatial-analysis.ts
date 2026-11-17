@@ -42,7 +42,7 @@ const intersection = (block: TerrainBlock, start: WorldPoint, end: WorldPoint): 
   return entry;
 };
 
-export const spatialBlockers = (terrain: Terrain[], start: WorldPoint, end: WorldPoint) => {
+export const traceSightline = (terrain: Terrain[], start: WorldPoint, end: WorldPoint) => {
   let collision: { item: Terrain; time: number } | undefined;
   let sight: { item: Terrain; time: number } | undefined;
   for (const item of terrain) {
@@ -57,5 +57,16 @@ export const spatialBlockers = (terrain: Terrain[], start: WorldPoint, end: Worl
       if (blocksSight && (!sight || time < sight.time)) sight = { item, time };
     }
   }
-  return { collision: collision?.item, sight: sight?.item };
+  const through = sight?.time ?? 1;
+  const endpoint: WorldPoint = [
+    start[0] + (end[0] - start[0]) * through,
+    start[1] + (end[1] - start[1]) * through,
+    start[2] + (end[2] - start[2]) * through,
+  ];
+  return { collision: collision?.item, sight: sight?.item, endpoint };
+};
+
+export const spatialBlockers = (terrain: Terrain[], start: WorldPoint, end: WorldPoint) => {
+  const { collision, sight } = traceSightline(terrain, start, end);
+  return { collision, sight };
 };

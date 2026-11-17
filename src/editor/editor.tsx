@@ -7,7 +7,7 @@ import { measureSegment } from '../domain/measurement';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import type { Annotation } from '../domain/annotation';
 import { rotateTerrain, snapTerrain } from '../domain/terrain-edit';
-import { spatialBlockers } from '../domain/spatial-analysis';
+import { traceSightline } from '../domain/spatial-analysis';
 import TerrainTools from './terrain-tools';
 import AnnotationTools from './annotation-tools';
 import type { SurfacePick } from './annotation-tools';
@@ -218,9 +218,10 @@ const Editor = () => {
   const previewKey = selectedHero ? JSON.stringify([mapId, selectedHero.id]) : '';
   const activeAbility = abilityPreviews[previewKey];
   const sightTarget = heroes.find((hero) => hero.id === sightTargetId && hero.id !== selectedHeroId);
-  const spatialProbe = selectedHero && sightTarget ? (() => {
+  const spatialProbe = !mapEditing && showHeroes && selectedHero && sightTarget ? (() => {
     const eye = ([x, y, z]: WorldPoint): WorldPoint => [x, y + 1.6, z];
-    return spatialBlockers(map.terrain, eye(selectedHero.position), eye(sightTarget.position));
+    const start = eye(selectedHero.position);
+    return { start, ...traceSightline(map.terrain, start, eye(sightTarget.position)) };
   })() : null;
   const selectTerrain = (id: string | null, extend = false) => {
     if (mapEditing && extend && id && selectedId) {
@@ -433,6 +434,9 @@ const Editor = () => {
               ) : []}
               snap={snap}
               selectedHeroId={selectedHeroId}
+              sightline={spatialProbe && {
+                start: spatialProbe.start, end: spatialProbe.endpoint, blocked: Boolean(spatialProbe.sight),
+              }}
               abilities={mapEditing ? [] : abilities}
               abilityPreview={!mapEditing && showHeroes && selectedHero && activeAbility
                 ? { hero: selectedHero, settings: activeAbility } : undefined}
@@ -491,7 +495,7 @@ const Editor = () => {
                   })}
                 />}
                 {heroes.length > 1 && <div className="spatial-probe">
-                  <label>시야 확인 대상 <select value={sightTarget?.id ?? ''} onChange={(event) => setSightTargetId(event.target.value)}>
+                  <label>시야 확인 대상 <select aria-label="시야 확인 대상" value={sightTarget?.id ?? ''} onChange={(event) => setSightTargetId(event.target.value)}>
                     <option value="">대상 선택</option>
                     {heroes.filter((hero) => hero.id !== selectedHeroId).map((hero, index) => (
                       <option key={hero.id} value={hero.id}>{heroName(hero.heroId)} · {index + 1}</option>
