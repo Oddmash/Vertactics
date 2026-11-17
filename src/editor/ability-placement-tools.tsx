@@ -1,8 +1,7 @@
-import { Button, Input } from '../ui/controls';
+import { Button } from '../ui/controls';
 import { useLocale } from '../ui/locale';
-import AbilityRangeReferenceForm from './ability-range-reference-form';
-import { isAbilityDuration, maxAbilityDurationSeconds, minAbilityDurationSeconds } from '../domain/ability-preview';
 import type { AbilityPlacement } from '../domain/ability-preview';
+import { getKoreanAbilityName } from '../domain/ability-reference';
 import { getHero } from '../domain/hero-catalogue';
 
 type Props = {
@@ -18,7 +17,7 @@ type Props = {
 };
 
 const AbilityPlacementTools = ({ items, selectedId, locked, pending, onSelect, onMove, onUpdate, onRemove, onCancel }: Props) => {
-  const { t } = useLocale();
+  const { locale, t } = useLocale();
   const selected = items.find((item) => item.id === selectedId);
 
   return (
@@ -30,9 +29,9 @@ const AbilityPlacementTools = ({ items, selectedId, locked, pending, onSelect, o
       </div>}
       {items.length > 0 && <ul className="terrain-list">
         {items.map((item) => {
-          const abilityName = getHero(item.heroId)?.abilities.find(({ id }) => id === item.abilityId)?.name ?? item.abilityId;
+          const abilityName = (locale === 'ko' ? getKoreanAbilityName(item.heroId, item.abilityId) : undefined) ?? getHero(item.heroId)?.abilities.find(({ id }) => id === item.abilityId)?.name ?? item.abilityId;
           return <li key={item.id}>
-            <Button type="button" className="terrain-button" aria-pressed={item.id === selectedId}
+            <Button type="button" className="terrain-button saved-strategy" aria-pressed={item.id === selectedId}
               onClick={() => onSelect(item.id)}>
               <span>{abilityName}</span><small>{item.visible ? t('표시 중') : t('숨김')}</small>
             </Button>
@@ -46,21 +45,6 @@ const AbilityPlacementTools = ({ items, selectedId, locked, pending, onSelect, o
             <dd>{selected.durationSeconds === undefined ? t('미설정') : t('{0}초', selected.durationSeconds)}</dd>
           </div>}
         </dl>
-        {selected.shape === 'area' && <form key={JSON.stringify([selected.id, selected.durationSeconds])} onSubmit={(event) => {
-          event.preventDefault();
-          const duration = new FormData(event.currentTarget).get('duration');
-          const durationSeconds = duration ? Number(duration) : undefined;
-          if (durationSeconds === selected.durationSeconds ||
-            (durationSeconds !== undefined && !isAbilityDuration(durationSeconds))) return;
-          onUpdate({ ...selected, durationSeconds });
-        }}>
-          <fieldset className="edit-controls" disabled={locked}>
-            <label>{t('배치한 영역 지속 시간 (초)') + ' '}<Input name="duration" type="number"
-              min={minAbilityDurationSeconds} max={maxAbilityDurationSeconds} step="any" defaultValue={selected.durationSeconds}
-            /></label>
-            <Button type="submit" className="reset-button">{t('지속 시간 적용')}</Button>
-          </fieldset>
-        </form>}
         <fieldset className="hero-actions edit-controls" disabled={locked}>
           <Button type="button" className="reset-button" onClick={() => onMove(selected)}>{t('능력 이동')}</Button>
           <Button type="button" className="reset-button"
@@ -71,9 +55,6 @@ const AbilityPlacementTools = ({ items, selectedId, locked, pending, onSelect, o
           </Button>
           <Button type="button" className="reset-button" onClick={() => onRemove(selected.id)}>{t('능력 삭제')}</Button>
         </fieldset>
-        <AbilityRangeReferenceForm key={selected.id} ability={selected} locked={locked}
-          onReference={(rangeReference) => onUpdate({ ...selected, rangeReference })}
-        />
       </>}
     </section>
   );

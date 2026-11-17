@@ -17,8 +17,3 @@ export const savedHeroPosition = (page: Page) => page.evaluate(() => {
   return point?.map((coordinate) => Number(coordinate.toFixed(2))).join(', ');
 });
 
-
-export const savedAbilityElevation = (page: Page) => page.evaluate(() => {
-  const raw = localStorage.getItem('vertactics-workspace-recovery');
-  return raw ? JSON.parse(raw).strategy.abilities.at(-1)?.position[1] as number | undefined : undefined;
-});

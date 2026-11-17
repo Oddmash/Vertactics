@@ -61,7 +61,6 @@ test('drops a portrait directly on the 2D map and places it on the selected team
   await page.route('https://d15f34w2p8l1cc.cloudfront.net/overwatch/*.png', (route) =>
     route.fulfill({
       contentType: 'image/svg+xml',
-      headers: { 'access-control-allow-origin': '*' },
       body: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"><rect width="16" height="16" fill="#ff04f3"/></svg>',
     }));
   await page.goto('./');
@@ -74,20 +73,11 @@ test('drops a portrait directly on the 2D map and places it on the selected team
   await tracer.dragTo(canvas);
   const placed = panel.getByRole('list', { name: '배치한 영웅' });
   await expect(placed.getByRole('button', { name: '트레이서 수비팀' })).toBeVisible();
-  for (const mode of ['2D 탑다운', '3D 원근']) {
-    await page.getByRole('button', { name: mode }).click();
-    await expect.poll(async () => {
-      const screenshot = (await canvas.screenshot()).toString('base64');
-      return page.evaluate(async (encoded) => {
-        const bytes = Uint8Array.from(atob(encoded), (character) => character.charCodeAt(0));
-        const image = await createImageBitmap(new Blob([bytes], { type: 'image/png' }));
-        const context = new OffscreenCanvas(image.width, image.height).getContext('2d');
-        if (!context) return false;
-        context.drawImage(image, 0, 0);
-        const pixels = context.getImageData(0, 0, image.width, image.height).data;
-        return pixels.some((red, index) => index % 4 === 0 &&
-          red > 215 && pixels[index + 1]! < 35 && pixels[index + 2]! > 200);
-      }, screenshot);
-    }).toBe(true);
+  const map = page.getByTestId('viewport');
+  const portrait = map.locator('[data-hero="tracer"] img');
+  for (const view of ['2D 탑다운', '3D 원근']) {
+    await page.getByRole('button', { name: view }).click();
+    await expect(portrait).toBeVisible();
+    await expect(portrait).toHaveJSProperty('naturalWidth', 16);
   }
 });

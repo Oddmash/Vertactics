@@ -6,6 +6,7 @@
 - Inspect the worktree, current branch, and remote HEAD. Preserve user edits and history. Include only relevant files in each commit.
 - Branch from the current remote `main` for each independently reviewable change. Use descriptive kebab-case branch names such as `feat/ability-placement` or `ci/pr-verification`.
 - Continue with the next unfinished item. Record environmental blockers in SPEC and proceed with independent work.
+- Track product changes in GitHub issues and link each implementation PR to its issue. Keep partially resolved issues open with the remaining verification or implementation work recorded.
 - Write repository documentation in English. Maintain Korean translations for reader-facing documents such as README, the development guide and SPEC. Keep agent instructions and skill guides in English.
 
 ## Implement

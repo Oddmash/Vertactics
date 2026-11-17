@@ -1,4 +1,6 @@
 {
+  "재사용 대기시간": "Cooldown",
+  "탄창": "Magazine",
   "전체 화면": "Fullscreen",
   "전체 화면 종료": "Exit fullscreen",
   "마커": "Markers",

@@ -1,3 +1,4 @@
+import LoadingImage from '../ui/loading-image';
 import { useState } from 'react';
 import HeroAbilityReference from './hero-ability-reference';
 import portraitUrls from '../domain/hero-portraits.json';
@@ -31,7 +32,6 @@ const HeroTools = ({
   const { locale, t } = useLocale();
   const selectedProfile = heroCatalogue[catalogueId];
   const name = locale === 'en' ? selectedProfile.name : selectedProfile.localizedName;
-  const [failedPortraits, setFailedPortraits] = useState<ReadonlySet<string>>(() => new Set());
   const [team, setTeam] = useState<Team>('attack');
   const portraits: Record<string, string> = portraitUrls;
   const chooseRole = (role: HeroRole) => {
@@ -66,8 +66,7 @@ const HeroTools = ({
                 event.dataTransfer.setData(heroDragType, `${id}:${team}`);
               }}
               onClick={() => { if (isCatalogueHero(id)) onChooseHero(id); }}>
-              {portrait && !failedPortraits.has(id) ? <img src={portrait} alt="" width="48" height="48" loading="lazy" draggable={false}
-                referrerPolicy="no-referrer" onError={() => setFailedPortraits((current) => new Set([...current, id]))} />
+              {portrait ? <LoadingImage src={portrait} width={48} height={48} fallback={label.slice(0, 2)} />
                 : <span className="hero-portrait-fallback" aria-hidden="true">{label.slice(0, 2)}</span>}
               <span className="hero-roster-name">{label}</span>
             </Button>

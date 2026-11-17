@@ -11,6 +11,13 @@ const summaries: Record<string, Record<string, { ko: string; en: string }>> = {
     'biotic-grenade': { ko: '아군을 치유하고 받는 치유량을 높입니다. 적에게는 피해를 주고 치유를 차단합니다.', en: 'A blast heals allies and boosts their incoming healing. Enemies take damage and cannot receive healing.' },
     'nano-boost': { ko: '아군 한 명이 주는 피해를 높이고 받는 피해를 줄입니다.', en: 'Empower one ally to deal more damage and take less.' },
   },
+  ramattra: {
+    'void-accelerator-omnic-form': { ko: '옴닉 형태에서 일정한 패턴으로 투사체를 연사합니다.', en: 'In Omnic form, fire a stream of projectiles in a set pattern.' },
+    'void-barrier-omnic-form': { ko: '지정한 위치에 방벽을 펼칩니다.', en: 'Create a barrier at the target location.' },
+    'pummel-nemesis-form': { ko: '주먹을 내질러 전방에 충격파를 보냅니다.', en: 'Punch forward to send out a shockwave.' },
+    'ravenous-vortex': { ko: '적을 감속시키고 아래로 끌어당기는 구체를 발사합니다. 다시 눌러 일찍 폭발시킬 수 있습니다.', en: 'Throw a sphere that slows and pulls enemies downward. Activate again to detonate it early.' },
+    annihilation: { ko: '네메시스 형태로 바뀌어 주변 적에게 지속 피해를 줍니다. 적에게 피해를 주면 더 오래 유지됩니다.', en: 'Enter Nemesis form and damage nearby enemies over time. Damaging enemies extends the effect.' },
+  },
   reinhardt: {
     'rocket-hammer': { ko: '망치를 휘둘러 근접 공격을 합니다.', en: 'Swing a large hammer in melee range.' },
     charge: { ko: '전방으로 돌진하고 붙잡은 적을 벽에 밀어붙입니다.', en: 'Rush forward and pin a caught enemy against a wall.' },
@@ -37,17 +44,31 @@ const summaries: Record<string, Record<string, { ko: string; en: string }>> = {
 export const getAbilitySummary = (heroId: string, abilityId: string, locale: 'ko' | 'en') =>
   summaries[heroId]?.[abilityId]?.[locale];
 
+type PatchReference = { label: string; value: number; unit?: string; patch: string; source: string };
+
+const patchReferences: Record<string, Record<string, PatchReference>> = {
+  ana: {
+    'biotic-grenade': { label: '폭발 피해', value: 60, patch: '2026-11',
+      source: 'https://overwatch.blizzard.com/en-us/news/patch-notes/live/2026/11/' },
+  },
+  ramattra: {
+    'void-accelerator-omnic-form': { label: '탄창', value: 125, patch: '2026-11',
+      source: 'https://overwatch.blizzard.com/en-us/news/patch-notes/live/2026/11/' },
+    'void-barrier-omnic-form': { label: '재사용 대기시간', value: 13, unit: 's', patch: '2026-07-30',
+      source: 'https://overwatch.blizzard.com/en-us/news/patch-notes/live/2026/07/' },
+    'ravenous-vortex': { label: '폭발 피해', value: 30, patch: '2026-07-14',
+      source: 'https://overwatch.blizzard.com/en-us/news/patch-notes/live/2026/07/' },
+  },
+};
+
 export const getAbilityPatchReference = (heroId: string, abilityId: string) =>
-  heroId === 'ana' && abilityId === 'biotic-grenade'
-    ? {
-      label: '폭발 피해',
-      value: 60,
-      patch: '2026-11',
-      source: 'https://overwatch.blizzard.com/en-us/news/patch-notes/live/2026/11/',
-    }
-    : undefined;
+  patchReferences[heroId]?.[abilityId];
 
 const koreanNames: Record<string, Record<string, string>> = {
+  ramattra: {
+    'void-accelerator-omnic-form': '공허 가속기 (옴닉 형태)', 'void-barrier-omnic-form': '공허 방벽 (옴닉 형태)',
+    'pummel-nemesis-form': '응징 (네메시스 형태)', 'ravenous-vortex': '탐식의 소용돌이', annihilation: '절멸',
+  },
   tracer: { 'pulse-pistols': '펄스 쌍권총', blink: '점멸', recall: '시간 역행', 'pulse-bomb': '펄스 폭탄' },
   ana: { 'biotic-rifle': '생체 소총', 'sleep-dart': '수면총', 'biotic-grenade': '생체 수류탄', 'nano-boost': '나노 강화제' },
   reinhardt: { 'rocket-hammer': '로켓 해머', charge: '돌진', 'fire-strike': '화염 강타', 'barrier-field': '방벽 방패', earthshatter: '대지분쇄' },
@@ -58,6 +79,10 @@ const koreanNames: Record<string, Record<string, string>> = {
 export const getKoreanAbilityName = (heroId: string, abilityId: string) => koreanNames[heroId]?.[abilityId];
 
 const iconSlots: Record<string, Record<string, string>> = {
+  genji: { shuriken: 'primary', deflect: 'ability_2', 'swift-strike': 'ability_1', dragonblade: 'ultimate', 'cyber-agility': 'passive' },
+  kiriko: { 'healing-ofuda': 'primary', kunai: 'secondary', 'swift-step': 'ability_1', 'protection-suzu': 'ability_2', 'kitsune-rush': 'ultimate' },
+  reinhardt: { 'rocket-hammer': 'primary', charge: 'ability_1', 'fire-strike': 'ability_2', 'barrier-field': 'secondary', earthshatter: 'ultimate' },
+  ramattra: { 'void-accelerator-omnic-form': 'primary', 'void-barrier-omnic-form': 'secondary', 'ravenous-vortex': 'ability_2', annihilation: 'ultimate' },
   ana: { 'biotic-rifle': 'primary', 'sleep-dart': 'ability_1', 'biotic-grenade': 'ability_2', 'nano-boost': 'ultimate' },
   tracer: { 'pulse-pistols': 'primary', blink: 'ability_1', recall: 'ability_2', 'pulse-bomb': 'ultimate' },
 };
@@ -66,3 +91,6 @@ export const getAbilityIcon = (heroId: string, abilityId: string) => {
   const slot = iconSlots[heroId]?.[abilityId];
   return slot && `https://raw.githubusercontent.com/rolldeep-stepmerrily/watchpoint/bcb50e9690b11533ffbccee81f98455878f0822c/apps/web/public/icons/heroes/${heroId}/abilities/${slot}.png`;
 };
+
+export const abilitySourceForLocale = (source: string, locale: 'ko' | 'en') =>
+  locale === 'ko' ? source.replace('overwatch.blizzard.com/en-us/', 'overwatch.blizzard.com/ko-kr/') : source;

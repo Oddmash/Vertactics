@@ -1,5 +1,5 @@
 import { openMap } from './open-map';
-import { clickWestHighGround, savedAbilityElevation, savedHeroPosition } from './workspace-map';
+import { clickWestHighGround, savedHeroPosition } from './workspace-map';
 import { PerspectiveCamera, Vector3 } from 'three';
 import { expect, test } from '@playwright/test';
 
@@ -541,186 +541,24 @@ test('shows the selected hero role, official source and abilities', async ({ pag
   const inspector = page.getByRole('complementary', { name: '지형 정보' });
   await expect(inspector.getByRole('heading', { name: '아나', exact: true })).toBeVisible();
   await inspector.getByText('영웅 정보 · 지원', { exact: true }).click();
-  await expect(inspector.getByText('Sleep Dart', { exact: true }).and(inspector.locator('li'))).toBeVisible();
+  await expect(inspector.getByText('수면총', { exact: true }).and(inspector.locator('li'))).toBeVisible();
   await expect(inspector.getByRole('link', { name: 'Blizzard 영웅 정보' })).toHaveAttribute(
-    'href', 'https://overwatch.blizzard.com/en-us/heroes/ana/',
+    'href', 'https://overwatch.blizzard.com/ko-kr/heroes/ana/',
   );
 });
 
-test('renders a custom hero ability preview in both map views and hides it on request', async ({ page }, testInfo) => {
+test('shows Korean ability labels and sourced stats without a custom range form', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: '2D 탑다운' }).click();
-  const canvas = page.getByTestId('viewport').locator('canvas');
-  await expect(canvas).toHaveAttribute('data-view-mode', '2d');
+  const panel = page.getByRole('complementary', { name: '지형 정보' });
+  await panel.getByRole('group', { name: '영웅 역할' }).getByRole('button', { name: '돌격' }).click();
+  await panel.getByRole('group', { name: '영웅 선택' }).getByRole('button', { name: '라마트라', exact: true }).click();
+  await panel.getByRole('button', { name: '공허 가속기 (옴닉 형태)' }).hover();
+  await expect(panel.getByRole('tooltip')).toContainText('125');
   await page.getByRole('button', { name: '지도에서 위치 선택' }).click();
-  await expect(canvas).toHaveCSS('cursor', 'crosshair');
-  await canvas.click();
-  const inspector = page.getByRole('complementary', { name: '지형 정보' });
-  await inspector.getByText('능력 범위 미리보기', { exact: true }).click();
-  await inspector.getByLabel('능력', { exact: true }).selectOption('blink');
-  await inspector.getByLabel('미리보기 형태', { exact: true }).selectOption('cone');
-  const range = inspector.getByLabel('범위 (u)', { exact: true });
-  await expect(range.locator('..')).toHaveCSS('display', 'grid');
-  expect(await range.evaluate((input) => {
-    const label = input.closest('label');
-    return Boolean(label && input.getBoundingClientRect().width >= label.getBoundingClientRect().width - 1);
-  })).toBe(true);
-  await inspector.getByLabel('범위 (u)', { exact: true }).fill('8');
-  const before = await canvas.screenshot();
-  await inspector.getByRole('button', { name: '범위 표시' }).click();
-  await expect(inspector.getByText('Blink · 8 u')).toBeVisible();
-  await expect(inspector.getByText('사용자 설정 · 지도 단위 (u)')).toBeVisible();
-  await expect.poll(async () => (await canvas.screenshot()).equals(before)).toBe(false);
-  await page.screenshot({ path: testInfo.outputPath('ability-preview-2d.png') });
-  await page.getByRole('button', { name: '3D 원근' }).click();
-  await expect(canvas).toHaveAttribute('data-view-mode', '3d');
-  await expect(inspector.getByText('Blink · 8 u')).toBeVisible();
-  await page.screenshot({ path: testInfo.outputPath('ability-preview-3d.png') });
-  const withPreview = await canvas.screenshot();
-  await inspector.getByRole('button', { name: '범위 숨기기' }).click();
-  await expect(inspector.getByText('Blink · 8 u')).toHaveCount(0);
-  await expect.poll(async () => (await canvas.screenshot()).equals(withPreview)).toBe(false);
-});
-
-test('places and edits an independent ability across the map views', async ({ page }, testInfo) => {
-  await page.goto('/');
-  const canvas = page.getByTestId('viewport').locator('canvas');
-  const placed = page.getByRole('region', { name: '배치한 능력' });
-  await page.getByRole('button', { name: '2D 탑다운' }).click();
-  await expect(canvas).toHaveAttribute('data-view-mode', '2d');
-  const box = await canvas.boundingBox();
-  if (!box) throw new Error('Canvas has no bounds');
-  const unitsPerPixel = Math.max(36 / box.width, 24 / box.height) * 1.22;
-  const clickWorld = (x: number, z: number) => page.mouse.click(
-    box.x + box.width / 2 + x / unitsPerPixel,
-    box.y + box.height / 2 + z / unitsPerPixel,
-  );
-
-  await page.getByRole('button', { name: '지도에서 위치 선택' }).click();
-  await expect(canvas).toHaveCSS('cursor', 'crosshair');
-  await clickWorld(0, 0);
-  await page.getByText('능력 범위 미리보기', { exact: true }).click();
-  await page.getByLabel('능력', { exact: true }).selectOption('blink');
-  await page.getByLabel('미리보기 형태', { exact: true }).selectOption('vector');
-  await page.getByRole('button', { name: '범위 표시', exact: true }).click();
-  await page.getByRole('button', { name: '지도에 배치', exact: true }).click();
-  await expect(canvas).toHaveCSS('cursor', 'crosshair');
-  await clickWorld(-9.5, -5);
-  await expect(placed.getByRole('button', { name: 'Blink 표시 중' })).toBeVisible();
-  await expect.poll(() => savedAbilityElevation(page)).toBe(4);
-  await page.getByRole('button', { name: '범위 숨기기', exact: true }).click();
-  await placed.getByRole('button', { name: '능력 이동' }).click();
-  await expect(canvas).toHaveCSS('cursor', 'crosshair');
-  await clickWorld(-4, 0);
-  await expect.poll(() => savedAbilityElevation(page)).toBe(0);
-  await placed.getByRole('button', { name: '능력 45° 회전' }).click();
-  await expect(placed.getByText('45°', { exact: true })).toBeVisible();
-  await page.screenshot({ path: testInfo.outputPath('ability-placement-2d.png') });
-  await page.getByRole('button', { name: '3D 원근' }).click();
-  await expect(canvas).toHaveAttribute('data-view-mode', '3d');
-  await expect.poll(() => savedAbilityElevation(page)).toBe(0);
-  await expect(placed.getByText('45°', { exact: true })).toBeVisible();
-  await page.screenshot({ path: testInfo.outputPath('ability-placement-3d.png') });
-  const visible = await canvas.screenshot();
-  await placed.getByRole('button', { name: '능력 숨기기' }).click();
-  await expect(placed.getByRole('button', { name: 'Blink 숨김' })).toBeVisible();
-  await expect.poll(async () => (await canvas.screenshot()).equals(visible)).toBe(false);
-  await placed.getByRole('button', { name: '능력 삭제' }).click();
-  await expect(placed).toHaveCount(0);
-  await page.getByRole('button', { name: '실행 취소', exact: true }).click();
-  await expect(placed.getByRole('button', { name: 'Blink 숨김' })).toBeVisible();
-});
-
-test('preserves and edits a custom area duration across map views', async ({ page }, testInfo) => {
-  await page.goto('/');
-  const canvas = page.getByTestId('viewport').locator('canvas');
-  const placed = page.getByRole('region', { name: '배치한 능력' });
-  await page.getByRole('button', { name: '2D 탑다운' }).click();
-  await expect(canvas).toHaveAttribute('data-view-mode', '2d');
-  await page.getByRole('button', { name: '지도에서 위치 선택' }).click();
-  await expect(canvas).toHaveCSS('cursor', 'crosshair');
-  await canvas.click();
-  await page.getByText('능력 범위 미리보기', { exact: true }).click();
-  await page.getByLabel('능력', { exact: true }).selectOption('blink');
-  await page.getByLabel('미리보기 형태', { exact: true }).selectOption('area');
-  await page.getByLabel('지속 시간 (초)', { exact: true }).fill('3.5');
-  await page.getByRole('button', { name: '범위 표시', exact: true }).click();
-  await expect(page.getByText('Blink · 5 u · 3.5초', { exact: true })).toBeVisible();
-  await page.getByRole('button', { name: '지도에 배치' }).click();
-  await expect(canvas).toHaveCSS('cursor', 'crosshair');
-  const box = await canvas.boundingBox();
-  if (!box) throw new Error('Canvas has no bounds');
-  const unitsPerPixel = Math.max(36 / box.width, 24 / box.height) * 1.22;
-  await page.mouse.click(box.x + box.width / 2 - 4 / unitsPerPixel, box.y + box.height / 2);
-  await expect(placed.getByText('3.5초', { exact: true })).toBeVisible();
-  await page.getByRole('button', { name: '범위 숨기기' }).click();
-  await placed.getByLabel('배치한 영역 지속 시간 (초)').fill('8');
-  await placed.getByRole('button', { name: '지속 시간 적용' }).click();
-  await expect(placed.getByText('8초', { exact: true })).toBeVisible();
-  await page.getByRole('button', { name: '3D 원근' }).click();
-  await expect(canvas).toHaveAttribute('data-view-mode', '3d');
-  await expect(placed.getByText('8초', { exact: true })).toBeVisible();
-  await page.screenshot({ path: testInfo.outputPath('ability-area-duration-3d.png') });
-  await placed.getByLabel('배치한 영역 지속 시간 (초)').fill('');
-  await placed.getByRole('button', { name: '지속 시간 적용' }).click();
-  await expect(placed.getByText('미설정', { exact: true })).toBeVisible();
-  await page.getByRole('button', { name: '실행 취소', exact: true }).click();
-  await expect(placed.getByText('8초', { exact: true })).toBeVisible();
-});
-
-test('shows the source and status of a game distance reference separately from map units', async ({ page }, testInfo) => {
-  await page.goto('/');
-  const canvas = page.getByTestId('viewport').locator('canvas');
-  const placed = page.getByRole('region', { name: '배치한 능력' });
-  await page.getByRole('button', { name: '2D 탑다운' }).click();
-  await expect(canvas).toHaveAttribute('data-view-mode', '2d');
-  await page.getByRole('button', { name: '지도에서 위치 선택' }).click();
-  await expect(canvas).toHaveCSS('cursor', 'crosshair');
-  await canvas.click();
-  await page.getByText('능력 범위 미리보기', { exact: true }).click();
-  await page.getByLabel('능력', { exact: true }).selectOption('blink');
-  await page.getByRole('button', { name: '범위 표시', exact: true }).click();
-  await page.getByRole('button', { name: '지도에 배치' }).click();
-  await expect(canvas).toHaveCSS('cursor', 'crosshair');
-  const box = await canvas.boundingBox();
-  if (!box) throw new Error('Canvas has no bounds');
-  const unitsPerPixel = Math.max(36 / box.width, 24 / box.height) * 1.22;
-  await page.mouse.click(box.x + box.width / 2 - 4 / unitsPerPixel, box.y + box.height / 2);
-
-  await placed.getByText('게임 거리 참고값', { exact: true }).click();
-  await placed.getByLabel('게임 거리 (m)', { exact: true }).fill('8.5');
-  await placed.getByRole('textbox', { name: '게임 버전' }).fill('Test build');
-  await placed.getByRole('textbox', { name: '출처' }).fill('Test reference notes');
-  await placed.getByRole('button', { name: '참고값 저장' }).click();
-  await expect(placed.getByText('사용자 추정 · 8.5 m', { exact: true })).toBeVisible();
-  await expect(placed.getByText('사용자 설정 · 5 u', { exact: true })).toBeVisible();
-  await placed.getByLabel('참고값 유형', { exact: true }).selectOption('measured');
-  await placed.getByRole('button', { name: '참고값 저장' }).click();
-  await page.getByRole('button', { name: '3D 원근' }).click();
-  await expect(canvas).toHaveAttribute('data-view-mode', '3d');
-  await expect(placed.getByText('사용자 실측 · 8.5 m', { exact: true })).toBeVisible();
-  await expect(placed.getByRole('definition').filter({ hasText: 'Test reference notes' })).toBeVisible();
-  await page.screenshot({ path: testInfo.outputPath('ability-range-reference-3d.png') });
-  await placed.getByRole('button', { name: '참고값 지우기' }).click();
-  await expect(placed.getByText('사용자 실측 · 8.5 m', { exact: true })).toHaveCount(0);
-  await page.getByRole('button', { name: '실행 취소', exact: true }).click();
-  await expect(placed.getByText('사용자 실측 · 8.5 m', { exact: true })).toBeVisible();
-
-  const local = page.getByRole('region', { name: '로컬 전략' });
-  await local.getByRole('button', { name: '전략 저장', exact: true }).click();
-  await expect(local.getByRole('status')).toHaveText('이 브라우저에 전략을 저장했습니다.');
-  await page.reload();
-  await expect(placed).toHaveCount(0);
-  await local.getByRole('button', { name: '저장본 확인' }).click();
-  await local.getByRole('button', { name: '전략 복원' }).click();
-  await expect(local.getByRole('status')).toHaveText('저장된 전략을 복원했습니다.');
-  await placed.getByRole('button', { name: 'Blink 표시 중' }).click();
-  await placed.getByText('게임 거리 참고값', { exact: true }).click();
-  await expect(placed.getByText('사용자 실측 · 8.5 m', { exact: true })).toBeVisible();
-  await expect(placed.getByText('Test reference notes', { exact: true })).toBeVisible();
-  await placed.getByRole('button', { name: '능력 45° 회전' }).click();
-  await expect(placed.getByText('45°', { exact: true })).toBeVisible();
-  await page.screenshot({ path: testInfo.outputPath('strategy-draft-restored.png') });
+  await page.getByTestId('viewport').locator('canvas').click();
+  await expect(panel.getByRole('heading', { name: '라마트라', exact: true })).toBeVisible();
+  await expect(panel.getByText('능력 범위 미리보기', { exact: true })).toHaveCount(0);
+  await expect(panel.getByLabel('범위 (u)', { exact: true })).toHaveCount(0);
 });
 
 test('reports missing drafts and leaves the editor intact when storage is malformed', async ({ page }) => {

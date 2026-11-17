@@ -13,8 +13,7 @@ import StrategyTimelineTools from './strategy-timeline-tools';
 import StrategyDraftTools from './strategy-draft-tools';
 import type { StrategyDraft } from '../domain/strategy-draft';
 import AbilityPlacementTools from './ability-placement-tools';
-import AbilityPreviewTools from './ability-preview-tools';
-import type { AbilityPlacement, AbilityPreviewSettings } from '../domain/ability-preview';
+import type { AbilityPlacement } from '../domain/ability-preview';
 import { measureSegment } from '../domain/measurement';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Annotation } from '../domain/annotation';
@@ -31,6 +30,7 @@ import MapViewport from '../render/map-viewport';
 import HeroTools, { heroDragType, roleNames, teamNames } from './hero-tools';
 import { getHero, heroName, isCatalogueHero } from '../domain/hero-catalogue';
 import type { CatalogueHero } from '../domain/hero-catalogue';
+import { getKoreanAbilityName, abilitySourceForLocale } from '../domain/ability-reference';
 import { competitiveOverview, terrainLocations } from '../map/competitive-overviews';
 
 type SurfaceTool =
@@ -122,7 +122,6 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
   const visibleTerrain = visibleTerrainForLayer(map.terrain, layerId);
   const [snap, setSnap] = useState(false);
   const [locked, setLocked] = useState(false);
-  const [abilityPreviews, setAbilityPreviews] = useState<Record<string, AbilityPreviewSettings>>({});
   const [sightTargetId, setSightTargetId] = useState('');
   const [showHeroes, setShowHeroes] = useState(true);
   const [showAnnotations, setShowAnnotations] = useState(true);
@@ -179,9 +178,6 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
   };
   const restoreDraft = (saved: StrategyDraft, persist = false) => {
     workspace.restoreDraft(saved, persist);
-    setAbilityPreviews((current) => Object.fromEntries(
-      Object.entries(current).filter(([key]) => JSON.parse(key)[0] !== saved.map.id),
-    ));
     resetMapView();
     setReset((value) => value + 1);
   };
@@ -191,8 +187,6 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
 
   const heroView = !overview && showHeroes && selectedHero?.id === heroViewId ? selectedHero : undefined;
   const selectedHeroProfile = selectedHero && getHero(selectedHero.heroId);
-  const previewKey = selectedHero ? JSON.stringify([mapId, selectedHero.id]) : '';
-  const activeAbility = abilityPreviews[previewKey];
   const sightTarget = heroes.find((hero) => hero.id === sightTargetId && hero.id !== selectedHeroId);
   const spatialProbe = showHeroes && selectedHero && sightTarget
     ? traceHeroSightline(map.terrain, selectedHero, sightTarget) : null;
@@ -452,8 +446,6 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
                 start: activeSight.start, end: activeSight.endpoint, blocked: Boolean(activeSight.sight),
               } : null}
               abilities={frame?.abilities ?? abilities}
-              abilityPreview={!frame && showHeroes && selectedHero && activeAbility
-                ? { hero: selectedHero, settings: activeAbility } : undefined}
               onSelect={(id) => { if (!frame) selectTerrain(id); }}
               onSelectHero={(id) => { if (!frame) selectHero(id); }}
               annotations={[...(showAnnotations ? annotations : []), ...measurementOverlay, ...sightOverlay, ...penOverlay]}
@@ -534,26 +526,10 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
                 {selectedHeroProfile && <Disclosure>
                   <summary>{t('영웅 정보 ·') + ' '}{t(roleNames[selectedHeroProfile.role])}</summary>
                   <ul>
-                    {selectedHeroProfile.abilities.map(({ id, name }) => <li key={id}>{name}</li>)}
+                    {selectedHeroProfile.abilities.map(({ id, name }) => <li key={id}>{locale === 'ko' ? getKoreanAbilityName(selectedHero.heroId, id) ?? name : name}</li>)}
                   </ul>
-                  <a href={selectedHeroProfile.source} target="_blank" rel="noreferrer">{t('Blizzard 영웅 정보')}</a>
+                  <a href={abilitySourceForLocale(selectedHeroProfile.source, locale)} target="_blank" rel="noreferrer">{t('Blizzard 영웅 정보')}</a>
                 </Disclosure>}
-                {selectedHeroProfile && <AbilityPreviewTools
-                  key={previewKey}
-                  abilities={selectedHeroProfile.abilities}
-                  preview={activeAbility}
-                  placementDisabled={locked || !showHeroes}
-                  onPlace={(settings) => pickAbilitySurface('능력을 배치할 지면을 선택하세요.', (position) => saveAbility({
-                    ...settings, id: crypto.randomUUID(), heroId: selectedHero.heroId,
-                    position, heading: selectedHero.yaw, visible: true,
-                  }))}
-                  onPreview={(next) => setAbilityPreviews((current) => {
-                    if (next) return { ...current, [previewKey]: next };
-                    const copy = { ...current };
-                    delete copy[previewKey];
-                    return copy;
-                  })}
-                />}
                 {heroes.length > 1 && <div className="spatial-probe">
                   <label>{t('시야 확인 대상') + ' '}<Select aria-label={t('시야 확인 대상')} value={sightTarget?.id ?? ''} onChange={(event) => {
                     activateTool(null);

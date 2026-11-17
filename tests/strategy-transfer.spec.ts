@@ -52,7 +52,7 @@ test('saves, restores and transfers a strategy with its map and timed event', as
   await expect(page.getByRole('heading', { name: map.name })).toBeVisible();
   const phases = page.getByRole('region', { name: '전술 단계' });
   await expect(phases.getByRole('textbox', { name: '단계 이름' })).toHaveValue('진입');
-  await expect(phases.getByText('Blink · 1 · 1초 · 1.2초 동안')).toBeVisible();
+  await expect(phases.getByText('점멸 · 1 · 1초 · 1.2초 동안')).toBeVisible();
 });
 
 test('downloads nonblank PNGs from both active map cameras', async ({ page }) => {

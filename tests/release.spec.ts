@@ -19,6 +19,8 @@ test('serves the editor, favicon, preview metadata and static recovery page', as
   expect(about?.ok()).toBe(true);
   await expect(page.getByRole('heading', { level: 1 })).toContainText('다음 교전을');
   await expect(page.getByRole('heading', { name: '전술은 이렇게 만드세요.' })).toBeVisible();
+  await expect(page.locator('.hero-map img')).toHaveJSProperty('naturalWidth', 1440);
+  await expect(page.locator('.workflow-list img')).toHaveCount(3);
   await expect(page.getByRole('heading', { name: '지금 열 수 있는 지도' })).toBeVisible();
   await expect(page.locator('#maps')).toContainText('왕의 길 A 거점 근사 지도');
   await expect(page.locator('#maps')).toContainText('내전 전장 31개');

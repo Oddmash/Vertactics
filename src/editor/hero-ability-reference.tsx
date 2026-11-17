@@ -1,5 +1,6 @@
+import LoadingImage from '../ui/loading-image';
 import { useId, useState } from 'react';
-import { getAbilityPatchReference, getAbilitySummary, getKoreanAbilityName, getAbilityIcon } from '../domain/ability-reference';
+import { getAbilityPatchReference, getAbilitySummary, getKoreanAbilityName, getAbilityIcon, abilitySourceForLocale } from '../domain/ability-reference';
 import type { CatalogueHero } from '../domain/hero-catalogue';
 import { Button } from '../ui/controls';
 import { useLocale } from '../ui/locale';
@@ -18,7 +19,6 @@ const HeroAbilityReference = ({ heroId, heroName, source, abilities }: Props) =>
   const [hovered, setHovered] = useState<number>();
   const [focused, setFocused] = useState<number>();
   const [pinned, setPinned] = useState<number>();
-  const [brokenIcons, setBrokenIcons] = useState<ReadonlySet<string>>(() => new Set());
 
   const localizedName = ({ id, name }: Props['abilities'][number]) =>
     locale === 'ko' ? getKoreanAbilityName(heroId, id) ?? name : name;
@@ -49,10 +49,8 @@ const HeroAbilityReference = ({ heroId, heroName, source, abilities }: Props) =>
             onFocus={() => setFocused(index)}
             onBlur={() => setFocused(undefined)}
             onClick={() => setPinned((current) => current === index ? undefined : index)}>
-            {icon && !brokenIcons.has(icon)
-              ? <img src={icon} alt="" width="25" height="25" referrerPolicy="no-referrer"
-                onError={() => setBrokenIcons((current) => new Set([...current, icon]))} />
-              : <span aria-hidden="true">{name.slice(0, 2)}</span>}
+            {icon ? <LoadingImage src={icon} width={25} height={25} fallback="◇" />
+              : <span aria-hidden="true">◇</span>}
           </Button>
         ))}
       </div>
@@ -60,11 +58,11 @@ const HeroAbilityReference = ({ heroId, heroName, source, abilities }: Props) =>
         {detail ? <div className="hero-ability-detail" id={detailsId} role="tooltip">
           <strong>{detail.name}</strong>
           <p>{detail.description || t('스킬 설명은 공식 영웅 페이지에서 확인할 수 있습니다.')}</p>
-          {patch && <dl className="hero-ability-stat"><dt>{t(patch.label)}</dt><dd>{patch.value}</dd></dl>}
+          {patch && <dl className="hero-ability-stat"><dt>{t(patch.label)}</dt><dd>{patch.value}{patch.unit ? ` ${patch.unit}` : ''}</dd></dl>}
         </div> : <p className="hero-ability-hint">{t('스킬을 가리키거나 선택해 설명을 확인하세요.')}</p>}
       </div>
       <div className="hero-ability-sources">
-        <a href={source} target="_blank" rel="noreferrer">{t('공식 스킬 출처')}</a>
+        <a href={abilitySourceForLocale(source, locale)} target="_blank" rel="noreferrer">{t('공식 스킬 출처')}</a>
         {patch && <a href={patch.source} target="_blank" rel="noreferrer">{t('{0} 패치 노트', patch.patch)}</a>}
       </div>
     </section>
