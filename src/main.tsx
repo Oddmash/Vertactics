@@ -1,6 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './app';
+import LocaleProvider from './ui/locale';
 import './theme';
 import './theme/editor.css';
 
@@ -9,6 +10,6 @@ if (!root) throw new Error('Application root is missing');
 
 createRoot(root).render(
   <StrictMode>
-    <App />
+    <LocaleProvider><App /></LocaleProvider>
   </StrictMode>,
 );
