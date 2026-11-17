@@ -730,6 +730,7 @@ test('shows the source and status of a game distance reference separately from m
   await expect(canvas).toHaveCSS('cursor', 'crosshair');
   await canvas.click();
   await page.getByText('능력 범위 미리보기', { exact: true }).click();
+  await page.getByLabel('능력', { exact: true }).selectOption('blink');
   await page.getByRole('button', { name: '범위 표시', exact: true }).click();
   await page.getByRole('button', { name: '지도에 배치' }).click();
   await expect(canvas).toHaveCSS('cursor', 'crosshair');
