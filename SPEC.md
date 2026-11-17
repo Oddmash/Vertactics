@@ -117,7 +117,7 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 - [x] 7.02b Share playback, pause, seeking and speed controls across both views
 - [x] 7.03 Verify interpolation, playback boundaries and restoration at an intermediate point
 - [x] 7.04 Create, list, reopen, clone and delete strategies in IndexedDB
-- [ ] 7.05 Handle autosave, errors, close recovery, migration and corrupt documents
+- [x] 7.05 Handle autosave, errors, close recovery, migration and corrupt documents
 - [ ] 7.06 Support validated JSON import and export and PNG export
 - [ ] 7.07 Support share links, size limits, read-only views, duplication and validation
 - [ ] 7.08 Verify save, reload, restore, export and re-import end to end
@@ -181,3 +181,4 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 | Strategy timeline editing | 58 unit tests and 27 Chromium scenarios passed. Validated timed events and IDs, placement dependencies, phase edits, undo, and restoring phases from a browser draft. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44049905226) |
 | Strategy playback | 60 unit tests and 27 Chromium scenarios passed. Verified position and heading interpolation, phase and event boundaries, viewing a sought point in both cameras, and returning to the editable strategy. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44051109069) |
 | Local strategy library | 60 unit tests and 29 Chromium scenarios passed. Verified named saves, recent order, update, duplication, confirmed deletion, restoration and in-place upgrade of a legacy workspace draft. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44052203062) |
+| Workspace autosave and recovery | 60 unit tests and 31 Chromium scenarios passed. Verified autosave, page-hide flush, reload and explicit restoration, malformed recovery and write failure, and preservation of named saves. Legacy named-draft migration is covered by the local strategy library checkpoint. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44053504783) |
