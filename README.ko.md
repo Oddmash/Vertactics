@@ -6,6 +6,12 @@
 
 Vertactics는 진입로, 엄폐물, 고지대를 살펴보고 전술을 구상하는 지도 도구입니다. 가상 훈련 지도 두 개와 왕의 길 A 거점 근사 지도를 둘러볼 수 있습니다.
 
+[Vertactics 열기](https://qtaghdi.github.io/Vertactics/)
+
+![고지대와 계단이 보이는 Vertactics 3D 편집기](docs/screenshots/workspace-3d.jpg)
+
+[같은 지도에서 2D 편집기 보기](docs/screenshots/workspace-2d.jpg)
+
 ## 지도 둘러보기
 
 1. **2D**에서 드래그해 이동하며 지형 배치를 확인합니다.
@@ -13,6 +19,8 @@ Vertactics는 진입로, 엄폐물, 고지대를 살펴보고 전술을 구상�
 3. 지도나 목록에서 지형을 선택하면 좌표와 높이가 표시됩니다. 보기를 전환해도 지형 선택은 유지됩니다.
 
 마우스 휠이나 핀치로 확대·축소할 수 있습니다. 시작 화면으로 돌아가려면 **시점 초기화**를 누르세요.
+
+**지도 관리 → 전장 목록**에서 OWKR 내전 전장 31개를 살펴볼 수 있습니다. 왕의 길은 A 거점 근사 지도를 열고, 지형 데이터가 필요한 항목은 준비 중으로 표시합니다.
 
 ## 영웅 배치하기
 
@@ -36,6 +44,6 @@ Vertactics는 진입로, 엄폐물, 고지대를 살펴보고 전술을 구상�
 
 고저차 테스트 맵에서 표시 층을 바꾸면 겹친 지면을 각각 선택할 수 있습니다. **드래그 이동**은 착지점을 미리 표시하고 포인터를 놓을 때 이동을 확정합니다.
 
-[지도, 영웅 배치와 마커 화면](https://github.com/qtaghdi/Vertactics/actions/runs/44035946473/artifacts/14306728587) · [개발 및 기여](development.ko.md)
+[개발 및 기여](development.ko.md) · [검증 기록](SPEC.ko.md) · [MIT 라이선스](LICENSE)
 
 Vertactics는 Blizzard Entertainment와 제휴하지 않은 팬 프로젝트입니다.

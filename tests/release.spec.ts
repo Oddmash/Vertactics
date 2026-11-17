@@ -15,6 +15,12 @@ test('serves the editor, favicon, preview metadata and static recovery page', as
   await expect(page.getByTestId('viewport').locator('canvas')).toBeVisible();
   expect(errors).toEqual([]);
 
+  const about = await page.goto('./about.html');
+  expect(about?.ok()).toBe(true);
+  await expect(page.getByRole('heading', { name: 'Vertactics', exact: true })).toBeVisible();
+  await page.getByRole('link', { name: /Open map editor/ }).click();
+  await expect(page).toHaveTitle('Vertactics');
+
   const missing = await page.goto(process.env.VERTACTICS_PUBLIC_URL ? './missing-workspace' : './404.html');
   expect(missing?.status()).toBe(process.env.VERTACTICS_PUBLIC_URL ? 404 : 200);
   await expect(page.getByRole('heading', { name: '페이지를 찾을 수 없습니다.' })).toBeVisible();

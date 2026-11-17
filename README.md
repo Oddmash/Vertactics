@@ -6,11 +6,19 @@
 
 Vertactics is a map tool for planning approaches, cover, and high-ground positions. Try two fictional training maps or a schematic reconstruction of King’s Row Point A.
 
+[Open Vertactics](https://qtaghdi.github.io/Vertactics/)
+
+![Vertactics in 3D with an elevated platform and stairs](docs/screenshots/workspace-3d.jpg)
+
+[See the same workspace in 2D](docs/screenshots/workspace-2d.jpg)
+
 ## Explore the map
 
 1. In **2D**, drag to pan and study the terrain layout.
 2. In **3D**, drag to orbit and right-drag to pan. Scroll or pinch to zoom in either view.
 3. Select a piece of terrain in the map or list to see its coordinates and elevation. The selection carries across both views.
+
+Open **Map catalogue** under map management to browse the 31 maps in the OWKR scrim pool. King’s Row opens the Point A schematic. Entries awaiting terrain are marked in the list.
 
 ## Plan a play
 
@@ -34,6 +42,6 @@ Choose a map or import a validated map JSON file. In **Map edit mode**, add, edi
 
 The layer selector exposes independently walkable surfaces in the elevation lab. Use **Drag move** to preview a hero’s landing and commit the move when you release the pointer.
 
-[Map, hero placement, and marker screenshots](https://github.com/qtaghdi/Vertactics/actions/runs/44035946473/artifacts/14306728587) · [Development and contribution](development.md)
+[Development](development.md) · [Contribution](development.md#contribute) · [Verification](SPEC.md) · [MIT licence](LICENSE)
 
 Vertactics is an unofficial fan project and is unaffiliated with Blizzard Entertainment.
