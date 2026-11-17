@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { abilityShapes } from '../domain/ability-preview';
+import { abilityShapes, isAbilityDuration, maxAbilityDurationSeconds, minAbilityDurationSeconds } from '../domain/ability-preview';
 import type { AbilityPreviewSettings, AbilityShape } from '../domain/ability-preview';
 
 const labels: Record<AbilityShape, string> = {
@@ -30,9 +30,12 @@ const AbilityPreviewTools = ({ abilities, preview, placementDisabled, onPlace, o
         const width = Number(data.get('width') ?? 1);
         const angle = Number(data.get('angle') ?? 60);
         const direction = Number(data.get('direction'));
+        const duration = data.get('duration');
+        const durationSeconds = duration ? Number(duration) : undefined;
         if (!(range > 0 && range <= 1000 && width > 0 && width <= 1000 &&
           angle > 0 && angle <= 360 && direction >= -360 && direction <= 360)) return;
-        onPreview({ abilityId: ability.id, shape, range, width, angle, direction, verification: 'custom' });
+        if (durationSeconds !== undefined && !isAbilityDuration(durationSeconds)) return;
+        onPreview({ abilityId: ability.id, shape, range, width, angle, direction, verification: 'custom', durationSeconds });
       }}>
         <label>능력 <select name="ability" aria-label="능력" defaultValue={preview?.abilityId}>
           {abilities.map(({ id, name }) => <option key={id} value={id}>{name}</option>)}
@@ -47,6 +50,9 @@ const AbilityPreviewTools = ({ abilities, preview, placementDisabled, onPlace, o
         {(shape === 'rectangle' || shape === 'area') && <label>폭 (u) <input
           name="width" type="number" min="0.1" max="1000" step="any" required defaultValue={preview?.width ?? 4}
         /></label>}
+        {shape === 'area' && <label>지속 시간 (초) <input name="duration" type="number"
+          min={minAbilityDurationSeconds} max={maxAbilityDurationSeconds} step="any" defaultValue={preview?.durationSeconds}
+        /></label>}
         {shape === 'cone' && <label>부채꼴 각도 <input
           name="angle" type="number" min="1" max="360" step="any" required defaultValue={preview?.angle ?? 60}
         /></label>}
@@ -57,7 +63,7 @@ const AbilityPreviewTools = ({ abilities, preview, placementDisabled, onPlace, o
       </form>
       <p>사용자 설정 · 지도 단위 (u)</p>
       {preview && <div className="hero-actions">
-        <span role="status">{abilities.find(({ id }) => id === preview.abilityId)?.name} · {preview.range} u</span>
+        <span role="status">{abilities.find(({ id }) => id === preview.abilityId)?.name} · {preview.range} u{preview.durationSeconds !== undefined && ` · ${preview.durationSeconds}초`}</span>
         <button className="reset-button" type="button" disabled={placementDisabled}
           onClick={() => onPlace(preview)}>지도에 배치</button>
         <button className="reset-button" type="button" onClick={() => onPreview(undefined)}>범위 숨기기</button>
