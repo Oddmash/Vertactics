@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 test('switches language without clearing selection and restores a save in English', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('./');
   await page.getByRole('button', { name: '서쪽 고지대 +4 u' }).click();
   await page.getByRole('combobox', { name: '언어' }).selectOption('en');
   await expect(page.locator('html')).toHaveAttribute('lang', 'en');
