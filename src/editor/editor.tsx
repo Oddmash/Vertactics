@@ -518,7 +518,10 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
             locked={locked || !showHeroes}
             selectedId={selectedHeroId}
             catalogueId={catalogueHeroId}
-            onChooseHero={setCatalogueHeroId}
+            onChooseHero={(id) => {
+              if (tool?.kind === 'place' && tool.heroId !== id) activateTool(null);
+              setCatalogueHeroId(id);
+            }}
             pendingMessage={tool?.kind === 'place' ? t('배치할 지면을 클릭하세요.') : tool?.kind === 'drag' ? t('지도에서 누른 채 끌어 이동하세요.') : tool?.kind === 'move' ? t('이동할 지면을 클릭하세요.') : ''}
             canUndo={!locked && history.past.length > 0}
             canRedo={!locked && history.future.length > 0}

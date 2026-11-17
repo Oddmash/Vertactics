@@ -37,6 +37,7 @@ const HeroTools = ({
   const [failedPortraits, setFailedPortraits] = useState<ReadonlySet<string>>(() => new Set());
   const portraits: Record<string, string> = portraitUrls;
   const chooseRole = (role: HeroRole) => {
+    if (role === selectedProfile.role) return;
     const first = Object.entries(heroCatalogue).find(([, hero]) => hero.role === role)?.[0];
     if (first && isCatalogueHero(first)) onChooseHero(first);
   };

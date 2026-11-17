@@ -22,7 +22,10 @@ test('selects heroes by portrait and reveals sourced skills in the right panel',
   await page.getByRole('button', { name: '2D 탑다운' }).hover();
   await expect(details).toHaveCount(0);
 
+  await panel.getByRole('button', { name: '배치 시작' }).click();
+  await expect(panel.getByText('배치할 지면을 클릭하세요.')).toBeVisible();
   await roles.getByRole('button', { name: '지원', exact: true }).click();
+  await expect(panel.getByText('배치할 지면을 클릭하세요.')).toHaveCount(0);
   await roster.getByRole('button', { name: '아나', exact: true }).click();
   await expect(panel.getByRole('heading', { name: '아나의 스킬' })).toBeVisible();
   const grenade = panel.getByRole('button', { name: 'Biotic Grenade', exact: true });
