@@ -59,7 +59,7 @@ const StrategyDraftTools = ({ draft, onRestore }: Props) => {
         const submitter = (event.nativeEvent as SubmitEvent).submitter;
         void save(title, submitter?.getAttribute('value') === 'new' ? undefined : existingId);
       }}>
-        <label>전략 이름 <input name="title" maxLength={80} required
+        <label className="strategy-name">전략 이름 <input name="title" maxLength={80} required
           defaultValue={existingId ? active?.title : draft.strategy.title} />
         </label>
         <div className="hero-actions">
