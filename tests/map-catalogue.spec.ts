@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 test('lists the OWKR map pool and opens the available terrain through its existing ID', async ({ page }) => {
-  await page.goto('/');
+  await page.goto('./');
   const open = page.getByRole('button', { name: '전장 목록' });
   await open.click();
   const library = page.getByRole('dialog', { name: '전장 목록' });

@@ -8,7 +8,12 @@ export default defineConfig({
   ...config,
   webServer: undefined,
   retries: 2,
-  testMatch: ['**/release.spec.ts', '**/strategy-share.spec.ts', '**/workspace-locale.spec.ts'],
+  testMatch: [
+    '**/release.spec.ts',
+    '**/strategy-share.spec.ts',
+    '**/workspace-locale.spec.ts',
+    '**/map-catalogue.spec.ts',
+  ],
   use: {
     ...config.use,
     baseURL: deployment.endsWith('/') ? deployment : `${deployment}/`,
