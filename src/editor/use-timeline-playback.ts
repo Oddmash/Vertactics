@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 
-const initialPlayback = { timeMs: 0, playing: false, speed: 1 };
+type PlaybackState = { timeMs: number; playing: boolean; speed: number };
 
 const useTimelinePlayback = (durationMs: number) => {
-  const [state, setState] = useState<typeof initialPlayback | null>(null);
+  const [state, setState] = useState<PlaybackState | null>(null);
   const playing = state?.playing ?? false;
 
   useEffect(() => {
