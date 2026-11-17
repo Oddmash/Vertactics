@@ -10,7 +10,7 @@ export const rotateTerrain = (terrain: Terrain): Terrain => {
     ...terrain,
     origin: [x + offset, y, z - offset],
     size: [depth, height, width],
-    ...(terrain.kind === 'stairs' ? { risesToward: clockwise[terrain.risesToward] } : {}),
+    ...((terrain.kind === 'stairs' || terrain.kind === 'ramp') ? { risesToward: clockwise[terrain.risesToward] } : {}),
   };
 };
 

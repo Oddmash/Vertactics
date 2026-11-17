@@ -478,3 +478,32 @@ test('duplicates multiple terrain blocks and undoes them together', async ({ pag
   await page.getByRole('button', { name: '지도 실행 취소' }).click();
   await expect(page.getByRole('button', { name: /벽 복제/ })).toHaveCount(0);
 });
+
+test('places and drags heroes at continuous ramp elevations', async ({ page }) => {
+  await page.goto('/');
+  await page.getByLabel('지도', { exact: true }).selectOption('courtyard');
+  await page.getByRole('button', { name: '2D 탑다운' }).click();
+  const canvas = page.getByTestId('viewport').locator('canvas');
+  await expect(canvas).toHaveAttribute('data-view-mode', '2d');
+  await page.getByRole('checkbox', { name: '격자 스냅' }).check();
+  await page.getByRole('button', { name: '배치 시작' }).click();
+  await expect(canvas).toHaveCSS('cursor', 'crosshair');
+  const box = await canvas.boundingBox();
+  if (!box) throw new Error('Canvas has no bounds');
+  const units = Math.max(24 / box.width, 18 / box.height) * 1.22;
+  const point = (x: number): [number, number] => [box.x + box.width / 2 + x / units, box.y + box.height / 2];
+  await page.mouse.click(...point(2.6));
+  const inspector = page.getByRole('complementary', { name: '지형 정보' });
+  await expect(inspector.getByText('3, 1.5, 0', { exact: true })).toBeVisible();
+  await inspector.getByRole('button', { name: '드래그 이동' }).click();
+  await expect(canvas).toHaveCSS('cursor', 'crosshair');
+  await page.mouse.move(...point(3));
+  await page.mouse.down();
+  const [x, y] = point(1.2);
+  await page.mouse.move(x, y, { steps: 5 });
+  await page.mouse.up();
+  await expect(inspector.getByText('1, 0.5, 0', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: '3D 원근' }).click();
+  await expect(canvas).toHaveAttribute('data-view-mode', '3d');
+  await expect(inspector.getByText('1, 0.5, 0', { exact: true })).toBeVisible();
+});

@@ -1,13 +1,13 @@
-import { snapSurfacePoint } from '../domain/surface-snap';
+import { pickTerrainSurface } from '../domain/surface-height';
+import rampGeometry from './ramp-geometry';
 import type { Annotation } from '../domain/annotation';
 import MapAnnotations from './map-annotations';
 import SurfaceDrag from './surface-drag';
 import { Canvas, useThree } from '@react-three/fiber';
 import { Component, useLayoutEffect, useMemo } from 'react';
 import type { ReactNode } from 'react';
-import type { ThreeEvent } from '@react-three/fiber';
 import { BoxGeometry } from 'three';
-import { isWalkableTerrain, mapBounds, terrainBlocks, visibleTerrainForLayer } from '../domain/map';
+import { mapBounds, terrainBlocks, visibleTerrainForLayer } from '../domain/map';
 import type { MapDefinition, WorldPoint } from '../domain/map';
 import type { HeroPlacement } from '../domain/strategy';
 import tokens from '../theme/tokens.json';
@@ -15,6 +15,7 @@ import MapCamera from './map-camera';
 import type { ViewMode } from './map-camera';
 
 const unitBox = new BoxGeometry();
+const ramps = { '+x': rampGeometry('+x'), '-x': rampGeometry('-x'), '+z': rampGeometry('+z'), '-z': rampGeometry('-z') };
 const skipRaycast = () => undefined;
 
 const Fallback = () => (
@@ -93,37 +94,35 @@ const MapViewport = ({
         <directionalLight position={[18, 8, -15]} intensity={0.35} />
         <MapCamera mode={mode} bounds={bounds} reset={reset} pointerEditing={Boolean(onDragSurface)} />
         <SurfaceCursor editing={Boolean(onEditSurface || onDragSurface)} />
-        {onDragSurface && onDropSurface && <SurfaceDrag groups={blocks} snap={snap} onPreview={onDragSurface} onFinish={onDropSurface} />}
+        {onDragSurface && onDropSurface && <SurfaceDrag snap={snap} onPreview={onDragSurface} onFinish={onDropSurface} />}
         <gridHelper
           position={[bounds.center[0], bounds.min[1] - 0.02, bounds.center[2]]}
           args={[gridSize, gridSize, tokens.color.axis, tokens.color.grid]}
         />
+        <group name="walkable-terrain">
         {blocks.map(({ terrain, blocks }) => (
           <group key={terrain.id}>
-            {blocks.map(({ center, size }, index) => {
-              const readSurface = ({ point: hit }: Pick<ThreeEvent<MouseEvent>, 'point'>): WorldPoint | null => {
-                const top = center[1] + size[1] / 2;
-                if (!isWalkableTerrain(terrain) || Math.abs(hit.y - top) >= 0.0001) return null;
-                const point: WorldPoint = [hit.x, top, hit.z];
-                return snap ? snapSurfacePoint(point, center, size) : point;
-              };
+            {blocks.map((block, index) => {
+              const geometry = block.slope ? ramps[block.slope] : unitBox;
               return (
                 <mesh
                   key={index}
-                  position={center}
-                  scale={size}
+                  position={block.center}
+                  scale={block.size}
+                  userData={{ terrain, block }}
                   onClick={(event) => {
                     if (event.delta > 4 || onDragSurface) return;
                     event.stopPropagation();
                     if (onEditSurface) {
-                      const point = readSurface(event);
+                      const { x, y, z } = event.point;
+                      const point = pickTerrainSurface(terrain, block, [x, y, z], snap);
                       if (point) onEditSurface(point);
                       return;
                     }
                     onSelect(terrain.id, event.shiftKey || event.metaKey || event.ctrlKey);
                   }}
                 >
-                  <boxGeometry />
+                  {block.slope ? <primitive object={geometry} attach="geometry" /> : <boxGeometry />}
                   <meshStandardMaterial
                     color={terrain.material ?? tokens.color[terrain.kind]}
                     roughness={0.92}
@@ -131,7 +130,7 @@ const MapViewport = ({
                     emissiveIntensity={selectedTerrainIds.has(terrain.id) ? 0.26 : 0}
                   />
                   <lineSegments raycast={skipRaycast}>
-                    <edgesGeometry args={[unitBox]} />
+                    <edgesGeometry args={[geometry]} />
                     <lineBasicMaterial color={tokens.color.app} transparent opacity={0.48} />
                   </lineSegments>
                 </mesh>
@@ -139,6 +138,7 @@ const MapViewport = ({
             })}
           </group>
         ))}
+        </group>
         <MapAnnotations items={annotations} selectedId={selectedAnnotationId} />
         {heroes.map(({ id, position, yaw, team }) => (
           <group

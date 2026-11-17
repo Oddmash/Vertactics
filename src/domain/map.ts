@@ -1,4 +1,4 @@
-export const terrainKinds = ['floor', 'wall', 'platform', 'stairs', 'building', 'column', 'railing', 'doorway', 'drop-zone'] as const;
+export const terrainKinds = ['floor', 'wall', 'platform', 'stairs', 'ramp', 'building', 'column', 'railing', 'doorway', 'drop-zone'] as const;
 
 export type TerrainKind = (typeof terrainKinds)[number];
 export type WorldPoint = [x: number, y: number, z: number];
@@ -15,18 +15,22 @@ type TerrainBase = {
 };
 
 type Box = TerrainBase & {
-  kind: Exclude<TerrainKind, 'stairs'>;
+  kind: Exclude<TerrainKind, 'stairs' | 'ramp'>;
   size: WorldPoint;
 };
+
+export type RiseDirection = '+x' | '-x' | '+z' | '-z';
+
+type Ramp = TerrainBase & { kind: 'ramp'; size: WorldPoint; risesToward: RiseDirection };
 
 type Stairs = TerrainBase & {
   kind: 'stairs';
   size: WorldPoint;
   steps: number;
-  risesToward: '+x' | '-x' | '+z' | '-z';
+  risesToward: RiseDirection;
 };
 
-export type Terrain = Box | Stairs;
+export type Terrain = Box | Stairs | Ramp;
 
 export type MapLayer = { id: string; name: string };
 
@@ -43,7 +47,7 @@ export type MapDefinition = {
   metadata?: MapMetadata;
 };
 
-export type TerrainBlock = { center: WorldPoint; size: WorldPoint };
+export type TerrainBlock = { center: WorldPoint; size: WorldPoint; slope?: RiseDirection };
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -77,12 +81,15 @@ const parseTerrain = (value: unknown, index: number): Terrain => {
     ...(blocksSight === undefined ? {} : { blocksSight }),
     ...(material === undefined ? {} : { material }),
   };
-  const solidKind = terrainKinds.find((item) => item !== 'stairs' && item === kind);
-  if (solidKind && solidKind !== 'stairs') return { id, name, kind: solidKind, origin, size, ...options };
-  if (kind === 'stairs' && typeof steps === 'number' &&
-    Number.isInteger(steps) && steps >= 2 && steps <= 64 &&
-    (risesToward === '+x' || risesToward === '-x' || risesToward === '+z' || risesToward === '-z')) {
-    return { id, name, kind, origin, size, ...options, steps, risesToward };
+  const solidKind = terrainKinds.find((item) => item === kind);
+  if (solidKind && solidKind !== 'stairs' && solidKind !== 'ramp') {
+    return { id, name, kind: solidKind, origin, size, ...options };
+  }
+  if (risesToward === '+x' || risesToward === '-x' || risesToward === '+z' || risesToward === '-z') {
+    if (kind === 'ramp') return { id, name, kind, origin, size, ...options, risesToward };
+    if (kind === 'stairs' && typeof steps === 'number' && Number.isInteger(steps) && steps >= 2 && steps <= 64) {
+      return { id, name, kind, origin, size, ...options, steps, risesToward };
+    }
   }
   throw new Error(`Invalid kind or step settings for ${path}`);
 };
@@ -151,6 +158,7 @@ export const terrainBlocks = (terrain: Terrain): TerrainBlock[] => {
       blockAt([x, y + postHeight, z], [width, header, depth]),
     ];
   }
+  if (terrain.kind === 'ramp') return [{ ...blockAt(origin, size), slope: terrain.risesToward }];
   if (terrain.kind !== 'stairs') return [blockAt(origin, size)];
 
   const alongX = terrain.risesToward.endsWith('x');
@@ -169,7 +177,7 @@ export const terrainBlocks = (terrain: Terrain): TerrainBlock[] => {
 };
 
 export const isWalkableTerrain = ({ kind, walkable }: Terrain) =>
-  walkable ?? (kind === 'floor' || kind === 'platform' || kind === 'stairs');
+  walkable ?? (kind === 'floor' || kind === 'platform' || kind === 'stairs' || kind === 'ramp');
 
 export const visibleTerrainForLayer = (terrain: Terrain[], layerId: string) =>
   terrain.filter((item) => !layerId || !item.layerId || item.layerId === layerId);

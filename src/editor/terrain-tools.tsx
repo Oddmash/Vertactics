@@ -113,10 +113,10 @@ const TerrainTools = ({ map, selected, selectedCount, undoable, redoable, onSave
             </fieldset>
           ))}
           <fieldset className="edit-controls">
-            <legend>계단 설정</legend>
+            <legend>계단·경사로 설정</legend>
             <label>디딤면 수 <input name="steps" type="number" min={2} max={64} required
               defaultValue={selected.kind === 'stairs' ? selected.steps : 5} /></label>
-            <label>상승 방향 <select name="rises" defaultValue={selected.kind === 'stairs' ? selected.risesToward : '+x'}>
+            <label>상승 방향 <select name="rises" defaultValue={(selected.kind === 'stairs' || selected.kind === 'ramp') ? selected.risesToward : '+x'}>
               {['+x', '-x', '+z', '-z'].map((axis) => <option key={axis}>{axis}</option>)}
             </select></label>
           </fieldset>

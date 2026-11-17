@@ -23,6 +23,7 @@ const kindNames: Record<TerrainKind, string> = {
   wall: '벽',
   platform: '고지대',
   stairs: '계단',
+  ramp: '경사로',
   building: '건물',
   column: '기둥',
   railing: '난간',
