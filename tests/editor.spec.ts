@@ -230,6 +230,14 @@ test('draws each marker shape and edits a note in the shared view', async ({ pag
   await page.getByRole('button', { name: '3D 원근' }).click();
   await expect(canvas).toHaveAttribute('data-view-mode', '3d');
   await expect(markerList.getByText('집결 지점')).toBeVisible();
+  const markerView = await canvas.screenshot();
+  const markers = page.getByRole('checkbox', { name: '마커 표시' });
+  await markers.uncheck();
+  await expect.poll(async () => (await canvas.screenshot()).equals(markerView)).toBe(false);
+  await expect(markerList.getByText('집결 지점')).toBeVisible();
+  await expect(tools.getByRole('button', { name: '마커 그리기' })).toBeDisabled();
+  await markers.check();
+  await expect.poll(async () => (await canvas.screenshot()).equals(markerView)).toBe(true);
   await page.screenshot({ path: testInfo.outputPath('vertactics-markers.png') });
   await tools.getByRole('button', { name: '마커 삭제' }).click();
   await expect(markerList.getByRole('listitem')).toHaveCount(3);
@@ -277,4 +285,8 @@ test('snaps a placement, locks edits, and keeps hidden layers in the strategy', 
   await expect(page.getByRole('list', { name: '배치한 영웅' })).toHaveCount(0);
   await lock.press('Control+Shift+z');
   await expect(inspector.getByText('7, 2, 5', { exact: true })).toBeVisible();
+  await inspector.getByRole('button', { name: '이동', exact: true }).click();
+  await expect(canvas).toHaveCSS('cursor', 'crosshair');
+  await page.mouse.click(box.x + box.width / 2 - 9.4 / scale, box.y + box.height / 2 + 2.94 / scale);
+  await expect(inspector.getByText('-9, 2, 3', { exact: true })).toBeVisible();
 });

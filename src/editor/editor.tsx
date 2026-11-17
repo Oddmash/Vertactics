@@ -96,7 +96,7 @@ const Editor = () => {
       }
       if (locked || event.defaultPrevented || event.altKey ||
         !(event.ctrlKey || event.metaKey) ||
-        (event.target instanceof Element && event.target.closest('input, textarea, select, [contenteditable]'))) return;
+        (event.target instanceof Element && event.target.closest('input:not([type=checkbox]):not([type=radio]), textarea, select, [contenteditable]'))) return;
       const key = event.key.toLowerCase();
       if (key !== 'z' && key !== 'y') return;
       event.preventDefault();
