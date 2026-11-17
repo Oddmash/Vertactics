@@ -3,98 +3,68 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Vertactics에서 전장의 높낮이와 시야를 확인하고, 영웅의 위치와 팀 움직임을 한 장의 지도에서 계획하세요." />
+    <meta name="description" content="Vertactics는 오버워치 전술 계획 도구입니다. 지형과 시야를 확인하고 영웅의 위치와 진입 타이밍을 정해 팀과 공유할 수 있습니다." />
     <meta property="og:title" content="Vertactics — 오버워치 전술 플래너" />
-    <meta property="og:description" content="전장의 높낮이부터 팀의 다음 움직임까지, 한 장의 지도에서 계획하세요." />
+    <meta property="og:description" content="지형을 읽고, 영웅을 배치하고, 다음 교전을 팀과 함께 준비하세요." />
     <meta property="og:image" content="https://qtaghdi.github.io/Vertactics/social-card.png" />
     <link rel="icon" type="image/png" href="%BASE_URL%favicon.png" />
     <link rel="stylesheet" href="/src/theme/landing.css" />
-    <title>About Vertactics</title>
+    <title>Vertactics — 오버워치 전술 플래너</title>
   </head>
   <body>
     <a class="skip" href="#main">본문 바로가기</a>
     <header class="site-header shell">
       <a class="brand" href="%BASE_URL%about.html" aria-label="Vertactics 소개">
-        <span class="brand-mark" aria-hidden="true">V</span>
-        <span>VERTACTICS</span>
+        <img src="%BASE_URL%favicon.png" width="32" height="32" alt="" />
+        Vertactics
       </a>
       <nav aria-label="소개 페이지">
-        <a class="nav-link" href="#workflow">주요 기능</a>
-        <a class="header-action" href="%BASE_URL%">편집기 열기 <span aria-hidden="true">↗</span></a>
+        <a href="#workflow">사용 방법</a>
+        <a href="#maps">지원 전장</a>
       </nav>
+      <a class="header-action" href="%BASE_URL%">편집기 열기 <span aria-hidden="true">↗</span></a>
     </header>
     <main id="main">
-      <section class="hero shell" aria-labelledby="hero-title">
-        <div class="hero-copy">
-          <p class="product-category">OVERWATCH TACTICAL PLANNER</p>
-          <h1 id="hero-title">전장의 높낮이까지,<br /><em>작전 안으로.</em></h1>
-          <p class="hero-description">같은 전장을 2D와 3D로 오가며 플레이를 준비하세요. 영웅을 배치하고, 엄폐물과 시야를 확인하고, 팀의 움직임을 타임라인에 남길 수 있어요.</p>
+      <section class="hero" aria-labelledby="hero-title">
+        <figure class="hero-map">
+          <img src="https://overfast-api.tekrop.fr/static/maps/kings-row.jpg" alt="" fetchpriority="high" />
+          <figcaption><span lang="en">KING’S ROW</span> / 오버워치 전장 이미지</figcaption>
+        </figure>
+        <div class="hero-copy shell">
+          <p class="product-category">오버워치 전술 플래너</p>
+          <h1 id="hero-title">다음 교전을<br />지도 위에서 준비하세요.</h1>
+          <p class="hero-description">누가 고지대를 잡고, 어디서 진입할지. 영웅을 지도에 놓고 이동 경로와 진입 타이밍을 정해 팀원에게 보여주세요.</p>
           <a class="primary-action" href="%BASE_URL%" aria-label="전술 편집기 열기 / Open map editor">
             전술 편집기 열기 <span aria-hidden="true">↗</span>
           </a>
         </div>
-        <figure class="demo" aria-labelledby="demo-caption">
-          <div class="demo-header">
-            <figcaption id="demo-caption">전술 배치 예시</figcaption>
-            <fieldset class="perspective">
-              <legend class="visually-hidden">예시 지도 보기</legend>
-              <input class="visually-hidden" type="radio" name="perspective" id="view-flat" />
-              <label for="view-flat">2D</label>
-              <input class="visually-hidden" type="radio" name="perspective" id="view-angled" checked />
-              <label for="view-angled">3D</label>
-            </fieldset>
-          </div>
-          <div class="demo-canvas" aria-hidden="true">
-            <span class="corner corner-nw"></span><span class="corner corner-ne"></span>
-            <span class="corner corner-sw"></span><span class="corner corner-se"></span>
-            <span class="axis">↑ N</span>
-            <div class="board">
-              <div class="obstacle plateau"></div>
-              <div class="obstacle steps"></div>
-              <div class="obstacle cover"></div>
-              <div class="obstacle high-ground"></div>
-              <div class="obstacle divider"></div>
-              <div class="objective"></div>
-              <div class="route route-a"></div>
-              <div class="route route-b"></div>
-              <div class="route route-c"></div>
-              <div class="marker marker-start"></div>
-              <div class="marker marker-turn"></div>
-              <div class="marker marker-target"></div>
-            </div>
-          </div>
-          <div class="demo-footer">
-            <span><i class="legend-dot legend-route" aria-hidden="true"></i>이동 경로</span>
-            <span><i class="legend-dot legend-objective" aria-hidden="true"></i>거점</span>
-          </div>
-        </figure>
       </section>
       <section class="workflow shell" id="workflow" aria-labelledby="workflow-title">
-        <header class="workflow-heading">
-          <h2 id="workflow-title">팀의 다음 움직임을 준비하세요.</h2>
-          <p>전장을 살펴보는 순간부터 작전을 공유하기까지.</p>
-        </header>
-        <div class="workflow-grid">
-          <article>
-            <span class="feature-icon icon-terrain" aria-hidden="true"></span>
-            <h3>지형을 파악하세요</h3>
-            <p>탑다운으로 진입로를 짚고 3D로 고지대와 엄폐물의 높이를 확인하세요.</p>
-          </article>
-          <article>
-            <span class="feature-icon icon-sight" aria-hidden="true"></span>
-            <h3>교전 위치를 잡으세요</h3>
-            <p>영웅과 스킬 범위를 지도에 표시하고, 장애물이 시야를 가리는 지점을 확인하세요.</p>
-          </article>
-          <article>
-            <span class="feature-icon icon-timeline" aria-hidden="true"></span>
-            <h3>움직임을 공유하세요</h3>
-            <p>작전을 단계별로 기록하고, 팀원에게 읽기 전용 링크를 보내세요.</p>
-          </article>
+        <h2 id="workflow-title">전술은 이렇게 만드세요.</h2>
+        <ol class="workflow-list">
+          <li>
+            <h3>진입로와 고지대를 확인하세요.</h3>
+            <p>2D에서 경로와 엄폐물의 위치를 살펴보고, 3D로 전환해 계단과 고지대의 높이를 확인하세요. 지형을 선택하면 높이를 볼 수 있습니다. 편집기 전체를 전체 화면으로 전환해 지도와 도구를 넓게 펼칠 수 있습니다.</p>
+          </li>
+          <li>
+            <h3>영웅을 놓고 교전 위치를 비교하세요.</h3>
+            <p>영웅을 공격팀이나 수비팀에 배치하고, 웨이포인트로 이동 경로를 만들고, 두 점을 선택해 직선을 긋거나 펜으로 자유롭게 표시하세요. 거리·높이 차를 재거나, 두 지점 사이 시야를 어느 지형이 가리는지 확인할 수 있습니다. 스킬 범위는 직접 값을 입력해 미리 볼 수 있습니다.</p>
+          </li>
+          <li>
+            <h3>진입 순서를 기록하고 공유하세요.</h3>
+            <p>타임라인에 단계별 영웅 위치와 능력 사용을 기록하세요. 팀원은 읽기 전용 링크에서 지도를 보고 타임라인을 재생할 수 있습니다. 작업은 같은 브라우저에 저장하거나 JSON으로 내보낼 수 있습니다.</p>
+          </li>
+        </ol>
+      </section>
+      <section class="map-scope shell" id="maps" aria-labelledby="maps-title">
+        <h2 id="maps-title">지금 열 수 있는 지도</h2>
+        <div>
+          <p>가상 훈련 지도 두 개와 <strong>왕의 길 A 거점 근사 지도</strong>를 사용할 수 있습니다. 전장 카탈로그에는 OWKR 내전 전장 31개가 있으며 지형이 준비되지 않은 전장은 준비 중으로 표시합니다.</p>
         </div>
       </section>
     </main>
     <footer class="site-footer shell">
-      <p>Vertactics는 Blizzard Entertainment와 제휴하지 않은 독립 오버워치 팬 프로젝트입니다.</p>
+      <p>Vertactics는 Blizzard Entertainment와 제휴하지 않은 독립 오버워치 팬 프로젝트입니다. 전장 이미지 © Blizzard Entertainment.</p>
       <a href="https://github.com/qtaghdi/Vertactics">GitHub <span aria-hidden="true">↗</span></a>
     </footer>
     <script type="module" src="/src/theme/index.ts"></script>
