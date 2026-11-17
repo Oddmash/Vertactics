@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+import { encodeStrategyShare, sharePrefix } from '../storage/strategy-share';
 import { parseStrategyDraft } from '../storage/strategy-draft';
 import type { StrategyDraft } from '../storage/strategy-draft';
 import { downloadFile, fileStem } from './download-file';
@@ -13,6 +14,8 @@ const maxBytes = 5 * 1024 * 1024;
 const StrategyFileTools = ({ draft, onImport }: Props) => {
   const [pending, setPending] = useState<StrategyDraft>();
   const [message, setMessage] = useState('');
+  const [shareLink, setShareLink] = useState('');
+  const [sharing, setSharing] = useState(false);
   const requestId = useRef(0);
 
   const read = async (file: File) => {
@@ -28,6 +31,22 @@ const StrategyFileTools = ({ draft, onImport }: Props) => {
       if (id === requestId.current) setPending(parsed);
     } catch {
       if (id === requestId.current) setMessage('전략 JSON을 읽을 수 없습니다. 파일 형식과 버전을 확인하세요.');
+    }
+  };
+
+  const share = async () => {
+    setSharing(true);
+    setShareLink('');
+    setMessage('');
+    try {
+      const payload = await encodeStrategyShare(draft);
+      const url = new URL(window.location.href);
+      url.hash = sharePrefix + payload;
+      setShareLink(url.href);
+    } catch {
+      setMessage('공유 링크를 만들 수 없습니다. 전략 JSON 파일을 사용하세요.');
+    } finally {
+      setSharing(false);
     }
   };
 
@@ -48,6 +67,22 @@ const StrategyFileTools = ({ draft, onImport }: Props) => {
         }
         downloadFile(blob, `${fileStem(draft.map.id)}-strategy.json`);
       }}>전략 JSON 내보내기</button>
+      <button type="button" className="reset-button" disabled={sharing} onClick={() => void share()}>공유 링크 만들기</button>
+      {shareLink && <div className="pending-edit">
+        <label className="strategy-name">읽기 전용 공유 링크 <input value={shareLink} readOnly
+          onFocus={(event) => event.currentTarget.select()} /></label>
+        <button type="button" className="reset-button" onClick={() => {
+          if (!navigator.clipboard) {
+            setMessage('링크를 선택해 복사하세요.');
+            return;
+          }
+          void navigator.clipboard.writeText(shareLink).then(
+            () => setMessage('공유 링크를 복사했습니다.'),
+            () => setMessage('링크를 선택해 복사하세요.'),
+          );
+        }}>링크 복사</button>
+        <p>링크를 받은 사람은 전략과 지도를 볼 수 있습니다.</p>
+      </div>}
       {pending && <div className="pending-edit">
         <p>{pending.map.name} · {pending.strategy.title}</p>
         <p>같은 지도의 현재 편집 내용이 파일의 내용으로 바뀝니다.</p>
