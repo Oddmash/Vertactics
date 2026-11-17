@@ -165,7 +165,7 @@ test('places and moves a hero across views, then undoes and redoes elevation cha
   expect(pageErrors).toEqual([]);
 });
 
-test('edits route waypoints and carries the annotation across views and history', async ({ page }) => {
+test('edits route waypoints and carries the annotation across views and history', async ({ page }, testInfo) => {
   await page.goto('/');
   const canvas = page.getByTestId('viewport').locator('canvas');
   await page.getByRole('button', { name: '2D 탑다운' }).click();
@@ -202,6 +202,7 @@ test('edits route waypoints and carries the annotation across views and history'
   await page.getByRole('button', { name: '실행 취소', exact: true }).click();
   await expect(points).toHaveCount(3);
   await expect(tools.getByText('14.31 u', { exact: true })).toBeVisible();
+  await page.screenshot({ path: testInfo.outputPath('route-measurement-3d.png') });
 });
 
 
