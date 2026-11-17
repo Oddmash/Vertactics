@@ -10,10 +10,12 @@ const labels: Record<AbilityShape, string> = {
 type Props = {
   abilities: { id: string; name: string }[];
   preview: AbilityPreviewSettings | undefined;
+  placementDisabled: boolean;
+  onPlace: (settings: AbilityPreviewSettings) => void;
   onPreview: (next: AbilityPreviewSettings | undefined) => void;
 };
 
-const AbilityPreviewTools = ({ abilities, preview, onPreview }: Props) => {
+const AbilityPreviewTools = ({ abilities, preview, placementDisabled, onPlace, onPreview }: Props) => {
   const [shape, setShape] = useState<AbilityShape>(preview?.shape ?? 'circle');
 
   return (
@@ -56,6 +58,8 @@ const AbilityPreviewTools = ({ abilities, preview, onPreview }: Props) => {
       <p>사용자 설정 · 지도 단위 (u)</p>
       {preview && <div className="hero-actions">
         <span role="status">{abilities.find(({ id }) => id === preview.abilityId)?.name} · {preview.range} u</span>
+        <button className="reset-button" type="button" disabled={placementDisabled}
+          onClick={() => onPlace(preview)}>지도에 배치</button>
         <button className="reset-button" type="button" onClick={() => onPreview(undefined)}>범위 숨기기</button>
       </div>}
     </details>

@@ -1,5 +1,6 @@
+import AbilityPlacementTools from './ability-placement-tools';
 import AbilityPreviewTools from './ability-preview-tools';
-import type { AbilityPreviewSettings } from '../domain/ability-preview';
+import type { AbilityPlacement, AbilityPreviewSettings } from '../domain/ability-preview';
 import { measureSegment } from '../domain/measurement';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import type { Annotation } from '../domain/annotation';
@@ -82,10 +83,13 @@ const Editor = () => {
   const [selectedHeroId, setSelectedHeroId] = useState<string | null>(null);
   const [tool, setHeroTool] = useState<EditTool | null>(null);
   const [dragPreview, setDragPreview] = useState<WorldPoint | null>(null);
+  const [abilityPick, setAbilityPick] = useState<SurfacePick | null>(null);
+  const [selectedAbilityId, setSelectedAbilityId] = useState<string | null>(null);
   const [annotationPick, setAnnotationPick] = useState<SurfacePick | null>(null);
   const [annotationId, setAnnotationId] = useState<string | null>(null);
   const setTool = useCallback((next: EditTool | null) => {
     setAnnotationPick(null);
+    setAbilityPick(null);
     setDragPreview(null);
     setHeroTool(next);
     setMeasuring(false);
@@ -106,6 +110,7 @@ const Editor = () => {
     setSelectedHeroId(null);
     setSightTargetId('');
     setAnnotationId(null);
+    setSelectedAbilityId(null);
     setMapId(id);
   };
   const importMap = async (file: File) => {
@@ -188,7 +193,7 @@ const Editor = () => {
       : { id, name: '새 블록', kind: 'platform', origin: [-1, 0, -1], size: [2, 1, 2], layerId: layerId || undefined };
     updateTerrain([...map.terrain, item], id);
   };
-  const { heroes, annotations } = history.present;
+  const { heroes, annotations, abilities } = history.present;
   const selected = visibleTerrain.find(({ id }) => id === selectedId);
   const selectedHero = heroes.find(({ id }) => id === selectedHeroId);
 
@@ -227,6 +232,17 @@ const Editor = () => {
     selectAnnotation(annotation.id);
   };
 
+  const saveAbility = (ability: AbilityPlacement) => {
+    setTool(null);
+    dispatch({ type: 'set-ability', ability });
+    setSelectedAbilityId(ability.id);
+  };
+
+  const pickAbilitySurface = (hint: string, apply: SurfacePick['apply']) => {
+    setTool(null);
+    setAbilityPick({ hint, apply });
+  };
+
   const finishDrag = useCallback((position: WorldPoint | null) => {
     if (tool?.kind !== 'drag') return;
     if (position && !locked) dispatch({ type: 'update', id: tool.id, patch: { position } });
@@ -239,6 +255,7 @@ const Editor = () => {
       return;
     }
     if (locked) return;
+    if (abilityPick) { abilityPick.apply(position); return; }
     if (annotationPick) { annotationPick.apply(position); return; }
     if (!tool) return;
     if (tool.kind === 'place') {
@@ -254,7 +271,7 @@ const Editor = () => {
 
   return (
     <div className="editor" onKeyDown={(event) => {
-      if (event.key === 'Escape' && (tool || annotationPick || measuring)) {
+      if (event.key === 'Escape' && (tool || annotationPick || abilityPick || measuring)) {
         event.preventDefault();
         setTool(null);
         return;
@@ -398,13 +415,14 @@ const Editor = () => {
               ) : []}
               snap={snap}
               selectedHeroId={selectedHeroId}
+              abilities={mapEditing ? [] : abilities}
               abilityPreview={!mapEditing && showHeroes && selectedHero && activeAbility
                 ? { hero: selectedHero, settings: activeAbility } : undefined}
               onSelect={selectTerrain}
               onSelectHero={selectHero}
               annotations={[...(!mapEditing && showAnnotations ? annotations : []), ...measurementOverlay]}
               selectedAnnotationId={annotationId}
-              onEditSurface={measuring || (!locked && ((tool && tool.kind !== 'drag') || annotationPick)) ? editSurface : undefined}
+              onEditSurface={measuring || (!locked && ((tool && tool.kind !== 'drag') || annotationPick || abilityPick)) ? editSurface : undefined}
               onDragSurface={!locked && tool?.kind === 'drag' ? setDragPreview : undefined}
               onDropSurface={!locked && tool?.kind === 'drag' ? finishDrag : undefined}
             />
@@ -442,6 +460,11 @@ const Editor = () => {
                   key={previewKey}
                   abilities={selectedHeroProfile.abilities}
                   preview={activeAbility}
+                  placementDisabled={locked || !showHeroes}
+                  onPlace={(settings) => pickAbilitySurface('능력을 배치할 지면을 선택하세요.', (position) => saveAbility({
+                    ...settings, id: crypto.randomUUID(), heroId: selectedHero.heroId,
+                    position, heading: selectedHero.yaw, visible: true,
+                  }))}
                   onPreview={(next) => setAbilityPreviews((current) => {
                     if (next) return { ...current, [previewKey]: next };
                     const copy = { ...current };
@@ -521,16 +544,30 @@ const Editor = () => {
               onHistory={moveMapHistory}
             />
             {mapMessage && <p role="status">{mapMessage}</p>}
-          </> : <AnnotationTools
-            items={annotations}
-            locked={locked || !showAnnotations}
-            selected={annotations.find((item) => item.id === annotationId)}
-            pending={annotationPick}
-            onSelect={selectAnnotation}
-            onSave={saveAnnotation}
-            onPick={(pick) => { setTool(null); setAnnotationPick(pick); }}
-            onRemove={(id) => { setAnnotationPick(null); dispatch({ type: 'remove-annotation', id }); }}
-          />}
+          </> : <>
+            {(abilities.length > 0 || abilityPick) && <AbilityPlacementTools
+              items={abilities}
+              selectedId={selectedAbilityId}
+              locked={locked}
+              pending={abilityPick?.hint}
+              onSelect={(id) => { setTool(null); setSelectedAbilityId(id); }}
+              onMove={(ability) => pickAbilitySurface('능력을 이동할 지면을 선택하세요.', (position) =>
+                saveAbility({ ...ability, position }))}
+              onUpdate={saveAbility}
+              onRemove={(id) => { setTool(null); dispatch({ type: 'remove-ability', id }); }}
+              onCancel={() => setTool(null)}
+            />}
+            <AnnotationTools
+              items={annotations}
+              locked={locked || !showAnnotations}
+              selected={annotations.find((item) => item.id === annotationId)}
+              pending={annotationPick}
+              onSelect={selectAnnotation}
+              onSave={saveAnnotation}
+              onPick={(pick) => { setTool(null); setAnnotationPick(pick); }}
+              onRemove={(id) => { setAnnotationPick(null); dispatch({ type: 'remove-annotation', id }); }}
+            />
+          </>}
           <div className="legend">
             <h3>범례</h3>
             <ul>
