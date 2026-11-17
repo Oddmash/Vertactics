@@ -4,7 +4,7 @@
 
 See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [the development guide](development.md). Check an item when its stated scope has been verified. Track implementation, browser behavior, CI and deployment separately.
 
-**Current phase** Phase 4. Continue with ramps, map schema migration, and the first objective of King’s Row.
+**Current phase** Phase 4. Continue with the first objective of King’s Row, reference verification and map-system acceptance.
 
 ## Phase 1 · Project setup
 
@@ -65,7 +65,7 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 - [x] 4.01 Add metadata, verification states, map registration and selection
 - [x] 4.02 Add layers and selection and visibility rules for non-active floors
 - [x] 4.03a Add buildings, columns, railings, doorway openings, and drop-zone markers
-- [ ] 4.03b Model walkable ramps and their sloped surfaces
+- [x] 4.03b Model walkable ramps and their sloped surfaces
 - [x] 4.04a Add rotation, material, and walkability controls with validated collision and sight flags
 - [ ] 4.04b Consume collision and sight flags in spatial analysis
 - [x] 4.05 Share the renderer between map editing and tactical planning
@@ -74,7 +74,7 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 - [x] 4.07a Edit terrain dimensions and type
 - [x] 4.07b Edit positions and layer assignments, rotate and snap terrain, and manage layer definitions
 - [x] 4.08a Support undo and redo, validated JSON import and export, and immediate preview
-- [ ] 4.08b Migrate map documents across schema versions
+- [x] 4.08b Migrate map documents across schema versions
 - [ ] 4.09 Record acceptable references for the first objective of King's Row
 - [ ] 4.10 Build and compare approaches, high ground, cover, objective, floors and placement areas
 - [x] 4.11 Verify floor switching, overlapping selection and map registration, editing and import
@@ -145,3 +145,4 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 | Phase 3 and map editing | 28 unit tests and nine Chromium scenarios passed. Verified stacked surface picking, 2D and 3D hero editing, a single history entry per drag, map switching and JSON transfer, and block editing with undo and redo. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44032978306) |
 | Layer and multi-selection editing | 30 unit tests and 11 Chromium scenarios passed. Verified layer creation, renaming and deletion, rotation, grid snapping, and batched duplication and undo. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44033821083) |
 | Terrain structures | 31 unit tests and 11 Chromium scenarios passed. Doorway geometry preserves an opening and map JSON validates terrain properties. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44034026109) |
+| Ramps and map schema | 37 unit tests and 12 Chromium scenarios passed. Verified ramp placement, dragging and elevation after snapping. Legacy v1 imports export as v2. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44034705436) |

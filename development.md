@@ -35,6 +35,8 @@ Playwright serves the production build from `dist`. Screenshots appear in `test-
 | `src/theme` | JSON design tokens and styles |
 | `tests` | Chromium scenarios |
 
+Map JSON is validated on import. The editor opens v1 and v2 files and exports v2. Strategy documents use their own version.
+
 ## Contribute
 
 1. Find the relevant requirements and checks in [SPEC.md](SPEC.md).
