@@ -1,0 +1,50 @@
+import { expect, test } from '@playwright/test';
+
+test('edits and restores a phase with hero poses and an ability event', async ({ page }) => {
+  await page.goto('/');
+  const canvas = page.getByTestId('viewport').locator('canvas');
+  await page.getByRole('button', { name: '2D 탑다운' }).click();
+  await expect(canvas).toHaveAttribute('data-view-mode', '2d');
+  await page.getByRole('button', { name: '배치 시작' }).click();
+  await expect(canvas).toHaveCSS('cursor', 'crosshair');
+  await canvas.click();
+  await page.getByText('능력 범위 미리보기', { exact: true }).click();
+  await page.getByLabel('능력', { exact: true }).selectOption('blink');
+  await page.getByRole('button', { name: '범위 표시', exact: true }).click();
+  await page.getByRole('button', { name: '지도에 배치' }).click();
+  await expect(canvas).toHaveCSS('cursor', 'crosshair');
+  const box = await canvas.boundingBox();
+  if (!box) throw new Error('Canvas has no bounds');
+  await page.mouse.click(box.x + box.width / 2 - 80, box.y + box.height / 2);
+  await expect(page.getByRole('button', { name: 'Blink 표시 중' })).toBeVisible();
+
+  const stage = page.getByRole('region', { name: '전술 단계', exact: true });
+  await stage.getByRole('button', { name: '단계 추가' }).click();
+  await stage.getByRole('textbox', { name: '단계 이름' }).fill('진입');
+  await stage.getByRole('spinbutton', { name: '단계 길이 (초)' }).fill('4');
+  await stage.getByRole('button', { name: '단계 설정 적용' }).click();
+  await stage.getByRole('button', { name: '현재 영웅 위치 기록' }).click();
+  await expect(stage.getByText('기록한 영웅 1명')).toBeVisible();
+  await stage.getByRole('spinbutton', { name: '이벤트 시작 (초)' }).fill('4');
+  await stage.getByRole('button', { name: '능력 이벤트 추가' }).click();
+  await expect(stage.getByRole('status')).toContainText('단계 안에');
+  await stage.getByRole('spinbutton', { name: '이벤트 시작 (초)' }).fill('1.5');
+  await stage.getByRole('button', { name: '능력 이벤트 추가' }).click();
+  const event = stage.getByRole('list', { name: '단계 능력 이벤트' }).getByText('Blink · 1 · 1.5초 · 1초 동안');
+  await expect(event).toBeVisible();
+  await stage.getByRole('button', { name: '현재 단계 삭제' }).click();
+  await expect(stage.getByLabel('현재 단계')).toHaveCount(0);
+  await page.getByRole('button', { name: '실행 취소', exact: true }).click();
+  await expect(event).toBeVisible();
+
+  const local = page.getByRole('region', { name: '로컬 전략' });
+  await local.getByRole('button', { name: '전략 저장', exact: true }).click();
+  await expect(local.getByRole('status')).toContainText('전략을 저장했습니다.');
+  await page.reload();
+  await local.getByRole('button', { name: '저장본 확인' }).click();
+  await local.getByRole('button', { name: '전략 복원' }).click();
+  await expect(stage.getByRole('textbox', { name: '단계 이름' })).toHaveValue('진입');
+  await expect(stage.getByRole('spinbutton', { name: '단계 길이 (초)' })).toHaveValue('4');
+  await expect(stage.getByText('기록한 영웅 1명')).toBeVisible();
+  await expect(event).toBeVisible();
+});
