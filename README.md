@@ -22,6 +22,8 @@ Use the editor controls to snap placements to the grid, lock edits, or hide hero
 
 In **Local strategy**, save the current map and plan under a name. Use the saved-strategy list to reopen, duplicate, or delete plans in the same browser. Save under a new name to keep a separate copy while editing.
 
+Your most recently edited workspace is also saved automatically in this browser. Use **Recover previous work** to reopen it. Named strategies remain available independently.
+
 ## Build a map
 
 Choose a map or import a validated map JSON file. In **Map edit mode**, add, edit or duplicate terrain blocks and preview changes in the shared 2D and 3D views. Export the map as JSON to keep a copy.
