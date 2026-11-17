@@ -79,7 +79,7 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 - [x] 4.10a Build the schematic Point A map, compare its landmarks with public references and verify it in the editor
 - [ ] 4.10b Verify dimensions, elevations and hero clearance against the live game client
 - [ ] 4.10c Compare the Point A Workshop survey with the editor using the [survey checker](development.md#check-kings-row-point-a-in-the-game-client). The live survey is pending.
-- [ ] 4.10d Survey all 31 competitive maps in the catalogue and build playable 2D layouts. The catalogue links to public overhead references where the source has coverage.
+- [ ] Survey all 31 maps and build playable 2D layouts. Run `python3 scripts/audit-owmap-catalogue.py <Maps> --game-build 2.25.1.0.155284 --output <report.json>` to check mode candidates and direct model and entity references. All 31 mode candidates resolved their direct OWMDL files, and the [geometry inspector](scripts/inspect-owmap.py) generated a separate X/Z vertex preview for each. Entity geometry, walkability, scale, objective positions and browser placement checks are pending.
 - [ ] 4.10e Confirm the mode-grouped map picker and 2D location selector in the editor. The 31 OWKR artwork cards represent the catalogue. Fifteen have legacy StatBanana overhead references, which need current-build comparison before use as terrain. King’s Row Point A is the existing approximate reference. Old schematic drafts can still be restored.
 - [x] 4.11 Verify floor switching, overlapping selection and map registration, editing and import
 - [x] 4.12 Evaluate GLB and glTF and define loading boundaries if needed
