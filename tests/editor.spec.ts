@@ -893,3 +893,46 @@ test('reports partial hero exposure above low cover in both map views', async ({
   await expect(inspector.getByText(/실제 영웅의 자세와 히트박스/)).toBeVisible();
   await page.screenshot({ path: testInfo.outputPath('hero-partial-exposure-3d.png') });
 });
+
+test('switches to hero eye level and restores adjusted 2D and 3D cameras', async ({ page }, testInfo) => {
+  await page.goto('/');
+  const canvas = page.getByTestId('viewport').locator('canvas');
+  const twoD = page.getByRole('button', { name: '2D 탑다운' });
+  const threeD = page.getByRole('button', { name: '3D 원근' });
+  const heroView = page.getByRole('button', { name: '영웅 시점', exact: true });
+  await twoD.click();
+  await expect(canvas).toHaveAttribute('data-view-mode', '2d');
+  await page.getByRole('button', { name: '배치 시작' }).click();
+  await expect(canvas).toHaveCSS('cursor', 'crosshair');
+  await canvas.click();
+  await expect(heroView).toBeVisible();
+  const box = await canvas.boundingBox();
+  if (!box) throw new Error('Canvas has no bounds');
+
+  for (const mode of ['2d', '3d'] as const) {
+    if (mode === '3d') await threeD.click();
+    await expect(canvas).toHaveAttribute('data-view-mode', mode);
+    const previous = await canvas.screenshot();
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.wheel(0, -320);
+    await expect.poll(async () => (await canvas.screenshot()).equals(previous)).toBe(false);
+    const zoomed = await canvas.screenshot();
+    await heroView.click();
+    await expect(canvas).toHaveAttribute('data-view-mode', 'hero');
+    await expect.poll(async () => (await canvas.screenshot()).equals(zoomed)).toBe(false);
+    if (mode === '3d') {
+      const forward = await canvas.screenshot();
+      await page.getByRole('button', { name: '45° 회전', exact: true }).click();
+      await expect.poll(async () => (await canvas.screenshot()).equals(forward)).toBe(false);
+      await page.screenshot({ path: testInfo.outputPath('hero-view.png') });
+      for (let turn = 0; turn < 7; turn++) {
+        await page.getByRole('button', { name: '45° 회전', exact: true }).click();
+      }
+      await page.getByRole('button', { name: '이전 시점으로' }).click();
+    } else {
+      await heroView.press('Escape');
+    }
+    await expect(canvas).toHaveAttribute('data-view-mode', mode);
+    await expect.poll(async () => (await canvas.screenshot()).equals(zoomed)).toBe(true);
+  }
+});
