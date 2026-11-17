@@ -78,6 +78,7 @@
 - [x] 4.09 King's Row 1거점의 승인 가능한 참고자료와 출처 기록
 - [x] 4.10a A 거점 근사 지도 제작, 공개 자료의 주요 지형 대조와 편집기 검증
 - [ ] 4.10b 현재 게임 클라이언트에서 거리·높이·영웅 통과 폭 검증
+- [ ] 4.10c 왕의 길 A 거점 Workshop 실측과 편집기 오차를 확인한다. [비교 방법](development.ko.md#왕의-길-a-거점-실측-데이터-대조)과 검증 도구를 마련했으며 인게임 실측을 기다리고 있다.
 - [x] 4.11 층 전환, 겹친 구조물 선택, 추가 맵 등록·편집·가져오기 검증
 - [x] 4.12 선택적 GLB/glTF 도입 필요성과 로딩 경계 검토
 
@@ -202,3 +203,4 @@
 | 브라우저 호환성 | Chromium 전체 시나리오와 Firefox·WebKit 기본 흐름을 실행했다. 두 모드의 지형 선택과 강제 WebGL 미지원 시 대체 화면을 확인했다. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44067292922) |
 | 렌더링 기준과 외곽선 배치 | Linux x64, Chromium 158.0.8127.18, ANGLE SwiftShader, 1440 × 900. 2D·3D 모두 안뜰 9→6회, 고저차 테스트 맵 43→23회, 왕의 길 79→41회로 감소했다. 첫 드로우는 Intel Xeon 8573C에서 504.5 ms, AMD EPYC 9V74에서 307.1 ms였다. 선택 이벤트부터 드로우까지 각각 5.9–18.3 ms와 4.8–20.4 ms, JS 힙은 11.36과 10.88 MiB였다. 시간과 메모리는 서로 다른 러너에서 측정했다. [기준](https://github.com/qtaghdi/Vertactics/actions/runs/44066787788) · [최적화](https://github.com/qtaghdi/Vertactics/actions/runs/44069847978) |
 | 공개 프리뷰 | 실제 공개 경로에서 파비콘, 메타데이터, WebGL, 404, 전략 공유 및 로컬 저장과 복원 검증을 통과했다. [배포 CI](https://github.com/qtaghdi/Vertactics/actions/runs/44071463018) · [공개 편집기](https://qtaghdi.github.io/Vertactics/) |
+| 오렌지·민트 공용 컨트롤 | 타입 검사, 린트, 단위 테스트, 빌드, Chromium 2D·3D 및 좁은 화면 시나리오, Firefox·WebKit 호환성 검사를 통과했다. Chromium에서 Select 메뉴 열기, Escape 닫기와 키보드 포커스를 확인했다. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44079651733) · [편집기 캡처](https://github.com/qtaghdi/Vertactics/actions/runs/44079651733/artifacts/14327260355) |

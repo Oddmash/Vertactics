@@ -78,6 +78,7 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 - [x] 4.09 Record acceptable references for the first objective of King's Row
 - [x] 4.10a Build the schematic Point A map, compare its landmarks with public references and verify it in the editor
 - [ ] 4.10b Verify dimensions, elevations and hero clearance against the live game client
+- [ ] 4.10c Compare the Point A Workshop survey with the editor using the [survey checker](development.md#check-kings-row-point-a-in-the-game-client). The live survey is pending.
 - [x] 4.11 Verify floor switching, overlapping selection and map registration, editing and import
 - [x] 4.12 Evaluate GLB and glTF and define loading boundaries if needed
 
@@ -194,3 +195,4 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 | Browser compatibility | Chromium runs the full suite. Firefox and WebKit verify terrain inspection and selection through both view modes and forced WebGL fallback. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44067292922) |
 | Renderer baseline and batching | Linux x64, Chromium 158.0.8127.18, ANGLE SwiftShader at 1440 × 900. Draw calls in each mode changed from 9 to 6 for Courtyard, 43 to 23 for Elevation Lab, and 79 to 41 for King’s Row. First draw was 504.5 ms on Intel Xeon 8573C and 307.1 ms on AMD EPYC 9V74. Selection-event-to-draw samples were 5.9–18.3 ms and 4.8–20.4 ms. JS heap was 11.36 and 10.88 MiB. Timing and heap samples come from different runners. [Baseline](https://github.com/qtaghdi/Vertactics/actions/runs/44066787788) · [Batched renderer](https://github.com/qtaghdi/Vertactics/actions/runs/44069847978) |
 | Public preview | The first production deployment passed favicon, metadata, WebGL, 404, shared strategy and local save/restore checks against the public repository path. [Production CI](https://github.com/qtaghdi/Vertactics/actions/runs/44071463018) · [Live editor](https://qtaghdi.github.io/Vertactics/) |
+| Amber and mint control refresh | The shared editor controls passed type checks, lint, unit tests, build, Chromium 2D/3D and narrow-screen flows, and Firefox/WebKit compatibility. Chromium verified picker opening, Escape dismissal and keyboard focus. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44079651733) · [Editor captures](https://github.com/qtaghdi/Vertactics/actions/runs/44079651733/artifacts/14327260355) |
