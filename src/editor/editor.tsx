@@ -1,10 +1,11 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import type { Annotation } from '../domain/annotation';
+import { rotateTerrain, snapTerrain } from '../domain/terrain-edit';
 import TerrainTools from './terrain-tools';
 import AnnotationTools from './annotation-tools';
 import type { SurfacePick } from './annotation-tools';
 import { mapBounds, terrainKinds, parseMap, topElevation, visibleTerrainForLayer } from '../domain/map';
-import type { MapDefinition, Terrain, TerrainKind, WorldPoint } from '../domain/map';
+import type { MapDefinition, MapLayer, Terrain, TerrainKind, WorldPoint } from '../domain/map';
 import { createStrategy } from '../domain/strategy';
 import type { Team } from '../domain/strategy';
 import { createStrategyHistory, reduceStrategyHistory } from '../domain/strategy-history';
@@ -99,13 +100,14 @@ const Editor = () => {
   const replaceMap = (next: MapDefinition) => {
     setCatalogue((current) => current.map((item) => item.id === next.id ? next : item));
   };
-  const updateTerrain = (terrain: unknown[], nextId: string | null) => {
+  const updateTerrain = (terrain: unknown[], nextId: string | null, layers = map.layers) => {
     try {
       const metadata = map.metadata?.verification === 'verified' ? { ...map.metadata, verification: 'unverified' } : map.metadata;
-      const next = parseMap({ ...map, terrain, metadata });
+      const next = parseMap({ ...map, terrain, metadata, layers });
       setMapHistory((current) => ({ ...current, [mapId]: { past: [...timeline.past, map], future: [] } }));
       replaceMap(next);
       setSelectedId(nextId);
+      if (layerId && !next.layers?.some((layer) => layer.id === layerId)) setLayerId('');
       setMapMessage('');
     } catch {
       setMapMessage('지형 값을 확인하세요. 지도에는 블록이 한 개 이상 필요합니다.');
@@ -122,8 +124,22 @@ const Editor = () => {
         : { past: [...timeline.past, map], future: stack.slice(0, -1) },
     }));
     replaceMap(next);
+    if (layerId && !next.layers?.some((layer) => layer.id === layerId)) setLayerId('');
     setSelectedId(null);
     setMapMessage('');
+  };
+  const saveLayer = (layer: MapLayer) => {
+    const layers = map.layers ?? [];
+    updateTerrain(map.terrain, selectedId, layers.some((item) => item.id === layer.id)
+      ? layers.map((item) => item.id === layer.id ? layer : item)
+      : [...layers, layer]);
+  };
+  const deleteLayer = (id: string) => {
+    updateTerrain(
+      map.terrain.map((item) => item.layerId === id ? { ...item, layerId: undefined } : item),
+      selectedId,
+      map.layers?.filter((layer) => layer.id !== id),
+    );
   };
   const createMap = () => {
     const id = crypto.randomUUID();
@@ -395,6 +411,12 @@ const Editor = () => {
               onSave={(terrain) => updateTerrain(map.terrain.map((item) => item.id === selectedId ? terrain : item), selectedId)}
               onAdd={() => copyTerrain()}
               onDuplicate={copyTerrain}
+              onTransform={(id, transform) => updateTerrain(
+                map.terrain.map((item) => item.id === id ? (transform === 'rotate' ? rotateTerrain(item) : snapTerrain(item)) : item),
+                id,
+              )}
+              onSaveLayer={saveLayer}
+              onDeleteLayer={deleteLayer}
               onRemove={(id) => updateTerrain(map.terrain.filter((item) => item.id !== id), null)}
               onHistory={moveMapHistory}
             />

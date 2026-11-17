@@ -435,3 +435,33 @@ test('creates, edits and restores terrain using the shared map view', async ({ p
   await tools.getByRole('button', { name: '블록 삭제', exact: true }).click();
   await expect(duplicate).toHaveCount(0);
 });
+
+test('manages map layers and transforms their terrain without losing blocks', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: '새 지도', exact: true }).click();
+  const tools = page.getByRole('region', { name: '지도 편집', exact: true });
+  const layerFilter = page.getByLabel('표시 층');
+  await tools.getByRole('textbox', { name: '새 층 이름' }).fill('발코니');
+  await tools.getByRole('button', { name: '층 추가' }).click();
+  await layerFilter.selectOption({ label: '발코니' });
+  await tools.getByRole('button', { name: '블록 추가' }).click();
+  const coordinates = tools.getByRole('group', { name: '좌표', exact: true });
+  const size = tools.getByRole('group', { name: '크기', exact: true });
+  await coordinates.getByRole('spinbutton', { name: 'X', exact: true }).fill('1.2');
+  await size.getByRole('spinbutton', { name: 'X', exact: true }).fill('6');
+  await tools.getByRole('button', { name: '블록 저장' }).click();
+  await tools.getByRole('button', { name: '격자에 맞추기' }).click();
+  await expect(coordinates.getByRole('spinbutton', { name: 'X', exact: true })).toHaveValue('1');
+  await tools.getByRole('button', { name: '90° 회전' }).click();
+  await expect(size.getByRole('spinbutton', { name: 'Z', exact: true })).toHaveValue('6');
+
+  const balcony = tools.getByRole('form', { name: '발코니' });
+  await balcony.getByRole('textbox', { name: '층 이름' }).fill('상층');
+  await balcony.getByRole('button', { name: '층 이름 저장' }).click();
+  await expect(layerFilter.getByRole('option', { name: '상층' })).toHaveCount(1);
+  await tools.getByRole('form', { name: '상층' }).getByRole('button', { name: '층 삭제' }).click();
+  await expect(layerFilter).toHaveCount(0);
+  await expect(page.getByRole('button', { name: /새 블록/ })).toBeVisible();
+  await tools.getByRole('button', { name: '지도 실행 취소' }).click();
+  await expect(layerFilter.getByRole('option', { name: '상층' })).toHaveCount(1);
+});

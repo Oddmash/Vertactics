@@ -1,6 +1,6 @@
 import type { FormEvent } from 'react';
 import { terrainKinds } from '../domain/map';
-import type { MapDefinition, Terrain, WorldPoint } from '../domain/map';
+import type { MapDefinition, MapLayer, Terrain, WorldPoint } from '../domain/map';
 
 type Props = {
   map: MapDefinition;
@@ -11,13 +11,16 @@ type Props = {
   onAdd: () => void;
   onDuplicate: (terrain: Terrain) => void;
   onRemove: (id: string) => void;
+  onTransform: (id: string, transform: 'rotate' | 'snap') => void;
+  onSaveLayer: (layer: MapLayer) => void;
+  onDeleteLayer: (id: string) => void;
   onHistory: (direction: 'undo' | 'redo') => void;
 };
 
 const axisNames = ['X', 'Y', 'Z'] as const;
 const vectorFields = [{ key: 'origin', label: '좌표' }, { key: 'size', label: '크기' }] as const;
 
-const TerrainTools = ({ map, selected, undoable, redoable, onSave, onAdd, onDuplicate, onRemove, onHistory }: Props) => {
+const TerrainTools = ({ map, selected, undoable, redoable, onSave, onAdd, onDuplicate, onRemove, onHistory, onTransform, onSaveLayer, onDeleteLayer }: Props) => {
   const save = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!selected) return;
@@ -45,6 +48,35 @@ const TerrainTools = ({ map, selected, undoable, redoable, onSave, onAdd, onDupl
         <button type="button" className="reset-button" disabled={!undoable} onClick={() => onHistory('undo')}>지도 실행 취소</button>
         <button type="button" className="reset-button" disabled={!redoable} onClick={() => onHistory('redo')}>지도 다시 실행</button>
       </div>
+      <fieldset className="edit-controls">
+        <legend>층 관리</legend>
+        <form onSubmit={(event) => {
+          event.preventDefault();
+          const form = event.currentTarget;
+          const name = new FormData(form).get('layer-name');
+          if (typeof name !== 'string' || !name.trim()) return;
+          onSaveLayer({ id: crypto.randomUUID(), name: name.trim() });
+          form.reset();
+        }}>
+          <label>새 층 이름 <input name="layer-name" required /></label>
+          <button type="submit" className="reset-button">층 추가</button>
+        </form>
+        {map.layers?.map((layer) => (
+          <form key={`${layer.id}:${layer.name}`} aria-label={layer.name} onSubmit={(event) => {
+            event.preventDefault();
+            const name = new FormData(event.currentTarget).get('layer-name');
+            if (typeof name === 'string' && name.trim() && name.trim() !== layer.name) {
+              onSaveLayer({ id: layer.id, name: name.trim() });
+            }
+          }}>
+            <label>층 이름 <input name="layer-name" defaultValue={layer.name} required /></label>
+            <div className="hero-actions">
+              <button type="submit" className="reset-button">층 이름 저장</button>
+              <button type="button" className="reset-button" onClick={() => onDeleteLayer(layer.id)}>층 삭제</button>
+            </div>
+          </form>
+        ))}
+      </fieldset>
       {selected && <>
         <form key={JSON.stringify(selected)} onSubmit={save}>
           <label>블록 이름 <input name="name" required defaultValue={selected.name} /></label>
@@ -75,6 +107,8 @@ const TerrainTools = ({ map, selected, undoable, redoable, onSave, onAdd, onDupl
           <button type="submit" className="reset-button">블록 저장</button>
         </form>
         <div className="hero-actions">
+          <button type="button" className="reset-button" onClick={() => onTransform(selected.id, 'rotate')}>90° 회전</button>
+          <button type="button" className="reset-button" onClick={() => onTransform(selected.id, 'snap')}>격자에 맞추기</button>
           <button type="button" className="reset-button" onClick={() => onDuplicate(selected)}>블록 복제</button>
           <button type="button" className="reset-button" onClick={() => onRemove(selected.id)}>블록 삭제</button>
         </div>
