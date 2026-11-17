@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import type { Annotation } from '../domain/annotation';
 import TerrainTools from './terrain-tools';
 import AnnotationTools from './annotation-tools';
@@ -54,22 +54,20 @@ const Editor = () => {
   const [selectedHeroId, setSelectedHeroId] = useState<string | null>(null);
   const [tool, setHeroTool] = useState<EditTool | null>(null);
   const [dragPreview, setDragPreview] = useState<WorldPoint | null>(null);
-  const dragPoint = useRef<WorldPoint | null>(null);
   const [annotationPick, setAnnotationPick] = useState<SurfacePick | null>(null);
   const [annotationId, setAnnotationId] = useState<string | null>(null);
-  const setTool = (next: EditTool | null) => {
+  const setTool = useCallback((next: EditTool | null) => {
     setAnnotationPick(null);
-    dragPoint.current = null;
     setDragPreview(null);
     setHeroTool(next);
-  };
+  }, []);
   const initialHistory = useMemo(() => createStrategyHistory(createStrategy('local-draft', mapId, '새 전략')), [mapId]);
   const [histories, setHistories] = useState<Record<string, StrategyHistory>>({});
   const history = Object.hasOwn(histories, mapId) ? histories[mapId]! : initialHistory;
-  const dispatch = (action: StrategyAction) => setHistories((current) => ({
+  const dispatch = useCallback((action: StrategyAction) => setHistories((current) => ({
     ...current,
     [mapId]: reduceStrategyHistory(Object.hasOwn(current, mapId) ? current[mapId]! : initialHistory, action),
-  }));
+  })), [initialHistory, mapId]);
   const switchMap = (id: string) => {
     setTool(null);
     setMapMessage('');
@@ -168,18 +166,11 @@ const Editor = () => {
     selectAnnotation(annotation.id);
   };
 
-  const previewDrag = (position: WorldPoint | null) => {
-    dragPoint.current = position;
-    setDragPreview(position);
-  };
-
-  const finishDrag = () => {
+  const finishDrag = useCallback((position: WorldPoint | null) => {
     if (tool?.kind !== 'drag') return;
-    if (dragPoint.current && !locked) {
-      dispatch({ type: 'update', id: tool.id, patch: { position: dragPoint.current } });
-    }
+    if (position && !locked) dispatch({ type: 'update', id: tool.id, patch: { position } });
     setTool(null);
-  };
+  }, [dispatch, locked, setTool, tool]);
 
   const editSurface = (position: WorldPoint) => {
     if (locked) return;
@@ -218,7 +209,7 @@ const Editor = () => {
           Vertactics
         </div>
         <div className="map-catalogue">
-          <label>지도 <select value={mapId} onChange={(event) => switchMap(event.target.value)}>
+          <label>지도 <select aria-label="지도" value={mapId} onChange={(event) => switchMap(event.target.value)}>
             {catalogue.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
           </select></label>
           <button type="button" className="reset-button" onClick={createMap}>새 지도</button>
@@ -322,7 +313,6 @@ const Editor = () => {
             }} /> 마커 표시</label>
           </div>
           <div className="viewport" data-testid="viewport"
-            onPointerUp={finishDrag}
             onPointerCancel={() => { if (tool?.kind === 'drag') setTool(null); }}
             onPointerLeave={(event) => { if (tool?.kind === 'drag' && event.buttons === 1) setTool(null); }}
           >
@@ -343,7 +333,8 @@ const Editor = () => {
               annotations={!mapEditing && showAnnotations ? annotations : []}
               selectedAnnotationId={annotationId}
               onEditSurface={!locked && ((tool && tool.kind !== 'drag') || annotationPick) ? editSurface : undefined}
-              onDragSurface={!locked && tool?.kind === 'drag' ? previewDrag : undefined}
+              onDragSurface={!locked && tool?.kind === 'drag' ? setDragPreview : undefined}
+              onDropSurface={!locked && tool?.kind === 'drag' ? finishDrag : undefined}
             />
             <span className="view-label" aria-hidden="true">{viewNames[mode]}</span>
             {mode === '2d' && <span className="north-label" aria-label="위쪽은 북쪽">↑ N</span>}

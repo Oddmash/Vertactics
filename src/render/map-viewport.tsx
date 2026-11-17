@@ -1,6 +1,7 @@
 import { snapSurfacePoint } from '../domain/surface-snap';
 import type { Annotation } from '../domain/annotation';
 import MapAnnotations from './map-annotations';
+import SurfaceDrag from './surface-drag';
 import { Canvas, useThree } from '@react-three/fiber';
 import { Component, useLayoutEffect, useMemo } from 'react';
 import type { ReactNode } from 'react';
@@ -56,11 +57,12 @@ type Props = {
   onSelectHero: (id: string) => void;
   onEditSurface?: (position: WorldPoint) => void;
   onDragSurface?: (position: WorldPoint | null) => void;
+  onDropSurface?: (position: WorldPoint | null) => void;
 };
 
 const MapViewport = ({
   map, mode, reset, selectedId, onSelect, heroes, selectedHeroId, onSelectHero, onEditSurface,
-  annotations, selectedAnnotationId, snap, layerId, onDragSurface,
+  annotations, selectedAnnotationId, snap, layerId, onDragSurface, onDropSurface,
 }: Props) => {
   const bounds = useMemo(() => mapBounds(map.terrain), [map]);
   const blocks = useMemo(() => visibleTerrainForLayer(map.terrain, layerId).map((terrain) => ({
@@ -91,6 +93,7 @@ const MapViewport = ({
         <directionalLight position={[18, 8, -15]} intensity={0.35} />
         <MapCamera mode={mode} bounds={bounds} reset={reset} pointerEditing={Boolean(onDragSurface)} />
         <SurfaceCursor editing={Boolean(onEditSurface || onDragSurface)} />
+        {onDragSurface && onDropSurface && <SurfaceDrag groups={blocks} snap={snap} onPreview={onDragSurface} onFinish={onDropSurface} />}
         <gridHelper
           position={[bounds.center[0], bounds.min[1] - 0.02, bounds.center[2]]}
           args={[gridSize, gridSize, tokens.color.axis, tokens.color.grid]}
@@ -109,17 +112,6 @@ const MapViewport = ({
                   key={index}
                   position={center}
                   scale={size}
-                  onPointerOut={onDragSurface && ((event) => { if (event.buttons === 1) onDragSurface(null); })}
-                  onPointerUp={onDragSurface && ((event) => {
-                    if (event.button !== 0) return;
-                    event.stopPropagation();
-                    onDragSurface(readSurface(event));
-                  })}
-                  onPointerMove={onDragSurface && ((event) => {
-                    if (event.buttons !== 1) return;
-                    event.stopPropagation();
-                    onDragSurface(readSurface(event));
-                  })}
                   onClick={(event) => {
                     if (event.delta > 4 || onDragSurface) return;
                     event.stopPropagation();
