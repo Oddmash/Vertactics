@@ -18,6 +18,8 @@ Vertactics는 진입로, 엄폐물, 고지대를 살펴보고 전술을 구상�
 
 **영웅 배치**에서 영웅과 팀을 고르고, 지도에서 바닥이나 고지대를 클릭해 배치합니다. 배치한 영웅의 위치와 방향을 바꾸거나 팀을 전환할 수 있습니다. 2D에서 놓은 영웅을 3D에서도 같은 위치와 높이에서 볼 수 있으며, 실행 취소와 다시 실행으로 배치를 비교할 수 있습니다.
 
-[2D·3D 지도와 영웅 배치 화면](https://github.com/qtaghdi/Vertactics/actions/runs/44028807455/artifacts/14304237794) · [개발 및 기여](development.ko.md)
+**전술 마커**에서 웨이포인트를 이어 이동 경로를 만들거나 선·원·영역·메모를 추가할 수 있습니다. 마커 패널에서 지점과 이름을 수정하세요. 경로와 마커는 두 보기에서 공유됩니다.
+
+[지도, 영웅 배치와 마커 화면](https://github.com/qtaghdi/Vertactics/actions/runs/44030502710/artifacts/14304991790) · [개발 및 기여](development.ko.md)
 
 Vertactics는 Blizzard Entertainment와 제휴하지 않은 팬 프로젝트입니다.

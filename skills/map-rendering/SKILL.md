@@ -8,3 +8,5 @@ description: Implement Vertactics map schemas, world coordinates, terrain geomet
 3. Keep domain calculations renderer-independent. Share scene data, geometry, terrain IDs and selections between camera modes. Switch mode without modifying persisted positions.
 4. Check stair direction and top elevation, overlapping surfaces, invalid inputs and legacy schema versions. Use `u` for world units until a real-world conversion is verified.
 5. Document the source and verification status of real-map geometry. Keep the synthetic elevation lab available for reproducible tests.
+
+[Korean guide](guide.ko.md)

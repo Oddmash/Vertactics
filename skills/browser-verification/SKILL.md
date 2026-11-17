@@ -8,3 +8,5 @@ description: Verify Vertactics rendering and interactions in Playwright, capture
 3. Inspect actual renders for clipping, misaligned picking, step readability, panels and viewport responsiveness. Capture both modes and record the browser and viewport size.
 4. Confirm CI results for the exact commit. Record missing dependencies, WebGL restrictions and other blockers separately from test assertion failures.
 5. Check SPEC only for the behavior verified. Use the actual captures in the README when their source build still matches the documented interface.
+
+[Korean guide](guide.ko.md)

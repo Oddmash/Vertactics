@@ -4,7 +4,7 @@
 
 See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [the development guide](development.md). Check an item when its stated scope has been verified. Track implementation, browser behavior, CI and deployment separately.
 
-**Current phase** Phase 3. Verify tactical routes and markers in both views, then continue with remaining placement and input checks.
+**Current phase** Phase 3. Continue with remaining placement and input checks, including stair treads, overlapping surfaces, snapping and visibility.
 
 ## Phase 1 · Project setup
 
@@ -51,8 +51,8 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 - [x] 3.07a Apply floor and high-ground elevation and reject wall placement
 - [ ] 3.07b Verify stair tread placement and overlapping surfaces
 - [x] 3.08 Show selection, coordinates, elevation, heading and team controls
-- [ ] 3.09 Add, edit and delete tactical routes and waypoints
-- [ ] 3.10 Edit and display line, circle, area and note markers
+- [x] 3.09 Add, edit and delete tactical routes and waypoints
+- [x] 3.10 Edit and display line, circle, area and note markers
 - [ ] 3.11 Support snapping, locking, visibility and keyboard actions
 - [x] 3.12a Unit test undo and redo for placement, update and deletion
 - [x] 3.12b Verify undo and redo restores placement elevation in the editor
@@ -134,4 +134,4 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 | --- | --- |
 | Initial rendering work | Local map and strategy unit checks ran through development. GitHub Actions later verified frozen installation, type checks, lint and the production build. |
 | CI #13 | Chromium 158 at 1440 × 900. 22 unit tests and two Chromium scenarios passed. Checked terrain picking, hero placement, team, coordinates, elevation and undo/redo. [Screenshots](https://github.com/qtaghdi/Vertactics/actions/runs/44028807455/artifacts/14304237794) |
-| Routes and markers | 24 local unit tests passed. The route editing scenario is queued for Chromium CI. |
+| Routes and markers | 24 unit tests and four Chromium scenarios passed. Verified route waypoint editing and undo, marker creation, note editing, and switching views. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44030502710) |

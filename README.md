@@ -16,6 +16,8 @@ Vertactics is a map tool for planning approaches, cover, and high-ground positio
 
 Choose a hero and team, then click a walkable surface to place the hero. You can move, rotate, change teams, or delete a placement. Switch views to inspect the same position and elevation from another angle.
 
-[Map and hero placement screenshots](https://github.com/qtaghdi/Vertactics/actions/runs/44028807455/artifacts/14304237794) · [Development and contribution](development.md)
+In **Tactical markers**, connect waypoints into a route or add a line, circle, area, or note. Use the marker panel to edit points and labels. Routes and markers appear in both views.
+
+[Map, hero placement, and marker screenshots](https://github.com/qtaghdi/Vertactics/actions/runs/44030502710/artifacts/14304991790) · [Development and contribution](development.md)
 
 Vertactics is an unofficial fan project and is unaffiliated with Blizzard Entertainment.
