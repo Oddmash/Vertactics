@@ -87,7 +87,7 @@
 - [ ] 5.01b 영웅 목록 확장과 검증
 - [ ] 5.02 아이콘 이용 조건 확인과 중립 대체 표시
 - [x] 5.03a 사용자 설정 미리보기의 방향·범위·형태·출처 모델 정의
-- [ ] 5.03b 실측 능력 수치의 근거와 검증 상태 정의
+- [x] 5.03b 사용자 실측·추정 범위를 출처 및 게임 버전과 함께 저장
 - [x] 5.04a 원·구·부채꼴·직선·직사각형·방향 벡터·지면 영역 윤곽선 표시
 - [x] 5.04b 지속 영역과 지속 시간 표현
 - [x] 5.05a 영웅에 연결된 미리보기 선택·회전·표시·숨기기
@@ -95,7 +95,7 @@
 - [x] 5.06a 2D·3D에서 미리보기 위치·방향·높이 공유
 - [x] 5.06b 2D·3D에서 독립 능력 오브젝트 배치 공유
 - [x] 5.07a 사용자 설정 범위와 지도 단위 표시
-- [ ] 5.07b 실측·추정 수치와 근거 표시
+- [x] 5.07b 사용자 실측·추정 거리와 출처, 단위 표시
 - [x] 5.08a 미리보기 도형 계산 단위 테스트와 브라우저 보기 전환 검증
 - [ ] 5.08b 저장된 능력 편집을 브라우저에서 검증
 
@@ -168,3 +168,4 @@
 | 영웅 능력 미리보기 | 단위 테스트 45개, Chromium 시나리오 17개 통과. 영웅 기준 부채꼴로 사용자 설정 범위와 2D·3D 전환을 검증. 타입 검사, 린트, 프로덕션 빌드 통과. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44039103823) · [2D·3D 캡처](https://github.com/qtaghdi/Vertactics/actions/runs/44039103823/artifacts/14309061041) |
 | 독립 능력 배치 | 단위 테스트 47개, Chromium 시나리오 18개 통과. 고지대 배치, 이동, 회전, 보기 전환, 숨기기, 삭제와 실행 취소를 검증. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44040575157) · [2D·3D 캡처](https://github.com/qtaghdi/Vertactics/actions/runs/44040575157/artifacts/14308738616) |
 | 사용자 설정 영역 지속 시간 | 지속 시간 검증, 배치, 편집, 뷰 전환, 값 지우기, 실행 취소를 확인. 전략 재생 시간 처리의 범위는 Phase 7에 포함. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44041404112) · [캡처](https://github.com/qtaghdi/Vertactics/actions/runs/44041404112/artifacts/14309283253) |
+| 능력 거리 참고값 | 단위 테스트 49개, Chromium 시나리오 20개 통과. 출처·게임 버전·실측과 추정 표시, 미터와 지도 단위 구분, 뷰 전환, 지우기와 실행 취소를 검증. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44042312699) · [캡처](https://github.com/qtaghdi/Vertactics/actions/runs/44042312699/artifacts/14310001845) |
