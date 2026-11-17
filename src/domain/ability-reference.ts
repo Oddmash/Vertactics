@@ -54,8 +54,9 @@ type PatchReference = { patch: string; values: Stat[] };
 
 const november = (...values: Stat[]): PatchReference => ({ patch: '2026-11-03', values });
 const october = (...values: Stat[]): PatchReference => ({ patch: '2026-10-06', values });
+const octoberHotfix = (...values: Stat[]): PatchReference => ({ patch: '2026-10-13', values });
 
-const patchReferences: Record<string, Record<string, PatchReference>> = {
+const patchReferences: Record<string, Record<string, PatchReference | PatchReference[]>> = {
   ana: { 'biotic-grenade': november(['폭발 피해', 60]) },
   anran: {
     'zhuque-fans': november(['피해량', 24]),
@@ -85,20 +86,22 @@ const patchReferences: Record<string, Record<string, PatchReference>> = {
   },
   roadhog: { 'chain-hook': october(['대상 정지 거리', 4.5, 'm'], ['당긴 후 기절 지속시간', 0.3, 's']) },
   sombra: {
-    'machine-pistol': october(['투사체당 피해', 7], ['피해 감소 시작 거리', 20, 'm']),
+    'machine-pistol': [octoberHotfix(['투사체당 피해', 6.5]), october(['피해 감소 시작 거리', 20, 'm'])],
     hotfix: november(['지속시간', 10, 's']),
     translocator: october(['투사체 사거리', 12.25, 'm'], ['은신 지속시간', 6.5, 's']),
-    cyberspace: october(['구역 반경', 5, 'm'], ['구역 지속시간', 3, 's']),
+    cyberspace: [octoberHotfix(['폭발 피해', 20], ['재사용 대기시간', 13, 's']),
+      october(['구역 반경', 5, 'm'], ['구역 지속시간', 3, 's'])],
   },
 };
 
-export const getAbilityPatchReference = (heroId: string, abilityId: string) => {
+export const getAbilityPatchReferences = (heroId: string, abilityId: string) => {
   const reference = patchReferences[heroId]?.[abilityId];
-  if (!reference) return undefined;
-  const monthPath = reference.patch.slice(0, 7).replace('-', '/');
-  return { ...reference, source: `https://overwatch.blizzard.com/en-us/news/patch-notes/live/${monthPath}/` };
+  if (!reference) return [];
+  return (Array.isArray(reference) ? reference : [reference]).map((entry) => {
+    const monthPath = entry.patch.slice(0, 7).replace('-', '/');
+    return { ...entry, source: `https://overwatch.blizzard.com/en-us/news/patch-notes/live/${monthPath}/` };
+  });
 };
-
 export const getKoreanAbilityName = (heroId: string, abilityId: string) => official[heroId]?.[abilityId]?.ko;
 
 export const getAbilityIcon = (heroId: string, abilityId: string) => official[heroId]?.[abilityId]?.icon;

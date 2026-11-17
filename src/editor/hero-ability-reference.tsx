@@ -1,6 +1,6 @@
 import LoadingImage from '../ui/loading-image';
 import { useId, useState } from 'react';
-import { getAbilityPatchReference, getAbilitySummary, getKoreanAbilityName, getAbilityIcon, abilitySourceForLocale } from '../domain/ability-reference';
+import { getAbilityPatchReferences, getAbilitySummary, getKoreanAbilityName, getAbilityIcon, abilitySourceForLocale } from '../domain/ability-reference';
 import type { CatalogueHero } from '../domain/hero-catalogue';
 import { Button } from '../ui/controls';
 import { useLocale } from '../ui/locale';
@@ -30,7 +30,7 @@ const HeroAbilityReference = ({ heroId, heroName, source, abilities }: Props) =>
   }));
   const shown = hovered ?? focused ?? pinned;
   const detail = shown === undefined ? undefined : reference[shown];
-  const patch = detail?.id ? getAbilityPatchReference(heroId, detail.id) : undefined;
+  const patches = detail ? getAbilityPatchReferences(heroId, detail.id) : [];
 
   return (
     <section className="hero-ability-reference" aria-labelledby={title} onKeyDown={(event) => {
@@ -58,14 +58,15 @@ const HeroAbilityReference = ({ heroId, heroName, source, abilities }: Props) =>
         {detail ? <div className="hero-ability-detail" id={detailsId} role="tooltip">
           <strong>{detail.name}</strong>
           <p>{detail.description || t('스킬 설명은 공식 영웅 페이지에서 확인할 수 있습니다.')}</p>
-          {patch ? <dl className="hero-ability-stat">{patch.values.map(([label, value, unit]) =>
-            <div key={label}><dt>{t(label)}</dt><dd>{value}{unit ? ` ${unit}` : ''}</dd></div>)}</dl>
+          {patches.length > 0 ? <dl className="hero-ability-stat">{patches.flatMap(({ patch, values }) =>
+            values.map(([label, value, unit]) =>
+              <div key={label}><dt>{t(label)} <small>{patch}</small></dt><dd>{value}{unit ? ` ${unit}` : ''}</dd></div>))}</dl>
             : <p className="hero-ability-hint">{t('검증된 수치가 아직 없습니다.')}</p>}
         </div> : <p className="hero-ability-hint">{t('스킬을 가리키거나 선택해 설명을 확인하세요.')}</p>}
       </div>
       <div className="hero-ability-sources">
         <a href={abilitySourceForLocale(source, locale)} target="_blank" rel="noreferrer">{t('공식 스킬 출처')}</a>
-        {patch && <a href={abilitySourceForLocale(patch.source, locale)} target="_blank" rel="noreferrer">{t('{0} 패치 노트', patch.patch)}</a>}
+        {patches.map(({ patch, source }) => <a key={patch} href={abilitySourceForLocale(source, locale)} target="_blank" rel="noreferrer">{t('{0} 패치 노트', patch)}</a>)}
       </div>
     </section>
   );

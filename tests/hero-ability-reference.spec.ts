@@ -54,6 +54,10 @@ test('selects heroes by portrait and reveals sourced skills in the right panel',
   await expect(details.getByText('구역 반경')).toBeVisible();
   await expect(details.getByText('5 m', { exact: true })).toBeVisible();
   await expect(details.getByText('3 s', { exact: true })).toBeVisible();
+  await panel.getByRole('button', { name: '기관권총', exact: true }).hover();
+  await expect(details.getByText('6.5', { exact: true })).toBeVisible();
+  await expect(details.getByText('20 m', { exact: true })).toBeVisible();
+  await expect(panel.getByRole('link', { name: '2026-10-13 패치 노트' })).toBeVisible();
   expect(apiRequests).toEqual([]);
 });
 
