@@ -119,7 +119,7 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 - [x] 7.04 Create, list, reopen, clone and delete strategies in IndexedDB
 - [x] 7.05 Handle autosave, errors, close recovery, migration and corrupt documents
 - [x] 7.06 Support validated JSON import and export and PNG export
-- [ ] 7.07 Support share links, size limits, read-only views, duplication and validation
+- [x] 7.07 Support share links, size limits, read-only views, duplication and validation
 - [x] 7.08 Verify save, reload, restore, export and re-import end to end
 
 ## Phase 8 · Product polish
@@ -183,3 +183,4 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 | Local strategy library | 60 unit tests and 29 Chromium scenarios passed. Verified named saves, recent order, update, duplication, confirmed deletion, restoration and in-place upgrade of a legacy workspace draft. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44052203062) |
 | Workspace autosave and recovery | 60 unit tests and 31 Chromium scenarios passed. Verified autosave, page-hide flush, reload and explicit restoration, malformed recovery and write failure, and preservation of named saves. Legacy named-draft migration is covered by the local strategy library checkpoint. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44053504783) |
 | Strategy file transfer and image export | 60 unit tests and 33 Chromium scenarios passed. Verified invalid import handling, saving, reload, restore, export and re-import of a map and timed plan. Decoded both PNG downloads and verified distinct nonblank views. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44054863071) |
+| Strategy share links | 62 unit tests and 35 Chromium scenarios passed. Verified read-only view, playback, JSON export, local duplication, malformed links and payload limits. Links carry a compressed snapshot. Strategies over the link limit can be transferred as JSON. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44055871444) |

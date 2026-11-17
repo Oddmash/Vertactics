@@ -26,6 +26,8 @@ Your most recently edited workspace is also saved automatically in this browser.
 
 Use **Strategy files** to transfer the map and strategy together as JSON. **Save map PNG** captures the active map camera.
 
+Create a share link under **Strategy files**. Anyone with the link can view the map or play the timeline. They can make an editable copy in their own browser. For strategies that exceed the link size limit, transfer the JSON file.
+
 ## Build a map
 
 Choose a map or import a validated map JSON file. In **Map edit mode**, add, edit or duplicate terrain blocks and preview changes in the shared 2D and 3D views. Export the map as JSON to keep a copy.
