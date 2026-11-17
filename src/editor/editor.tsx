@@ -46,6 +46,9 @@ const formatNumber = (value: number) => new Intl.NumberFormat('ko-KR', {
 }).format(value);
 const formatElevation = (value: number) => `${value > 0 ? '+' : ''}${formatNumber(value)} u`;
 
+const probeEyeHeight = 1.6;
+const sightOrigin = ([x, y, z]: WorldPoint): WorldPoint => [x, y + probeEyeHeight, z];
+
 const Editor = () => {
   const [catalogue, setCatalogue] = useState(maps);
   const [mapId, setMapId] = useState(maps[0]!.id);
@@ -53,7 +56,11 @@ const Editor = () => {
   const { min, max } = useMemo(() => mapBounds(map.terrain), [map]);
   const [importMessage, setImportMessage] = useState('');
   const [mapEditing, setMapEditing] = useState(false);
-  const [measuring, setMeasuring] = useState(false);
+  const [probeTool, setProbeTool] = useState<'distance' | 'sight' | null>(null);
+  const measuring = probeTool === 'distance';
+  const sightPicking = probeTool === 'sight';
+  const [sightPoints, setSightPoints] = useState<WorldPoint[]>([]);
+  const [sightFirst, sightSecond] = sightPoints;
   const [measurement, setMeasurement] = useState<WorldPoint[]>([]);
   const first = measurement[0];
   const second = measurement[1];
@@ -94,7 +101,8 @@ const Editor = () => {
     setAbilityPick(null);
     setDragPreview(null);
     setHeroTool(next);
-    setMeasuring(false);
+    setProbeTool(null);
+    setSightPoints((points) => points.length === 2 ? points : []);
   }, []);
   const initialHistory = useMemo(() => createStrategyHistory(createStrategy('local-draft', mapId, '새 전략')), [mapId]);
   const [histories, setHistories] = useState<Record<string, StrategyHistory>>({});
@@ -107,6 +115,7 @@ const Editor = () => {
     setTool(null);
     setMapMessage('');
     setMeasurement([]);
+    setSightPoints([]);
     setLayerId('');
     setSelectedId(null);
     setSelectedHeroId(null);
@@ -219,10 +228,17 @@ const Editor = () => {
   const activeAbility = abilityPreviews[previewKey];
   const sightTarget = heroes.find((hero) => hero.id === sightTargetId && hero.id !== selectedHeroId);
   const spatialProbe = !mapEditing && showHeroes && selectedHero && sightTarget ? (() => {
-    const eye = ([x, y, z]: WorldPoint): WorldPoint => [x, y + 1.6, z];
-    const start = eye(selectedHero.position);
-    return { start, ...traceSightline(map.terrain, start, eye(sightTarget.position)) };
+    const start = sightOrigin(selectedHero.position);
+    return { start, ...traceSightline(map.terrain, start, sightOrigin(sightTarget.position)) };
   })() : null;
+  const terrainSight = sightFirst && sightSecond ? (() => {
+    const start = sightOrigin(sightFirst);
+    return { start, ...traceSightline(map.terrain, start, sightOrigin(sightSecond)) };
+  })() : null;
+  const activeSight = sightPicking || sightFirst ? terrainSight : spatialProbe;
+  const sightOverlay: Annotation[] = sightFirst && !sightSecond ? [{
+    id: 'sight-start', kind: 'note', label: '시야 시작점', points: [sightFirst],
+  }] : [];
   const selectTerrain = (id: string | null, extend = false) => {
     if (mapEditing && extend && id && selectedId) {
       if (id === selectedId) {
@@ -272,6 +288,10 @@ const Editor = () => {
       setMeasurement((points) => points.length === 1 ? [...points, position] : [position]);
       return;
     }
+    if (sightPicking) {
+      setSightPoints((points) => points.length === 1 ? [...points, position] : [position]);
+      return;
+    }
     if (locked) return;
     if (abilityPick) { abilityPick.apply(position); return; }
     if (annotationPick) { annotationPick.apply(position); return; }
@@ -289,7 +309,7 @@ const Editor = () => {
 
   return (
     <div className="editor" onKeyDown={(event) => {
-      if (event.key === 'Escape' && (tool || annotationPick || abilityPick || measuring)) {
+      if (event.key === 'Escape' && (tool || annotationPick || abilityPick || probeTool)) {
         event.preventDefault();
         setTool(null);
         return;
@@ -401,9 +421,14 @@ const Editor = () => {
             </select></label>}
             <button type="button" className="reset-button" aria-pressed={measuring} onClick={() => {
               setTool(null);
-              setMeasuring(!measuring);
+              setProbeTool(measuring ? null : 'distance');
               if (!measuring) setMeasurement([]);
             }}>거리 측정</button>
+            <button type="button" className="reset-button" aria-pressed={sightPicking} onClick={() => {
+              setTool(null);
+              setProbeTool(sightPicking ? null : 'sight');
+              if (!sightPicking || !sightSecond) setSightPoints([]);
+            }}>지점 간 시야</button>
             <label><input type="checkbox" checked={snap} onChange={(event) => setSnap(event.target.checked)} /> 격자 스냅</label>
             <label><input type="checkbox" checked={locked} onChange={(event) => {
               setTool(null);
@@ -434,17 +459,17 @@ const Editor = () => {
               ) : []}
               snap={snap}
               selectedHeroId={selectedHeroId}
-              sightline={spatialProbe && {
-                start: spatialProbe.start, end: spatialProbe.endpoint, blocked: Boolean(spatialProbe.sight),
+              sightline={activeSight && {
+                start: activeSight.start, end: activeSight.endpoint, blocked: Boolean(activeSight.sight),
               }}
               abilities={mapEditing ? [] : abilities}
               abilityPreview={!mapEditing && showHeroes && selectedHero && activeAbility
                 ? { hero: selectedHero, settings: activeAbility } : undefined}
               onSelect={selectTerrain}
               onSelectHero={selectHero}
-              annotations={[...(!mapEditing && showAnnotations ? annotations : []), ...measurementOverlay]}
+              annotations={[...(!mapEditing && showAnnotations ? annotations : []), ...measurementOverlay, ...sightOverlay]}
               selectedAnnotationId={annotationId}
-              onEditSurface={measuring || (!locked && ((tool && tool.kind !== 'drag') || annotationPick || abilityPick)) ? editSurface : undefined}
+              onEditSurface={probeTool || (!locked && ((tool && tool.kind !== 'drag') || annotationPick || abilityPick)) ? editSurface : undefined}
               onDragSurface={!locked && tool?.kind === 'drag' ? setDragPreview : undefined}
               onDropSurface={!locked && tool?.kind === 'drag' ? finishDrag : undefined}
             />
@@ -495,7 +520,11 @@ const Editor = () => {
                   })}
                 />}
                 {heroes.length > 1 && <div className="spatial-probe">
-                  <label>시야 확인 대상 <select aria-label="시야 확인 대상" value={sightTarget?.id ?? ''} onChange={(event) => setSightTargetId(event.target.value)}>
+                  <label>시야 확인 대상 <select aria-label="시야 확인 대상" value={sightTarget?.id ?? ''} onChange={(event) => {
+                    setTool(null);
+                    setSightPoints([]);
+                    setSightTargetId(event.target.value);
+                  }}>
                     <option value="">대상 선택</option>
                     {heroes.filter((hero) => hero.id !== selectedHeroId).map((hero, index) => (
                       <option key={hero.id} value={hero.id}>{heroName(hero.heroId)} · {index + 1}</option>
@@ -537,6 +566,13 @@ const Editor = () => {
               <div><dt>직선 거리</dt><dd>{formatNumber(distance.distance)} u</dd></div>
             </dl> : <p>{first ? '두 번째 지점을 선택하세요.' : '첫 번째 지점을 선택하세요.'}</p>}
             {first && <button type="button" className="reset-button" onClick={() => setMeasurement([])}>측정 지우기</button>}
+          </section>}
+          {(sightPicking || sightFirst) && <section className="hero-tools" aria-label="지점 간 시야 결과">
+            <p>두 지면에서 {probeEyeHeight} u 위를 연결합니다.</p>
+            <p role="status">{terrainSight
+              ? terrainSight.sight ? `시야 차단: ${terrainSight.sight.name}` : '시야 개방'
+              : sightFirst ? '시야 목표점을 선택하세요.' : '시야 시작점을 선택하세요.'}</p>
+            {sightFirst && <button type="button" className="reset-button" onClick={() => setSightPoints([])}>시야 지우기</button>}
           </section>}
           {mapEditing ? <>
             <TerrainTools

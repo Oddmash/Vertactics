@@ -809,3 +809,48 @@ test('reports missing drafts and leaves the editor intact when storage is malfor
   await expect(local.getByRole('button', { name: '전략 복원' })).toHaveCount(0);
   await expect(page.getByRole('heading', { name: '고저차 테스트 맵' })).toBeVisible();
 });
+
+test('checks sight between chosen terrain points across walls and elevation', async ({ page }, testInfo) => {
+  await page.goto('/');
+  const canvas = page.getByTestId('viewport').locator('canvas');
+  const twoD = page.getByRole('button', { name: '2D 탑다운' });
+  const tool = page.getByRole('button', { name: '지점 간 시야', exact: true });
+  const result = page.getByRole('region', { name: '지점 간 시야 결과' });
+  await twoD.click();
+  await expect(canvas).toHaveAttribute('data-view-mode', '2d');
+  await tool.click();
+  await expect(canvas).toHaveCSS('cursor', 'crosshair');
+  const box = await canvas.boundingBox();
+  if (!box) throw new Error('Canvas has no bounds');
+  const units = Math.max(36 / box.width, 24 / box.height) * 1.22;
+  const click = (x: number, z: number) => page.mouse.click(
+    box.x + box.width / 2 + x / units, box.y + box.height / 2 + z / units,
+  );
+
+  await click(6, -11);
+  await expect(result.getByRole('status')).toHaveText('시야 목표점을 선택하세요.');
+  await click(6, -6);
+  await expect(result.getByRole('status')).toHaveText('시야 차단: 북쪽 벽');
+  await page.screenshot({ path: testInfo.outputPath('terrain-sight-blocked-2d.png') });
+  await page.getByRole('button', { name: '3D 원근' }).click();
+  await expect(canvas).toHaveAttribute('data-view-mode', '3d');
+  await expect(result.getByRole('status')).toHaveText('시야 차단: 북쪽 벽');
+
+  await twoD.click();
+  await expect(canvas).toHaveAttribute('data-view-mode', '2d');
+  await click(-9, 7);
+  await click(-9, 10);
+  await expect(result.getByRole('status')).toHaveText('시야 차단: 남쪽 엄폐벽');
+  await click(0, 5);
+  await click(7, 5);
+  await expect(result.getByRole('status')).toHaveText('시야 개방');
+  await page.getByRole('button', { name: '3D 원근' }).click();
+  await expect(canvas).toHaveAttribute('data-view-mode', '3d');
+  await expect(result.getByRole('status')).toHaveText('시야 개방');
+  await page.screenshot({ path: testInfo.outputPath('terrain-sight-clear-3d.png') });
+  await result.getByRole('button', { name: '시야 지우기' }).click();
+  await expect(result.getByRole('status')).toHaveText('시야 시작점을 선택하세요.');
+  await tool.press('Escape');
+  await expect(tool).toHaveAttribute('aria-pressed', 'false');
+  await expect(result).toHaveCount(0);
+});
