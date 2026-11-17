@@ -87,7 +87,7 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 - [ ] 5.01b Expand and verify the hero roster
 - [ ] 5.02 Confirm icon rights and create neutral fallbacks
 - [x] 5.03a Model custom preview direction, range, shape and provenance
-- [ ] 5.03b Model sources and verification states for measured ability values
+- [x] 5.03b Store a user-measured or estimated range with its source and game version
 - [x] 5.04a Render circle, sphere, cone, line, rectangle, vector and ground area outlines
 - [x] 5.04b Represent persistent areas and their durations
 - [x] 5.05a Select, rotate, show and hide a hero-anchored preview
@@ -95,7 +95,7 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 - [x] 5.06a Share preview position, direction and elevation across 2D and 3D
 - [x] 5.06b Share independent ability placement across 2D and 3D
 - [x] 5.07a Label custom range values and their map units
-- [ ] 5.07b Label measured and estimated values with their sources
+- [x] 5.07b Label user-measured and estimated ranges with their sources and units
 - [x] 5.08a Test preview shape geometry and browser view switching
 - [ ] 5.08b Verify saved ability editing in a browser
 
@@ -160,3 +160,4 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 | Hero ability previews | 45 unit tests and 17 Chromium scenarios passed. Verified custom ranges and view switching using a hero-anchored cone. Type checks, lint and the production build passed. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44039103823) · [2D and 3D screenshots](https://github.com/qtaghdi/Vertactics/actions/runs/44039103823/artifacts/14309061041) |
 | Independent ability placement | 47 unit tests and 18 Chromium scenarios passed. Verified high-ground placement, moving, rotation, view switching, visibility, removal, and undo. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44040575157) · [2D and 3D screenshots](https://github.com/qtaghdi/Vertactics/actions/runs/44040575157/artifacts/14308738616) |
 | Custom area durations | Verified duration validation, placement, editing, switching views, clearing and undo. Strategy playback timing remains in Phase 7. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44041404112) · [Screenshots](https://github.com/qtaghdi/Vertactics/actions/runs/44041404112/artifacts/14309283253) |
+| Ability range references | 49 unit tests and 20 Chromium scenarios passed. Verified source, game version, measured and estimated labels, separate meters and map units, view switching, clearing and undo. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44042312699) · [Screenshots](https://github.com/qtaghdi/Vertactics/actions/runs/44042312699/artifacts/14310001845) |
