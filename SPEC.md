@@ -103,7 +103,7 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 
 - [ ] 6.01 Connect terrain and heroes to raycasting and blocking rules
 - [x] 6.02a Show hero-to-hero sightlines and mark the first blocking surface in both views
-- [ ] 6.02b Pick arbitrary terrain endpoints and verify sightlines across walls, cover and elevation
+- [x] 6.02b Pick arbitrary terrain endpoints and verify sightlines across walls, cover and elevation
 - [ ] 6.03 Evaluate partial exposure and describe model limitations
 - [ ] 6.04 Show horizontal and straight-line distances, elevations and route length
 - [ ] 6.05 Switch to a selected hero view and restore the original camera
@@ -170,3 +170,4 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 | Ability range references | 49 unit tests and 20 Chromium scenarios passed. Verified source, game version, measured and estimated labels, separate meters and map units, view switching, clearing and undo. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44042312699) · [Screenshots](https://github.com/qtaghdi/Vertactics/actions/runs/44042312699/artifacts/14310001845) |
 | Local strategy draft | Verified manual saving, reloading, restoring and editing an ability with its reference. Empty and malformed storage leave the workspace usable. Multiple drafts and autosave remain open in Phase 7. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44043379399) · [Restored editor screenshot](https://github.com/qtaghdi/Vertactics/actions/runs/44043379399/artifacts/14310311989) |
 | Hero sightlines | 50 unit tests and 21 Chromium scenarios passed. Checked the first blocking surface, an elevated clear ray, blocked overlay in both views and target reset. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44044442148) · [2D and 3D screenshots](https://github.com/qtaghdi/Vertactics/actions/runs/44044442148/artifacts/14311166558) |
+| Terrain point sightlines | 50 unit tests and 22 Chromium scenarios passed. Verified a blocked wall, low cover, a clear elevation change, view switching and clearing the probe. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44045214843) · [Browser screenshots](https://github.com/qtaghdi/Vertactics/actions/runs/44045214843/artifacts/14311187263) |
