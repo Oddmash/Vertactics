@@ -12,7 +12,8 @@ test('renders and manipulates the same elevated terrain in both views', async ({
   const twoD = page.getByRole('button', { name: '2D 탑다운' });
   const reset = page.getByRole('button', { name: '시점 초기화' });
   const inspector = page.getByRole('complementary', { name: '지형 정보' });
-  await expect(threeD).toHaveAttribute('aria-pressed', 'true');
+  await expect(twoD).toHaveAttribute('aria-pressed', 'true');
+  await threeD.click();
   await expect(canvas).toBeVisible();
   await expect(page.getByText('WebGL 2를 사용할 수 없어', { exact: false })).toBeHidden();
   await page.getByRole('button', { name: '서쪽 고지대 +4 u' }).click();
@@ -130,7 +131,7 @@ test('places and moves a hero across views, then undoes and redoes elevation cha
     box.y + box.height / 2 + z / unitsPerPixel,
   );
 
-  await page.getByRole('button', { name: '배치 시작' }).click();
+  await page.getByRole('button', { name: '지도에서 위치 선택' }).click();
   await expect(canvas).toHaveCSS('cursor', 'crosshair');
   await clickWorld(6, -8.6);
   await expect(page.getByText('배치할 지면을 클릭하세요.')).toBeVisible();
@@ -261,7 +262,7 @@ test('snaps a placement, locks edits, and keeps hidden layers in the strategy', 
   const canvas = page.getByTestId('viewport').locator('canvas');
   await expect(canvas).toHaveAttribute('data-view-mode', '2d');
   const inspector = page.getByRole('complementary', { name: '지형 정보' });
-  const place = page.getByRole('button', { name: '배치 시작' });
+  const place = page.getByRole('button', { name: '지도에서 위치 선택' });
   await page.getByRole('checkbox', { name: '격자 스냅' }).check();
   await place.click();
   await expect(canvas).toHaveCSS('cursor', 'crosshair');
@@ -308,7 +309,7 @@ test('picks stacked floors and places and selects heroes in both views', async (
   const canvas = page.getByTestId('viewport').locator('canvas');
   const inspector = page.getByRole('complementary', { name: '지형 정보' });
   const layer = page.getByLabel('표시 층');
-  const place = page.getByRole('button', { name: '배치 시작' });
+  const place = page.getByRole('button', { name: '지도에서 위치 선택' });
   await page.getByRole('button', { name: '2D 탑다운' }).click();
   await expect(canvas).toHaveAttribute('data-view-mode', '2d');
   const box = await canvas.boundingBox();
@@ -366,7 +367,7 @@ test('commits a continuous hero drag as one undoable edit', async ({ page }) => 
     const units = Math.max(36 / current.width, 24 / current.height) * 1.22;
     return [current.x + current.width / 2 + x / units, current.y + current.height / 2 + z / units];
   };
-  await page.getByRole('button', { name: '배치 시작' }).click();
+  await page.getByRole('button', { name: '지도에서 위치 선택' }).click();
   await expect(canvas).toHaveCSS('cursor', 'crosshair');
   await page.mouse.click(...await screen(0, 1));
   await expect(inspector.getByText('0, 0, 1', { exact: true })).toBeVisible();
@@ -395,7 +396,7 @@ test('switches maps without losing plans and registers validated JSON', async ({
   const placements = page.getByRole('list', { name: '배치한 영웅' });
   await page.getByRole('button', { name: '2D 탑다운' }).click();
   await expect(canvas).toHaveAttribute('data-view-mode', '2d');
-  await page.getByRole('button', { name: '배치 시작' }).click();
+  await page.getByRole('button', { name: '지도에서 위치 선택' }).click();
   await expect(canvas).toHaveCSS('cursor', 'crosshair');
   const box = await canvas.boundingBox();
   if (!box) throw new Error('Canvas has no bounds');
@@ -498,7 +499,7 @@ test('places and drags heroes at continuous ramp elevations', async ({ page }) =
   const canvas = page.getByTestId('viewport').locator('canvas');
   await expect(canvas).toHaveAttribute('data-view-mode', '2d');
   await page.getByRole('checkbox', { name: '격자 스냅' }).check();
-  await page.getByRole('button', { name: '배치 시작' }).click();
+  await page.getByRole('button', { name: '지도에서 위치 선택' }).click();
   await expect(canvas).toHaveCSS('cursor', 'crosshair');
   const box = await canvas.boundingBox();
   if (!box) throw new Error('Canvas has no bounds');
@@ -529,7 +530,7 @@ test('opens the approximate Kings Row blockout and places a hero on Point A', as
   const canvas = page.getByTestId('viewport').locator('canvas');
   await expect(canvas).toHaveAttribute('data-view-mode', '2d');
   await page.getByRole('checkbox', { name: '격자 스냅' }).check();
-  await page.getByRole('button', { name: '배치 시작' }).click();
+  await page.getByRole('button', { name: '지도에서 위치 선택' }).click();
   await expect(canvas).toHaveCSS('cursor', 'crosshair');
   const box = await canvas.boundingBox();
   if (!box) throw new Error('Canvas has no bounds');
@@ -553,7 +554,7 @@ test('shows a blocked hero sightline in both map views', async ({ page }, testIn
   const canvas = page.getByTestId('viewport').locator('canvas');
   await expect(canvas).toHaveAttribute('data-view-mode', '2d');
   const add = async (z: number) => {
-    await page.getByRole('button', { name: '배치 시작' }).click();
+    await page.getByRole('button', { name: '지도에서 위치 선택' }).click();
     await expect(canvas).toHaveCSS('cursor', 'crosshair');
     const box = await canvas.boundingBox();
     if (!box) throw new Error('Canvas has no bounds');
@@ -616,7 +617,7 @@ test('shows the selected hero role, official source and abilities', async ({ pag
   await expect(canvas).toHaveAttribute('data-view-mode', '2d');
   await page.getByRole('group', { name: '영웅 역할' }).getByRole('button', { name: '지원' }).click();
   await page.getByRole('group', { name: '영웅 선택' }).getByRole('button', { name: '아나', exact: true }).click();
-  await page.getByRole('button', { name: '배치 시작' }).click();
+  await page.getByRole('button', { name: '지도에서 위치 선택' }).click();
   await expect(canvas).toHaveCSS('cursor', 'crosshair');
   await canvas.click();
   const inspector = page.getByRole('complementary', { name: '지형 정보' });
@@ -633,7 +634,7 @@ test('renders a custom hero ability preview in both map views and hides it on re
   await page.getByRole('button', { name: '2D 탑다운' }).click();
   const canvas = page.getByTestId('viewport').locator('canvas');
   await expect(canvas).toHaveAttribute('data-view-mode', '2d');
-  await page.getByRole('button', { name: '배치 시작' }).click();
+  await page.getByRole('button', { name: '지도에서 위치 선택' }).click();
   await expect(canvas).toHaveCSS('cursor', 'crosshair');
   await canvas.click();
   const inspector = page.getByRole('complementary', { name: '지형 정보' });
@@ -671,7 +672,7 @@ test('places and edits an independent ability across the map views', async ({ pa
     box.y + box.height / 2 + z / unitsPerPixel,
   );
 
-  await page.getByRole('button', { name: '배치 시작' }).click();
+  await page.getByRole('button', { name: '지도에서 위치 선택' }).click();
   await expect(canvas).toHaveCSS('cursor', 'crosshair');
   await clickWorld(0, 0);
   await page.getByText('능력 범위 미리보기', { exact: true }).click();
@@ -713,7 +714,7 @@ test('preserves and edits a custom area duration across map views', async ({ pag
   const placed = page.getByRole('region', { name: '배치한 능력' });
   await page.getByRole('button', { name: '2D 탑다운' }).click();
   await expect(canvas).toHaveAttribute('data-view-mode', '2d');
-  await page.getByRole('button', { name: '배치 시작' }).click();
+  await page.getByRole('button', { name: '지도에서 위치 선택' }).click();
   await expect(canvas).toHaveCSS('cursor', 'crosshair');
   await canvas.click();
   await page.getByText('능력 범위 미리보기', { exact: true }).click();
@@ -750,7 +751,7 @@ test('shows the source and status of a game distance reference separately from m
   const placed = page.getByRole('region', { name: '배치한 능력' });
   await page.getByRole('button', { name: '2D 탑다운' }).click();
   await expect(canvas).toHaveAttribute('data-view-mode', '2d');
-  await page.getByRole('button', { name: '배치 시작' }).click();
+  await page.getByRole('button', { name: '지도에서 위치 선택' }).click();
   await expect(canvas).toHaveCSS('cursor', 'crosshair');
   await canvas.click();
   await page.getByText('능력 범위 미리보기', { exact: true }).click();
@@ -875,7 +876,7 @@ test('reports partial hero exposure above low cover in both map views', async ({
   if (!box) throw new Error('Canvas has no bounds');
   const units = Math.max(36 / box.width, 24 / box.height) * 1.22;
   const place = async (z: number) => {
-    await page.getByRole('button', { name: '배치 시작' }).click();
+    await page.getByRole('button', { name: '지도에서 위치 선택' }).click();
     await expect(canvas).toHaveCSS('cursor', 'crosshair');
     await page.mouse.click(box.x + box.width / 2 - 9 / units, box.y + box.height / 2 + z / units);
   };
@@ -904,7 +905,7 @@ test('switches to hero eye level and restores adjusted 2D and 3D cameras', async
   const heroView = page.getByRole('button', { name: '영웅 시점', exact: true });
   await twoD.click();
   await expect(canvas).toHaveAttribute('data-view-mode', '2d');
-  await page.getByRole('button', { name: '배치 시작' }).click();
+  await page.getByRole('button', { name: '지도에서 위치 선택' }).click();
   await expect(canvas).toHaveCSS('cursor', 'crosshair');
   await canvas.click();
   await expect(heroView).toBeVisible();

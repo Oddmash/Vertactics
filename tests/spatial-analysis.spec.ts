@@ -51,7 +51,7 @@ test('keeps hidden terrain in hero analysis and separates collision and sight fl
   if (!box) throw new Error('Canvas has no bounds');
   const scale = Math.max(36 / box.width, 24 / box.height) * 1.22;
   for (const x of [-6, 6]) {
-    await page.getByRole('button', { name: '배치 시작' }).click();
+    await page.getByRole('button', { name: '지도에서 위치 선택' }).click();
     await expect(canvas).toHaveCSS('cursor', 'crosshair');
     await page.mouse.click(box.x + box.width / 2 + x / scale, box.y + box.height / 2);
   }

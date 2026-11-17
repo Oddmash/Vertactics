@@ -11,7 +11,7 @@ test('switches from a pending sight probe to hero placement without applying bot
   await expect(canvas).toHaveCSS('cursor', 'crosshair');
   await canvas.click();
   await expect(result.getByRole('status')).toHaveText('시야 목표점을 선택하세요.');
-  await page.getByRole('button', { name: '배치 시작' }).click();
+  await page.getByRole('button', { name: '지도에서 위치 선택' }).click();
   await expect(sight).toHaveAttribute('aria-pressed', 'false');
   await expect(result).toHaveCount(0);
   await canvas.click();

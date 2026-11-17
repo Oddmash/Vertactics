@@ -46,3 +46,13 @@ export const getAbilityPatchReference = (heroId: string, abilityId: string) =>
       source: 'https://overwatch.blizzard.com/en-us/news/patch-notes/live/2026/11/',
     }
     : undefined;
+
+const koreanNames: Record<string, Record<string, string>> = {
+  tracer: { 'pulse-pistols': '펄스 쌍권총', blink: '점멸', recall: '시간 역행', 'pulse-bomb': '펄스 폭탄' },
+  ana: { 'biotic-rifle': '생체 소총', 'sleep-dart': '수면총', 'biotic-grenade': '생체 수류탄', 'nano-boost': '나노 강화제' },
+  reinhardt: { 'rocket-hammer': '로켓 해머', charge: '돌진', 'fire-strike': '화염 강타', 'barrier-field': '방벽 방패', earthshatter: '대지분쇄' },
+  genji: { shuriken: '수리검', deflect: '튕겨내기', 'swift-strike': '질풍참', dragonblade: '용검', 'cyber-agility': '사이보그의 날렵함' },
+  kiriko: { 'healing-ofuda': '치유의 부적', kunai: '쿠나이', 'swift-step': '순보', 'protection-suzu': '정화의 방울', 'kitsune-rush': '여우길' },
+};
+
+export const getKoreanAbilityName = (heroId: string, abilityId: string) => koreanNames[heroId]?.[abilityId];

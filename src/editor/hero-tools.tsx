@@ -11,6 +11,7 @@ import type { CatalogueHero, HeroRole } from '../domain/hero-catalogue';
 export const teamNames: Record<Team, string> = { attack: '공격팀', defense: '수비팀' };
 
 export const roleNames: Record<HeroRole, string> = { damage: '공격', tank: '돌격', support: '지원' };
+export const heroDragType = 'application/x-vertactics-hero';
 
 type Props = {
   heroes: HeroPlacement[];
@@ -35,6 +36,7 @@ const HeroTools = ({
   const selectedProfile = heroCatalogue[catalogueId];
   const name = locale === 'en' ? selectedProfile.name : selectedProfile.localizedName;
   const [failedPortraits, setFailedPortraits] = useState<ReadonlySet<string>>(() => new Set());
+  const [team, setTeam] = useState<Team>('attack');
   const portraits: Record<string, string> = portraitUrls;
   const chooseRole = (role: HeroRole) => {
     if (role === selectedProfile.role) return;
@@ -50,14 +52,25 @@ const HeroTools = ({
             onClick={() => chooseRole(role)}>{t(roleNames[role])}</Button>
         ))}
       </div>
+      <label>{t('팀') + ' '}<Select value={team} disabled={locked} onChange={(event) => {
+        if (event.target.value === 'attack' || event.target.value === 'defense') setTeam(event.target.value);
+      }}>
+        {Object.entries(teamNames).map(([id, name]) => <option key={id} value={id}>{t(name)}</option>)}
+      </Select></label>
+      <p className="hero-placement-help">{t('영웅 얼굴을 지도에 끌어 놓으세요.')}</p>
       <div className="hero-roster" role="group" aria-label={t('영웅 선택')}>
         {Object.entries(heroCatalogue).filter(([, hero]) => hero.role === selectedProfile.role).map(([id, hero]) => {
           const label = locale === 'en' ? hero.name : hero.localizedName;
           const portrait = portraits[id];
           return (
-            <Button key={id} className="hero-roster-card" aria-pressed={catalogueId === id}
+            <Button key={id} className="hero-roster-card" aria-pressed={catalogueId === id} draggable={!locked}
+              onDragStart={(event) => {
+                if (locked || !isCatalogueHero(id)) { event.preventDefault(); return; }
+                event.dataTransfer.effectAllowed = 'copy';
+                event.dataTransfer.setData(heroDragType, `${id}:${team}`);
+              }}
               onClick={() => { if (isCatalogueHero(id)) onChooseHero(id); }}>
-              {portrait && !failedPortraits.has(id) ? <img src={portrait} alt="" width="48" height="48" loading="lazy"
+              {portrait && !failedPortraits.has(id) ? <img src={portrait} alt="" width="48" height="48" loading="lazy" draggable={false}
                 referrerPolicy="no-referrer" onError={() => setFailedPortraits((current) => new Set([...current, id]))} />
                 : <span className="hero-portrait-fallback" aria-hidden="true">{label.slice(0, 2)}</span>}
               <span className="hero-roster-name">{label}</span>
@@ -65,22 +78,12 @@ const HeroTools = ({
           );
         })}
       </div>
-      <HeroAbilityReference key={catalogueId} heroId={catalogueId} heroName={name}
+      <HeroAbilityReference key={catalogueId + locale} heroId={catalogueId} heroName={name}
         source={selectedProfile.source} abilities={selectedProfile.abilities} />
       <small className="hero-portrait-credit">{t('영웅 이미지 © Blizzard Entertainment')}</small>
-      <form onSubmit={(event) => {
-        event.preventDefault();
-        const data = new FormData(event.currentTarget);
-        const team = data.get('team');
-        if (team === 'attack' || team === 'defense') onPlace(catalogueId, team);
-      }}>
-        <fieldset className="edit-controls" disabled={locked}>
-        <label>{t('팀') + ' '}<Select name="team">
-          {Object.entries(teamNames).map(([id, name]) => <option key={id} value={id}>{t(name)}</option>)}
-        </Select></label>
-        <Button className="reset-button" type="submit">{t('배치 시작')}</Button>
-        </fieldset>
-      </form>
+      <Button className="reset-button hero-placement-alternative" disabled={locked} onClick={() => onPlace(catalogueId, team)}>
+        {t('지도에서 위치 선택')}
+      </Button>
       {pendingMessage && <div className="pending-edit">
         <p role="status">{pendingMessage}</p>
         <Button type="button" className="reset-button" onClick={onCancel}>{t('취소')}</Button>

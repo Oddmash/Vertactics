@@ -8,7 +8,7 @@ test('recovers unsaved work after reload and keeps the named snapshot intact', a
   const canvas = page.getByTestId('viewport').locator('canvas');
   await page.getByRole('button', { name: '2D 탑다운' }).click();
   await expect(canvas).toHaveAttribute('data-view-mode', '2d');
-  await page.getByRole('button', { name: '배치 시작' }).click();
+  await page.getByRole('button', { name: '지도에서 위치 선택' }).click();
   await expect(canvas).toHaveCSS('cursor', 'crosshair');
   await canvas.click();
   await expect(recovery.getByRole('status')).toHaveText('작업을 자동 저장했습니다.');
@@ -17,7 +17,7 @@ test('recovers unsaved work after reload and keeps the named snapshot intact', a
 
   await page.getByRole('group', { name: '영웅 역할' }).getByRole('button', { name: '지원' }).click();
   await page.getByRole('group', { name: '영웅 선택' }).getByRole('button', { name: '아나', exact: true }).click();
-  await page.getByRole('button', { name: '배치 시작' }).click();
+  await page.getByRole('button', { name: '지도에서 위치 선택' }).click();
   await expect(canvas).toHaveCSS('cursor', 'crosshair');
   const box = await canvas.boundingBox();
   if (!box) throw new Error('Canvas has no bounds');

@@ -679,6 +679,8 @@ ul { padding: 0; list-style: none; }
 }
 
 .hero-roster-card:hover { border-color: var(--color-accent); }
+.hero-roster-card[draggable="true"] { cursor: grab; }
+.hero-placement-help { color: var(--color-muted); font-size: 12px; }
 
 .hero-roster-card[aria-pressed="true"] {
   border-color: var(--color-action);
@@ -697,17 +699,31 @@ ul { padding: 0; list-style: none; }
 .hero-portrait-credit { color: var(--color-muted); font-size: 10px; }
 .hero-ability-reference { display: grid; gap: var(--space-sm); }
 .hero-ability-reference h3 { font-size: 13px; }
-.hero-ability-option { flex: 1 1 40%; white-space: normal; min-block-size: var(--size-control); }
+.hero-ability-list { position: relative; }
+.hero-ability-option {
+  inline-size: 44px;
+  min-block-size: 44px;
+  display: grid;
+  place-items: center;
+  padding: var(--space-xs);
+}
+.hero-ability-option img { object-fit: contain; }
+.hero-ability-option[aria-pressed="true"] { border-color: var(--color-action); }
 .hero-ability-detail {
+  position: absolute;
+  inset: 100% 0 auto;
+  z-index: 2;
   display: grid;
   gap: var(--space-xs);
   padding: var(--space-sm);
   background: var(--color-raised);
   border-inline-start: 2px solid var(--color-accent);
+  box-shadow: 0 6px 18px #0008;
   font-size: 12px;
   line-height: 1.5;
 }
 .hero-ability-detail p { color: var(--color-muted); }
-.hero-ability-detail a { color: var(--color-accent); }
+.hero-ability-sources { display: flex; flex-wrap: wrap; gap: var(--space-sm); font-size: 11px; }
+.hero-ability-sources a { color: var(--color-accent); }
 .hero-ability-stat { display: flex; gap: var(--space-sm); }
 .hero-ability-stat dd { color: var(--color-action); }

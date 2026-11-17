@@ -79,6 +79,7 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 - [x] 4.10a Build the schematic Point A map, compare its landmarks with public references and verify it in the editor
 - [ ] 4.10b Verify dimensions, elevations and hero clearance against the live game client
 - [ ] 4.10c Compare the Point A Workshop survey with the editor using the [survey checker](development.md#check-kings-row-point-a-in-the-game-client). The live survey is pending.
+- [ ] 4.10d Survey all 31 competitive maps in the catalogue and build playable 2D layouts. The catalogue links to public overhead references where the source has coverage.
 - [x] 4.11 Verify floor switching, overlapping selection and map registration, editing and import
 - [x] 4.12 Evaluate GLB and glTF and define loading boundaries if needed
 
