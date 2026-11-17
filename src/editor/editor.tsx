@@ -7,7 +7,7 @@ import { measureSegment } from '../domain/measurement';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import type { Annotation } from '../domain/annotation';
 import { rotateTerrain, snapTerrain } from '../domain/terrain-edit';
-import { traceSightline } from '../domain/spatial-analysis';
+import { sampleExposure, traceSightline } from '../domain/spatial-analysis';
 import TerrainTools from './terrain-tools';
 import AnnotationTools from './annotation-tools';
 import type { SurfacePick } from './annotation-tools';
@@ -47,6 +47,8 @@ const formatNumber = (value: number) => new Intl.NumberFormat('ko-KR', {
 const formatElevation = (value: number) => `${value > 0 ? '+' : ''}${formatNumber(value)} u`;
 
 const probeEyeHeight = 1.6;
+const exposureLabels = { blocked: '완전 차단', partial: '부분 노출', clear: '개방' };
+const sampleLabels = { lower: '하단', middle: '중단', upper: '상단' };
 const sightOrigin = ([x, y, z]: WorldPoint): WorldPoint => [x, y + probeEyeHeight, z];
 
 const Editor = () => {
@@ -229,7 +231,11 @@ const Editor = () => {
   const sightTarget = heroes.find((hero) => hero.id === sightTargetId && hero.id !== selectedHeroId);
   const spatialProbe = !mapEditing && showHeroes && selectedHero && sightTarget ? (() => {
     const start = sightOrigin(selectedHero.position);
-    return { start, ...traceSightline(map.terrain, start, sightOrigin(sightTarget.position)) };
+    return {
+      start,
+      ...traceSightline(map.terrain, start, sightOrigin(sightTarget.position)),
+      exposure: sampleExposure(map.terrain, start, sightTarget.position),
+    };
   })() : null;
   const terrainSight = sightFirst && sightSecond ? (() => {
     const start = sightOrigin(sightFirst);
@@ -530,7 +536,19 @@ const Editor = () => {
                       <option key={hero.id} value={hero.id}>{heroName(hero.heroId)} · {index + 1}</option>
                     ))}
                   </select></label>
-                  {spatialProbe && <p>시야: {spatialProbe.sight?.name ?? '개방'} · 충돌: {spatialProbe.collision?.name ?? '없음'}</p>}
+                  {spatialProbe && <>
+                    <p>시야: {spatialProbe.sight?.name ?? '개방'} · 충돌: {spatialProbe.collision?.name ?? '없음'}</p>
+                    <p>노출: {exposureLabels[spatialProbe.exposure.status]} ({spatialProbe.exposure.visibleCount}/{spatialProbe.exposure.samples.length})</p>
+                    <ul aria-label="높이별 노출">
+                      {spatialProbe.exposure.samples.map(({ part, visible }) => (
+                        <li key={part}>{sampleLabels[part]}: {visible ? '보임' : '가려짐'}</li>
+                      ))}
+                    </ul>
+                    <details>
+                      <summary>노출 판정 기준</summary>
+                      <p>지도 단위 기준 0.45, 1.05, 1.8 높이의 세 점을 검사합니다. 실제 영웅의 자세와 히트박스는 반영하지 않습니다.</p>
+                    </details>
+                  </>}
                 </div>}
                 <fieldset className="hero-actions edit-controls" disabled={locked || !showHeroes}>
                   <button className="reset-button" type="button" onClick={() => setTool({ kind: 'move', id: selectedHero.id })}>이동</button>
