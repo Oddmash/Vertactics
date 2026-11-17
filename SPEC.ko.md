@@ -2,7 +2,7 @@
 
 [English](SPEC.md)
 
-제품 방향은 [PROMPT.md](PROMPT.ko.md), 작업 규칙은 [AGENTS.md](AGENTS.ko.md), 실행과 기여 절차는 [development.md](development.ko.md)를 따른다. 체크박스는 항목에 적힌 범위가 확인됐을 때만 선택한다. 코드 작성, 브라우저 동작, CI 통과, 공개 배포는 각각 확인한다. 항목 ID는 커밋과 검증 기록에서 사용한다.
+제품 방향은 [PROMPT.md](PROMPT.ko.md), 작업 규칙은 [AGENTS.md](AGENTS.md), 실행과 기여 절차는 [development.md](development.ko.md)를 따른다. 체크박스는 항목에 적힌 범위가 확인됐을 때만 선택한다. 코드 작성, 브라우저 동작, CI 통과, 공개 배포는 각각 확인한다. 항목 ID는 커밋과 검증 기록에서 사용한다.
 
 **현재 순서** Phase 4에서 지형 유형, 지도 편집 조작과 층 관리를 확장한다.
 

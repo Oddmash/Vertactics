@@ -8,5 +8,3 @@ description: Advance Vertactics phases using PROMPT.md and SPEC.md, update verif
 3. Check items supported by source inspection, automated checks, or browser evidence according to each item's wording. Record command, result and remaining blocker in `SPEC.md`.
 4. Review the exact files and whitespace before committing. Use a descriptive commit message. Update the approved branch with a fast-forward and verify the resulting SHA and CI run.
 5. Continue with the next unchecked item. When a dependency is unavailable, pursue independent work and preserve the blocked item as unchecked.
-
-[Korean guide](guide.ko.md)

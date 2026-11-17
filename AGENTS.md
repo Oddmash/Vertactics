@@ -1,13 +1,11 @@
 # Vertactics repository instructions
 
-[한국어](AGENTS.ko.md)
-
 ## Start work
 
 - Read [PROMPT.md](PROMPT.md) for product direction and [SPEC.md](SPEC.md) for verification and the next task.
 - Inspect the worktree, current branch, and remote HEAD. Preserve user edits and history. Include only relevant files in each commit.
 - Continue with the next unfinished item. Record environmental blockers in SPEC and proceed with independent work.
-- Write English as the default for repository documentation. Update the linked Korean version in the same change.
+- Write repository documentation in English. Maintain Korean translations for reader-facing documents such as README, the development guide and SPEC. Keep agent instructions and skill guides in English.
 
 ## Implement
 
