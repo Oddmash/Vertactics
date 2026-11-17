@@ -4,6 +4,7 @@
 
 - Read [PROMPT.md](PROMPT.md) for product direction and [SPEC.md](SPEC.md) for verification and the next task.
 - Inspect the worktree, current branch, and remote HEAD. Preserve user edits and history. Include only relevant files in each commit.
+- Branch from the current remote `main` for each independently reviewable change. Use descriptive kebab-case branch names such as `feat/ability-placement` or `ci/pr-verification`.
 - Continue with the next unfinished item. Record environmental blockers in SPEC and proceed with independent work.
 - Write repository documentation in English. Maintain Korean translations for reader-facing documents such as README, the development guide and SPEC. Keep agent instructions and skill guides in English.
 
@@ -21,8 +22,8 @@
 - Run checks affected by each change. At product checkpoints run `pnpm typecheck`, `pnpm lint`, `pnpm test`, `pnpm build`, and `pnpm test:e2e`.
 - For rendering changes, verify the real canvas, both modes, and any affected picking or elevation behavior. Capture the actual application.
 - Check off only verified requirements in SPEC. Record the command or evidence and distinguish local checks, remote CI, and deployment.
-- Make one reviewable change per commit. Verify remote HEAD before updating an approved branch. Use fast-forward updates and preserve any concurrent changes.
-- Confirm the resulting remote SHA and CI. Record blockers and continue independent work.
+- Make one reviewable change per commit. Push the topic branch with a fast-forward and open a PR for each independently reviewable change. Include its SPEC IDs, verification evidence, and known gaps.
+- Leave merging to the user unless they authorize merging that PR. Confirm the PR head SHA and CI result. Record blockers and continue independent work on a separate branch.
 
 | Work | Instructions |
 | --- | --- |
