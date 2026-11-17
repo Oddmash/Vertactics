@@ -38,7 +38,7 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 const isName = (value: unknown): value is string =>
   typeof value === 'string' && value.trim().length > 0;
 
-const isPoint = (value: unknown): value is WorldPoint =>
+export const isWorldPoint = (value: unknown): value is WorldPoint =>
   Array.isArray(value) && value.length === 3 &&
   Array.from(value).every((coordinate) => typeof coordinate === 'number' && Number.isFinite(coordinate));
 
@@ -47,8 +47,8 @@ const parseTerrain = (value: unknown, index: number): Terrain => {
   if (!isRecord(value)) throw new Error(`Invalid ${path}`);
 
   const { id, kind, name, origin, size, steps, risesToward } = value;
-  if (!isName(id) || !isName(name) || !isPoint(origin) ||
-    !isPoint(size) || size.some((dimension) => dimension <= 0) ||
+  if (!isName(id) || !isName(name) || !isWorldPoint(origin) ||
+    !isWorldPoint(size) || size.some((dimension) => dimension <= 0) ||
     size.some((dimension, axis) => !Number.isFinite(dimension + origin[axis]!))) {
     throw new Error(`Invalid bounds or metadata for ${path}`);
   }
