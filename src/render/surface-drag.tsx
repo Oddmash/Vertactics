@@ -1,6 +1,7 @@
 import { useLayoutEffect } from 'react';
 import { useThree } from '@react-three/fiber';
 import { Box3, Raycaster, Vector2, Vector3 } from 'three';
+import { isWalkableTerrain } from '../domain/map';
 import type { Terrain, TerrainBlock, WorldPoint } from '../domain/map';
 import { snapSurfacePoint } from '../domain/surface-snap';
 
@@ -21,7 +22,7 @@ const SurfaceDrag = ({ groups, snap, onPreview, onFinish }: Props) => {
     const hit = new Vector3();
     const boxes = groups.flatMap(({ terrain, blocks }) => blocks.map((block) => ({
       block,
-      walkable: terrain.kind !== 'wall',
+      walkable: isWalkableTerrain(terrain),
       bounds: new Box3().setFromCenterAndSize(new Vector3(...block.center), new Vector3(...block.size)),
     })));
     let pointerId: number | null = null;

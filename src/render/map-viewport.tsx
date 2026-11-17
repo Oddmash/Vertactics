@@ -7,7 +7,7 @@ import { Component, useLayoutEffect, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import type { ThreeEvent } from '@react-three/fiber';
 import { BoxGeometry } from 'three';
-import { mapBounds, terrainBlocks, visibleTerrainForLayer } from '../domain/map';
+import { isWalkableTerrain, mapBounds, terrainBlocks, visibleTerrainForLayer } from '../domain/map';
 import type { MapDefinition, WorldPoint } from '../domain/map';
 import type { HeroPlacement } from '../domain/strategy';
 import tokens from '../theme/tokens.json';
@@ -103,7 +103,7 @@ const MapViewport = ({
             {blocks.map(({ center, size }, index) => {
               const readSurface = ({ point: hit }: Pick<ThreeEvent<MouseEvent>, 'point'>): WorldPoint | null => {
                 const top = center[1] + size[1] / 2;
-                if (terrain.kind === 'wall' || Math.abs(hit.y - top) >= 0.0001) return null;
+                if (!isWalkableTerrain(terrain) || Math.abs(hit.y - top) >= 0.0001) return null;
                 const point: WorldPoint = [hit.x, top, hit.z];
                 return snap ? snapSurfacePoint(point, center, size) : point;
               };
@@ -125,7 +125,7 @@ const MapViewport = ({
                 >
                   <boxGeometry />
                   <meshStandardMaterial
-                    color={tokens.color[terrain.kind]}
+                    color={terrain.material ?? tokens.color[terrain.kind]}
                     roughness={0.92}
                     emissive={tokens.color.accent}
                     emissiveIntensity={selectedTerrainIds.has(terrain.id) ? 0.26 : 0}

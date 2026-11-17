@@ -272,3 +272,8 @@ ul { padding: 0; list-style: none; }
   .workspace { min-height: 0; grid-template-rows: minmax(0, 1fr); }
   .terrain-panel, .inspector-panel { overflow: auto; }
 }
+.terrain-swatch.building { background: var(--color-building); }
+.terrain-swatch.column { background: var(--color-column); }
+.terrain-swatch.railing { background: var(--color-railing); }
+.terrain-swatch.doorway { background: var(--color-doorway); }
+.terrain-swatch.drop-zone { background: var(--color-drop-zone); }

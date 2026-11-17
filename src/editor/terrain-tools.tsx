@@ -31,6 +31,10 @@ const TerrainTools = ({ map, selected, selectedCount, undoable, redoable, onSave
     const vector = (prefix: string): WorldPoint => [
       Number(data.get(prefix + 'X')), Number(data.get(prefix + 'Y')), Number(data.get(prefix + 'Z')),
     ];
+    const property = (key: string) => {
+      const value = data.get(key);
+      return value === 'on' ? true : value === 'off' ? false : undefined;
+    };
     onSave({
       id: selected.id,
       name: data.get('name'),
@@ -40,6 +44,10 @@ const TerrainTools = ({ map, selected, selectedCount, undoable, redoable, onSave
       layerId: data.get('layer') || undefined,
       steps: Number(data.get('steps')),
       risesToward: data.get('rises'),
+      walkable: property('walkable'),
+      collision: property('collision'),
+      blocksSight: property('blocksSight'),
+      material: String(data.get('material') ?? '').trim() || undefined,
     });
   };
 
@@ -111,6 +119,20 @@ const TerrainTools = ({ map, selected, selectedCount, undoable, redoable, onSave
             <label>상승 방향 <select name="rises" defaultValue={selected.kind === 'stairs' ? selected.risesToward : '+x'}>
               {['+x', '-x', '+z', '-z'].map((axis) => <option key={axis}>{axis}</option>)}
             </select></label>
+          </fieldset>
+          <fieldset className="edit-controls terrain-properties">
+            <legend>지형 속성</legend>
+            {[
+              { key: 'walkable', label: '이동 가능' },
+              { key: 'collision', label: '충돌' },
+              { key: 'blocksSight', label: '시야 차단' },
+            ].map(({ key, label }) => {
+              const value = selected[key as 'walkable' | 'collision' | 'blocksSight'];
+              return <label key={key}>{label} <select name={key} defaultValue={value === undefined ? '' : value ? 'on' : 'off'}>
+                <option value="">기본값</option><option value="on">켜기</option><option value="off">끄기</option>
+              </select></label>;
+            })}
+            <label>재질 색상 <input name="material" pattern="#[0-9a-fA-F]{6}" defaultValue={selected.material ?? ''} /></label>
           </fieldset>
           <button type="submit" className="reset-button">블록 저장</button>
         </form>

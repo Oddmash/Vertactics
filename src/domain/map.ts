@@ -1,4 +1,4 @@
-export const terrainKinds = ['floor', 'wall', 'platform', 'stairs'] as const;
+export const terrainKinds = ['floor', 'wall', 'platform', 'stairs', 'building', 'column', 'railing', 'doorway', 'drop-zone'] as const;
 
 export type TerrainKind = (typeof terrainKinds)[number];
 export type WorldPoint = [x: number, y: number, z: number];
@@ -7,6 +7,10 @@ type TerrainBase = {
   id: string;
   name: string;
   layerId?: string;
+  walkable?: boolean;
+  collision?: boolean;
+  blocksSight?: boolean;
+  material?: string;
   origin: WorldPoint;
 };
 
@@ -55,21 +59,30 @@ const parseTerrain = (value: unknown, index: number): Terrain => {
   const path = `terrain[${index}]`;
   if (!isRecord(value)) throw new Error(`Invalid ${path}`);
 
-  const { id, kind, name, origin, size, steps, risesToward, layerId } = value;
+  const { id, kind, name, origin, size, steps, risesToward, layerId, walkable, collision, blocksSight, material } = value;
   if (!isName(id) || !isName(name) || (layerId !== undefined && !isName(layerId)) || !isWorldPoint(origin) ||
     !isWorldPoint(size) || size.some((dimension) => dimension <= 0) ||
-    size.some((dimension, axis) => !Number.isFinite(dimension + origin[axis]!))) {
+    size.some((dimension, axis) => !Number.isFinite(dimension + origin[axis]!)) ||
+    (walkable !== undefined && typeof walkable !== 'boolean') ||
+    (collision !== undefined && typeof collision !== 'boolean') ||
+    (blocksSight !== undefined && typeof blocksSight !== 'boolean') ||
+    (material !== undefined && (typeof material !== 'string' || !/^#[0-9a-f]{6}$/i.test(material)))) {
     throw new Error(`Invalid bounds or metadata for ${path}`);
   }
 
-  const layer = layerId === undefined ? {} : { layerId };
-  if (kind === 'floor' || kind === 'wall' || kind === 'platform') {
-    return { id, name, kind, origin, size, ...layer };
-  }
+  const options = {
+    ...(layerId === undefined ? {} : { layerId }),
+    ...(walkable === undefined ? {} : { walkable }),
+    ...(collision === undefined ? {} : { collision }),
+    ...(blocksSight === undefined ? {} : { blocksSight }),
+    ...(material === undefined ? {} : { material }),
+  };
+  const solidKind = terrainKinds.find((item) => item !== 'stairs' && item === kind);
+  if (solidKind && solidKind !== 'stairs') return { id, name, kind: solidKind, origin, size, ...options };
   if (kind === 'stairs' && typeof steps === 'number' &&
     Number.isInteger(steps) && steps >= 2 && steps <= 64 &&
     (risesToward === '+x' || risesToward === '-x' || risesToward === '+z' || risesToward === '-z')) {
-    return { id, name, kind, origin, size, ...layer, steps, risesToward };
+    return { id, name, kind, origin, size, ...options, steps, risesToward };
   }
   throw new Error(`Invalid kind or step settings for ${path}`);
 };
@@ -118,6 +131,26 @@ const blockAt = ([x, y, z]: WorldPoint, size: WorldPoint): TerrainBlock => ({
 
 export const terrainBlocks = (terrain: Terrain): TerrainBlock[] => {
   const { origin, size } = terrain;
+  if (terrain.kind === 'doorway') {
+    const [x, y, z] = origin;
+    const [width, height, depth] = size;
+    const header = height * 0.2;
+    const postHeight = height - header;
+    if (width >= depth) {
+      const post = width * 0.15;
+      return [
+        blockAt(origin, [post, postHeight, depth]),
+        blockAt([x + width - post, y, z], [post, postHeight, depth]),
+        blockAt([x, y + postHeight, z], [width, header, depth]),
+      ];
+    }
+    const post = depth * 0.15;
+    return [
+      blockAt(origin, [width, postHeight, post]),
+      blockAt([x, y, z + depth - post], [width, postHeight, post]),
+      blockAt([x, y + postHeight, z], [width, header, depth]),
+    ];
+  }
   if (terrain.kind !== 'stairs') return [blockAt(origin, size)];
 
   const alongX = terrain.risesToward.endsWith('x');
@@ -134,6 +167,9 @@ export const terrainBlocks = (terrain: Terrain): TerrainBlock[] => {
     return blockAt(stepOrigin, stepSize);
   });
 };
+
+export const isWalkableTerrain = ({ kind, walkable }: Terrain) =>
+  walkable ?? (kind === 'floor' || kind === 'platform' || kind === 'stairs');
 
 export const visibleTerrainForLayer = (terrain: Terrain[], layerId: string) =>
   terrain.filter((item) => !layerId || !item.layerId || item.layerId === layerId);

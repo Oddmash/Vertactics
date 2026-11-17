@@ -72,3 +72,21 @@ describe('terrain geometry', () => {
     expect(topElevation(terrain)).toBe(26);
   });
 });
+
+it('validates terrain properties and preserves the doorway opening', () => {
+  const map = parseMap({
+    ...mapJson, layers: undefined,
+    terrain: [{
+      id: 'door', name: 'Door', kind: 'doorway', origin: [0, 0, 0], size: [10, 5, 2],
+      walkable: false, collision: true, blocksSight: true, material: '#173abc',
+    }],
+  });
+  const doorway = map.terrain[0]!;
+  expect(doorway).toMatchObject({ walkable: false, collision: true, blocksSight: true, material: '#173abc' });
+  expect(terrainBlocks(doorway)).toEqual([
+    { center: [0.75, 2, 1], size: [1.5, 4, 2] },
+    { center: [9.25, 2, 1], size: [1.5, 4, 2] },
+    { center: [5, 4.5, 1], size: [10, 1, 2] },
+  ]);
+  expect(() => parseMap({ ...map, terrain: [{ ...doorway, material: 'url()' }] })).toThrow(/metadata/);
+});

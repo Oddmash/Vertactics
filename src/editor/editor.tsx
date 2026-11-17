@@ -23,6 +23,11 @@ const kindNames: Record<TerrainKind, string> = {
   wall: '벽',
   platform: '고지대',
   stairs: '계단',
+  building: '건물',
+  column: '기둥',
+  railing: '난간',
+  doorway: '출입구',
+  'drop-zone': '낙하 구역',
 };
 const viewNames: Record<ViewMode, string> = { '2d': '2D 탑다운', '3d': '3D 원근' };
 const viewportModes = ['2d', '3d'] as const;
