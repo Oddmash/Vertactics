@@ -1,142 +1,137 @@
-# Vertactics 구현 명세
+# Vertactics implementation checklist
 
-제품 방향은 [PROMPT.md](PROMPT.md), 작업 규칙은 [AGENTS.md](AGENTS.md), 실행과 기여 절차는 [development.md](development.md)를 따른다. 체크박스는 항목에 적힌 범위가 확인됐을 때만 선택한다. 코드 작성, 브라우저 동작, CI 통과, 공개 배포는 각각 확인한다. 항목 ID는 커밋과 검증 기록에서 사용한다.
+[한국어](SPEC.ko.md)
 
-**현재 순서** Phase 3에서 웨이포인트 편집과 마커 도구를 구현한다. 남은 배치 입력과 겹친 지형 케이스는 이 단계의 브라우저 검증에 포함한다.
+See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [the development guide](development.md). Check an item when its stated scope has been verified. Track implementation, browser behavior, CI and deployment separately.
 
-## Phase 1 · 프로젝트 초기화
+**Current phase** Phase 3. Verify tactical routes and markers in both views, then continue with remaining placement and input checks.
 
-- [x] 1.01 Vertactics 이름과 개인 GitHub 저장소 `qtaghdi/Vertactics` 확인
-- [x] 1.02 OW2Plant, StatBanana, OWScouter, Overwatch Tactical Board, Sightline 공개 기능 비교
-- [x] 1.03 React, TypeScript, Vite, Three.js, R3F 의존성과 스크립트 정의
-- [x] 1.04 도메인·맵·렌더러·편집기·토큰·테스트 디렉터리 구성
-- [x] 1.05 strict TypeScript, ESLint, Vitest, Playwright 설정 작성
-- [x] 1.06 GitHub Actions 설치·타입·린트·단위·빌드·E2E 단계 작성
-- [x] 1.07 JSON 색상·간격·타이포·모서리 토큰과 독립 편집기 스타일 작성
-- [x] 1.08 맵 스키마 버전, 지형 ID, 위치·크기 검증 및 오류 처리
-- [x] 1.09 서비스 README, 개발 및 기여 문서, AGENTS, 단계 명세와 저장소 스킬 작성
-- [x] 1.10 pnpm 의존성 설치 및 lockfile 커밋, CI에서 frozen lockfile 사용
-- [x] 1.11a 설치·실행·테스트와 기여 절차 작성
-- [ ] 1.11b 이슈·PR 템플릿과 릴리스 방식 정리
-- [ ] 1.12 프로젝트 소스 라이선스 결정 및 제3자 자산 고지 정리
+## Phase 1 · Project setup
 
-## Phase 2 · 렌더링 기반
+- [x] 1.01 Confirm the project name and personal GitHub repository
+- [x] 1.02 Compare the public features of five existing tools
+- [x] 1.03 Declare React, TypeScript, Vite, Three.js, R3F and project scripts
+- [x] 1.04 Set up directories for domain logic, maps, rendering, editor, tokens and tests
+- [x] 1.05 Configure strict TypeScript, ESLint, Vitest and Playwright
+- [x] 1.06 Set up Actions for installation, type checks, lint, unit tests, build and E2E
+- [x] 1.07 Create JSON tokens for colour, spacing, typography and radii
+- [x] 1.08 Validate map schema version, terrain IDs, positions and dimensions
+- [x] 1.09 Write product README, contributor guide, agent instructions and phase checklist
+- [x] 1.10 Commit the pnpm lockfile and verify a frozen CI install
+- [x] 1.11a Document installation, execution, testing and contribution
+- [ ] 1.11b Prepare issue and PR templates and a release process
+- [ ] 1.12 Choose a source licence and document third-party assets
 
-- [x] 2.01 단일 Y-up 월드 좌표계와 북쪽 −Z 규약 구현
-- [x] 2.02 테스트 JSON에 바닥·벽·고지대·계단과 두 높이 연결 작성
-- [x] 2.03 최소 모서리→메시 중심 변환과 지도 경계 계산 검증
-- [x] 2.04 ±X·±Z 계단 방향과 마지막 디딤면 높이 검증
-- [x] 2.05 R3F 장면, 지형 메시·윤곽선·재질·그리드 코드 작성
-- [x] 2.06 2D 직교·3D 원근 카메라와 보기 전환 코드 작성
-- [x] 2.07 2D 팬·줌, 3D 오비트·팬·줌, 시점 초기화 입력 코드 작성
-- [x] 2.08 지형 목록·선택·좌표·높이 패널과 WebGL 안내 화면 작성
-- [x] 2.09 Chromium 시나리오와 2D/3D 캡처 코드 작성
-- [x] 2.10 전체 타입 검사·ESLint·단위 테스트·프로덕션 빌드 통과
-- [x] 2.11 Chromium에서 두 모드의 캔버스와 바닥·벽·고지대·계단 시각 확인
-- [x] 2.12 Chromium에서 팬·오비트·휠·시점 초기화, 선택과 높이 유지 검증
-- [x] 2.13 실제 2D/3D 화면 캡처와 브라우저·해상도 기록
-- [x] 2.14 원격 기본 브랜치 및 첫 CI 결과 확인
+## Phase 2 · Rendering foundation
 
-## Phase 3 · 기본 전술 편집기
+- [x] 2.01 Implement a shared Y-up coordinate system with −Z north
+- [x] 2.02 Create demo terrain with floors, walls, platforms and stairs
+- [x] 2.03 Verify mesh centres and map bounds
+- [x] 2.04 Verify stair direction and top elevation on ±X and ±Z
+- [x] 2.05 Build R3F terrain geometry, outlines, materials and grid
+- [x] 2.06 Implement top-down orthographic and perspective cameras
+- [x] 2.07 Implement pan, zoom, orbit and reset
+- [x] 2.08 Implement terrain lists, selection, coordinate and elevation details and WebGL fallback
+- [x] 2.09 Add Chromium scenarios and 2D and 3D captures
+- [x] 2.10 Pass full type checks, lint, unit tests and production build
+- [x] 2.11 Verify floors, walls, platforms and stairs in both Chromium views
+- [x] 2.12 Verify pan, orbit, wheel zoom, reset and selection and elevation retention
+- [x] 2.13 Record real 2D and 3D captures, browser and viewport size
+- [x] 2.14 Verify the remote default branch and first CI run
 
-- [x] 3.01 버전이 있는 전략 문서, 팀·영웅 참조·배치 엔티티의 타입과 파서
-- [x] 3.02 입력·영속 전략·카메라 상태 분리 및 전략 초기 상태 생성
-- [x] 3.03 파서에서 버전·팀·좌표·방향·중복 ID 검증
-- [x] 3.04 공격팀·수비팀의 색과 명시적 텍스트·기호
-- [x] 3.05 영웅 선택 및 유효한 지형 표면에 배치
-- [x] 3.06a 2D 배치·고지대 이동과 3D 방향 변경·삭제 시나리오
-- [ ] 3.06b 두 모드에서 개별 배치·이동, 지도상의 영웅 직접 선택
-- [x] 3.07a 바닥·고지대 표면의 Y 적용 및 벽 배치 거부
-- [ ] 3.07b 계단 디딤면 배치와 층이 겹친 표면 선택 검증
-- [x] 3.08 선택 상태, 좌표·높이·방향·팀 속성 패널과 팀 변경
-- [ ] 3.09 전술 경로의 웨이포인트 또는 화살표 추가·수정·삭제
-- [ ] 3.10 선·원·영역·메모 마커 편집 및 화면 표현
-- [ ] 3.11 스냅·잠금·표시 전환과 키보드로 실행 가능한 핵심 액션
-- [x] 3.12a 배치·수정·삭제의 Undo/Redo 도메인 테스트
-- [x] 3.12b 편집기 Undo/Redo로 배치 높이 복원
-- [ ] 3.12c 연속 드래그의 단일 히스토리 처리 검증
-- [x] 3.13 2D 배치→고지대 이동→3D 전환 시 팀·좌표·높이 유지 E2E
+## Phase 3 · Basic tactical editor
 
-## Phase 4 · 맵 시스템
+- [x] 3.01 Version strategy documents and validate teams, heroes and placements
+- [x] 3.02 Separate input, strategy and camera state and initialize a draft
+- [x] 3.03 Validate versions, teams, coordinates, headings and duplicate IDs
+- [x] 3.04 Provide team colours and explicit team text and shapes
+- [x] 3.05 Select a hero and place it on a valid surface
+- [x] 3.06a Verify 2D placement and high ground movement, then 3D rotation and deletion
+- [ ] 3.06b Verify placement, movement and direct hero picking separately in both views
+- [x] 3.07a Apply floor and high-ground elevation and reject wall placement
+- [ ] 3.07b Verify stair tread placement and overlapping surfaces
+- [x] 3.08 Show selection, coordinates, elevation, heading and team controls
+- [ ] 3.09 Add, edit and delete tactical routes and waypoints
+- [ ] 3.10 Edit and display line, circle, area and note markers
+- [ ] 3.11 Support snapping, locking, visibility and keyboard actions
+- [x] 3.12a Unit test undo and redo for placement, update and deletion
+- [x] 3.12b Verify undo and redo restores placement elevation in the editor
+- [ ] 3.12c Verify that a continuous drag creates a single history entry
+- [x] 3.13 Verify that team, position and elevation survive switching to 3D
 
-- [ ] 4.01 맵 메타데이터, 단계별 검증 상태, 멀티맵 등록 및 선택
-- [ ] 4.02 레이어 ID, 층 표현, 현재 층 이외의 지형 가시성·선택 정책
-- [ ] 4.03 블록 이외의 경사로, 건물, 기둥, 난간, 출입구와 낙하 영역 확장
-- [ ] 4.04 지형 회전·크기·재질·이동 가능·충돌·시야 차단 데이터 추가
-- [ ] 4.05 맵 편집기 모드와 전술 편집기 간 렌더러 공유
-- [ ] 4.06 맵 생성·불러오기, 블록 추가·삭제·복제와 다중 선택
-- [ ] 4.07 이동·회전·스케일·높이·그리드 스냅·속성 편집과 레이어 관리
-- [ ] 4.08 Undo/Redo, JSON 가져오기·내보내기, 스키마 마이그레이션과 미리보기
-- [ ] 4.09 King's Row 1거점의 승인 가능한 참고자료와 출처 기록
-- [ ] 4.10 주요 진입로·고지대·엄폐·목표·층·배치 영역 구현 및 게임 화면 대조
-- [ ] 4.11 층 전환, 겹친 구조물 선택, 추가 맵 등록·편집·가져오기 검증
-- [ ] 4.12 선택적 GLB/glTF 도입 필요성과 로딩 경계 검토
+## Phase 4 · Map system
 
-## Phase 5 · 영웅 및 스킬
+- [ ] 4.01 Add metadata, verification states, map registration and selection
+- [ ] 4.02 Add layers and selection and visibility rules for non-active floors
+- [ ] 4.03 Support ramps, buildings, columns, railings, openings and drop zones
+- [ ] 4.04 Add terrain rotation, materials, walkability, collision and sight blockers
+- [ ] 4.05 Share the renderer between map editing and tactical planning
+- [ ] 4.06 Create and open maps, add, delete and duplicate blocks, and select multiple objects
+- [ ] 4.07 Move, rotate, scale, snap and edit terrain and manage layers
+- [ ] 4.08 Support undo and redo, JSON import and export, schema migration and preview
+- [ ] 4.09 Record acceptable references for the first objective of King's Row
+- [ ] 4.10 Build and compare approaches, high ground, cover, objective, floors and placement areas
+- [ ] 4.11 Verify floor switching, overlapping selection and map registration, editing and import
+- [ ] 4.12 Evaluate GLB and glTF and define loading boundaries if needed
 
-- [ ] 5.01 공식 출처 기준 영웅 ID·이름·역할·능력 정의와 갱신 기준
-- [ ] 5.02 아이콘 이용 조건 확인과 중립 대체 표시
-- [ ] 5.03 방향·범위·형태·근거·검증 상태를 포함한 스킬 정의
-- [ ] 5.04 원·구·원뿔·선·사각형·방향 벡터·지면 영역·지속 영역 표현
-- [ ] 5.05 스킬 선택·배치·이동·회전·표시 제어·삭제
-- [ ] 5.06 2D/3D에서 스킬 위치·방향·높이 공유
-- [ ] 5.07 검증 수치와 사용자 정의·추정 범위 표시 구분
-- [ ] 5.08 도형 계산 단위 테스트 및 브라우저 스킬 편집 검증
+## Phase 5 · Heroes and abilities
 
-## Phase 6 · 공간 분석
+- [ ] 5.01 Source hero IDs, roles, names, abilities and update criteria
+- [ ] 5.02 Confirm icon rights and create neutral fallbacks
+- [ ] 5.03 Model ability direction, range, shape, source and verification state
+- [ ] 5.04 Render circles, spheres, cones, lines, rectangles, vectors and areas
+- [ ] 5.05 Select, place, move, turn, hide and remove abilities
+- [ ] 5.06 Share ability position, direction and elevation in 2D and 3D
+- [ ] 5.07 Distinguish verified numbers from custom and estimated ranges
+- [ ] 5.08 Unit test shapes and verify ability editing in a browser
 
-- [ ] 6.01 지형·영웅과 Raycaster의 입력 및 차단 기준 연결
-- [ ] 6.02 영웅 간·임의 지점 간 시야, 벽·엄폐·고저차 판정과 경로 표시
-- [ ] 6.03 부분 노출 샘플링 평가와 단순화된 시야 모델의 한계 안내
-- [ ] 6.04 수평 거리·3D 직선 거리·높이 차이·지점 높이·경로 길이 표시
-- [ ] 6.05 선택 영웅 시점으로 진입 및 원래 카메라 복귀
-- [ ] 6.06 차단·비차단·경계·계단 시나리오의 단위 및 통합 검증
-- [ ] 6.07 레이캐스트 비용 측정 및 데이터에 근거한 BVH 도입 판단
+## Phase 6 · Spatial analysis
 
-## Phase 7 · 전략 기능
+- [ ] 6.01 Connect terrain and heroes to raycasting and blocking rules
+- [ ] 6.02 Show sightlines and test walls, cover and elevation between units or arbitrary points
+- [ ] 6.03 Evaluate partial exposure and describe model limitations
+- [ ] 6.04 Show horizontal and straight-line distances, elevations and route length
+- [ ] 6.05 Switch to a selected hero view and restore the original camera
+- [ ] 6.06 Test blocked and clear paths, boundaries and stairs
+- [ ] 6.07 Measure raycasting and decide whether to use a BVH
 
-- [ ] 7.01 단계·시간·영웅 위치·스킬 이벤트·지속 시간 모델
-- [ ] 7.02 단계 추가·삭제·편집과 2D/3D 공통 재생·일시정지·탐색·속도 조절
-- [ ] 7.03 위치·방향 보간, 재생 종료 경계와 중간 시점 복원 검증
-- [ ] 7.04 IndexedDB 전략 생성·목록·최근 작업·저장·재개·복제·삭제
-- [ ] 7.05 자동 저장, 오류 상태, 닫기 시 보존, 버전 마이그레이션·손상 데이터 처리
-- [ ] 7.06 JSON 내보내기·검증된 가져오기·PNG 내보내기
-- [ ] 7.07 공유 URL·크기 한계·읽기 전용 뷰·복제와 공유 문서 입력 검증
-- [ ] 7.08 저장→새로고침→복원→내보내기→재가져오기 E2E
+## Phase 7 · Strategy tools
 
-## Phase 8 · 제품 완성도
+- [ ] 7.01 Model phases, timing, hero positions, abilities and durations
+- [ ] 7.02 Edit phases and share playback, pause, seeking and speed controls across views
+- [ ] 7.03 Verify interpolation, playback boundaries and restoration at an intermediate point
+- [ ] 7.04 Create, list, reopen, clone and delete strategies in IndexedDB
+- [ ] 7.05 Handle autosave, errors, close recovery, migration and corrupt documents
+- [ ] 7.06 Support validated JSON import and export and PNG export
+- [ ] 7.07 Support share links, size limits, read-only views, duplication and validation
+- [ ] 7.08 Verify save, reload, restore, export and re-import end to end
 
-- [ ] 8.01 서비스 소개·맵 선택·전략 목록·설정·도움말 화면
-- [ ] 8.02 첫 사용 안내, 빈 상태, 오류·복구 상태와 조작 도움말
-- [ ] 8.03 편집기 패널·브라우저 단축키·드래그 앤 드롭·컨텍스트 메뉴 점검
-- [ ] 8.04 한국어·영어 UI, 접근성 이름, 날짜·숫자 포맷 검증
-- [ ] 8.05 키보드 탐색·포커스·대비·스크린 리더·색상 외 팀 표시·모션 감소 검증
-- [ ] 8.06 데스크톱 작업 흐름과 모바일 조회·터치 UI, 겹침과 줄바꿈 확인
-- [ ] 8.07 독립 브랜드·파비콘·공유 카드·비공식 팬 프로젝트 고지
+## Phase 8 · Product polish
 
-## Phase 9 · 품질 및 배포
+- [ ] 8.01 Build product, map, strategy, settings and help screens
+- [ ] 8.02 Add onboarding, empty states, errors, recovery and input help
+- [ ] 8.03 Check panels, shortcuts, drag and drop and context menus
+- [ ] 8.04 Verify Korean and English UI, accessible names, dates and numbers
+- [ ] 8.05 Verify keyboard, focus, contrast, screen readers, team cues and reduced motion
+- [ ] 8.06 Check desktop workflows and touch layouts for clipping and wrapping
+- [ ] 8.07 Ship independent branding, favicon, social card and fan-project notice
 
-- [ ] 9.01 좌표·높이·거리·시야·스킬·직렬화·히스토리·타임라인 단위 테스트
-- [ ] 9.02 맵·층·영웅·스킬·시야·저장 흐름 통합 및 전체 E2E
-- [ ] 9.03 Chromium·Firefox·WebKit과 WebGL 미지원 안내 검증
-- [ ] 9.04 장면 품질, 클릭 판정, 패널, 오브젝트 가림, 반응형 시각 점검
-- [ ] 9.05 측정 환경과 draw call·메모리·입력 반응·로딩 기준 기록
-- [ ] 9.06 측정에 따라 인스턴싱·기하와 재질 재사용·리소스 해제·지연 로딩 적용
-- [ ] 9.07 최종 실제 캡처와 사용법·기술 구조·기여·라이선스를 README에 반영
-- [ ] 9.08 원격 CI 통과, 프로덕션 빌드 및 정적 경로·오류 페이지·메타데이터 확인
-- [ ] 9.09 승인된 공개 URL에 배포하고 WebGL·콘솔·주요 사용자 흐름 재검증
+## Phase 9 · Quality and release
 
-## 검증 기록
+- [ ] 9.01 Unit test coordinate, elevation, distance, visibility, abilities, serialization, history and timeline logic
+- [ ] 9.02 Integrate map, floor, hero, ability, sightline and saving flows and test end to end
+- [ ] 9.03 Verify Chromium, Firefox, WebKit and WebGL fallback
+- [ ] 9.04 Review render quality, picking, panels, occlusion and responsive layouts
+- [ ] 9.05 Record measurement environment, draw calls, memory, input latency and load performance
+- [ ] 9.06 Apply instancing, resource reuse, disposal and lazy loading where measured
+- [ ] 9.07 Add real captures to the product README and link usage, development, contribution and licence information
+- [ ] 9.08 Verify CI, production build, static paths, errors and metadata
+- [ ] 9.09 Deploy to an approved public URL and check WebGL, console and core flows
 
-| 기준 | 결과 |
+## Verification record
+
+| Checkpoint | Result |
 | --- | --- |
-| Phase 1–2 초기 구현 | Vitest 8개 통과. 도메인·테스트 설정 타입 검사 통과. Playwright 시나리오 1개 등록 확인. |
-| 전체 검증 | npm 레지스트리 DNS 및 오프라인 캐시 누락으로 설치 차단. 로컬 포트 바인딩도 제한됨. 전체 타입·린트·빌드·브라우저·캡처는 미확인. |
-| Phase 2 원격 CI #1 | 설치·전체 타입 검사 통과. 의도적으로 만든 sparse 배열 테스트 리터럴에서 ESLint 실패. |
-| Phase 3 전략 문서 | 총 19개 Vitest 통과. 전략 도메인 타입 검사 통과. 편집기 연결은 대기 중. |
-| CI #4, Chromium 158 · 1440 × 900 | 설치·전체 타입·린트·Vitest 19개·Vite 빌드·브라우저 시나리오 1개 통과. 2D와 3D의 실제 캡처를 저장. [실행과 캡처](https://github.com/qtaghdi/Vertactics/actions/runs/44027542773) |
-| Phase 3 히스토리 | Vitest 총 22개 통과. 추가·수정·삭제·Undo/Redo 및 무효 변경을 검증. |
-| CI #5 | 커밋한 lockfile로 frozen 설치, 타입·린트·테스트·빌드와 Chromium 통과. |
-| 확장 지형 클릭 검증 | 정확히 디딤면 경계에 있던 좌표에서 계단 클릭 검증 실패. 다음 검증은 디딤면 중앙을 사용. |
-| CI #11 | Chromium에서 바닥 배치, 벽 배치 거부, Y=4 고지대로 이동, 3D 전환, Undo/Redo, 회전·팀 전환·삭제 통과. 지형 윤곽선이 계단 클릭을 가로챈 문제는 별도 수정. |
-| CI #13, Chromium 158 · 1440 × 900 | frozen 설치, 전체 타입·린트, Vitest 22개, 프로덕션 빌드 및 Chromium 2개 통과. 네 지형 선택, 영웅의 팀·좌표·높이 유지, Undo/Redo 확인. [실제 화면 3개](https://github.com/qtaghdi/Vertactics/actions/runs/44028807455/artifacts/14304237794) |
+| Initial rendering work | Local map and strategy unit checks ran through development. GitHub Actions later verified frozen installation, type checks, lint and the production build. |
+| CI #13 | Chromium 158 at 1440 × 900. 22 unit tests and two Chromium scenarios passed. Checked terrain picking, hero placement, team, coordinates, elevation and undo/redo. [Screenshots](https://github.com/qtaghdi/Vertactics/actions/runs/44028807455/artifacts/14304237794) |
+| Routes and markers | 24 local unit tests passed. The route editing scenario is queued for Chromium CI. |

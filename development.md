@@ -1,17 +1,19 @@
-# Vertactics 개발 및 기여
+# Develop and contribute to Vertactics
 
-## 시작하기
+[한국어](development.ko.md)
 
-Node.js 24와 `package.json`에 지정된 pnpm을 사용합니다.
+## Run locally
+
+Use Node.js 24 and the pnpm version declared in `package.json`.
 
 ```sh
 pnpm install --frozen-lockfile
 pnpm dev
 ```
 
-Vite가 터미널에 출력한 로컬 주소를 엽니다. 지도 렌더링에는 WebGL 2를 지원하는 브라우저가 필요합니다.
+Open the local address printed by Vite. The map needs a browser with WebGL 2 support.
 
-## 검증하기
+## Run checks
 
 ```sh
 pnpm typecheck
@@ -22,22 +24,20 @@ pnpm exec playwright install chromium
 pnpm test:e2e
 ```
 
-Playwright는 `dist`의 프로덕션 빌드를 프리뷰 서버로 실행합니다. 화면 파일은 `test-results` 아래에 저장되며, GitHub Actions 실행 페이지에서는 `editor-screenshots` 아티팩트로 받을 수 있습니다.
+Playwright serves the production build from `dist`. Screenshots appear in `test-results` locally and as the `editor-screenshots` artifact on the GitHub Actions run.
 
-## 코드 둘러보기
-
-| 경로 | 역할 |
+| Path | Purpose |
 | --- | --- |
-| `src/domain` | 맵·전략 검증, 월드 좌표·지형 기하, 전략 히스토리 |
-| `src/map` | 테스트 맵 JSON |
-| `src/render` | 지형 장면, 카메라, 선택 판정 |
-| `src/editor` | 편집기 UI와 상호작용 상태 |
-| `src/theme` | JSON 디자인 토큰과 스타일 |
-| `tests` | Chromium 사용 흐름 검증 |
+| `src/domain` | Map and strategy validation, coordinates, terrain geometry, and history |
+| `src/map` | Demo map data |
+| `src/render` | Terrain scene, cameras, and map picking |
+| `src/editor` | Editor UI and interaction state |
+| `src/theme` | JSON design tokens and styles |
+| `tests` | Chromium scenarios |
 
-## 기여하기
+## Contribute
 
-1. [SPEC.md](SPEC.md)에서 변경 범위와 검증 항목을 확인합니다.
-2. [AGENTS.md](AGENTS.md)의 개발 규칙에 따라 변경하고 관련 테스트를 실행합니다.
-3. 지형과 편집기 상호작용을 바꿨다면 브라우저에서 2D와 3D를 확인합니다.
-4. 변경과 검증 결과를 설명하는 PR을 엽니다. UI 변경에는 해당 화면을 첨부합니다.
+1. Find the relevant requirements and checks in [SPEC.md](SPEC.md).
+2. Follow [AGENTS.md](AGENTS.md) and run the checks affected by your change.
+3. Verify both views in a browser after editing terrain or map interactions.
+4. Open a pull request explaining the change and its verification. Include screenshots for visual changes.

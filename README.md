@@ -1,21 +1,21 @@
 # Vertactics
 
-**오버워치 전장을 위에서 보고, 높낮이는 3D로 확인하세요.**
+[한국어](README.ko.md)
 
-Vertactics는 진입로, 엄폐물, 고지대를 살펴보고 전술을 구상하는 지도 도구입니다. 현재는 바닥, 벽, 계단, 두 높이의 고지대가 있는 가상 테스트 맵을 둘러볼 수 있습니다.
+**Explore Overwatch tactics in 2D and see the elevation in 3D.**
 
-## 지도 둘러보기
+Vertactics is a map tool for planning approaches, cover, and high-ground positions. The current demo uses a fictional training map with walls, stairs, and two levels of high ground.
 
-1. **2D**에서 드래그해 이동하며 지형 배치를 확인합니다.
-2. **3D**에서 드래그해 시점을 회전하고, 우클릭 드래그로 이동하며 계단과 고지대를 살펴봅니다.
-3. 지도나 목록에서 지형을 선택하면 좌표와 높이가 표시됩니다. 보기를 전환해도 지형 선택은 유지됩니다.
+## Explore the map
 
-마우스 휠이나 핀치로 확대·축소할 수 있습니다. 시작 화면으로 돌아가려면 **시점 초기화**를 누르세요.
+1. In **2D**, drag to pan and study the terrain layout.
+2. In **3D**, drag to orbit and right-drag to pan. Scroll or pinch to zoom in either view.
+3. Select a piece of terrain in the map or list to see its coordinates and elevation. The selection carries across both views.
 
-## 영웅 배치하기
+## Plan a play
 
-**영웅 배치**에서 영웅과 팀을 고르고, 지도에서 바닥이나 고지대를 클릭해 배치합니다. 배치한 영웅의 위치와 방향을 바꾸거나 팀을 전환할 수 있습니다. 2D에서 놓은 영웅을 3D에서도 같은 위치와 높이에서 볼 수 있으며, 실행 취소와 다시 실행으로 배치를 비교할 수 있습니다.
+Choose a hero and team, then click a walkable surface to place the hero. You can move, rotate, change teams, or delete a placement. Switch views to inspect the same position and elevation from another angle.
 
-[2D·3D 지도와 영웅 배치 화면](https://github.com/qtaghdi/Vertactics/actions/runs/44028807455/artifacts/14304237794) · [개발 및 기여](development.md)
+[Map and hero placement screenshots](https://github.com/qtaghdi/Vertactics/actions/runs/44028807455/artifacts/14304237794) · [Development and contribution](development.md)
 
-Vertactics는 Blizzard Entertainment와 제휴하지 않은 팬 프로젝트입니다.
+Vertactics is an unofficial fan project and is unaffiliated with Blizzard Entertainment.
