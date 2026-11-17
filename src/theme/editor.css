@@ -264,3 +264,5 @@ ul { padding: 0; list-style: none; }
 .map-catalogue label { display: inline-flex; align-items: center; gap: var(--space-xs); }
 .map-catalogue input { max-width: min(210px, 48vw); }
 .map-catalogue a { display: inline-flex; align-items: center; color: inherit; text-decoration: none; }
+.terrain-tools input { width: 100%; min-width: 0; }
+.terrain-tools fieldset label { display: grid; grid-template-columns: minmax(18px, auto) minmax(0, 1fr); }

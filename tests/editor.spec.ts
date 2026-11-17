@@ -409,3 +409,26 @@ test('switches maps without losing plans and registers validated JSON', async ({
   await page.getByRole('link', { name: '지도 JSON 저장' }).click();
   expect((await download).suggestedFilename()).toBe('custom.json');
 });
+
+test('creates, edits and restores terrain using the shared map view', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: '새 지도', exact: true }).click();
+  await expect(page.getByRole('heading', { name: '새 지도', exact: true })).toBeVisible();
+  const tools = page.getByRole('region', { name: '지도 편집', exact: true });
+  await tools.getByRole('button', { name: '블록 추가' }).click();
+  await tools.getByRole('textbox', { name: '블록 이름' }).fill('연습 벽');
+  await tools.getByLabel('지형 유형').selectOption('wall');
+  await tools.getByRole('group', { name: '크기' }).getByRole('spinbutton', { name: 'Y' }).fill('3');
+  await tools.getByRole('button', { name: '블록 저장' }).click();
+  await expect(page.getByRole('button', { name: /연습 벽 \+3 u/ })).toBeVisible();
+  await tools.getByRole('button', { name: '블록 복제' }).click();
+  const duplicate = page.getByRole('button', { name: /연습 벽 복제/ });
+  await expect(duplicate).toBeVisible();
+  await tools.getByRole('button', { name: '지도 실행 취소' }).click();
+  await expect(duplicate).toHaveCount(0);
+  await tools.getByRole('button', { name: '지도 다시 실행' }).click();
+  await expect(duplicate).toBeVisible();
+  await duplicate.click();
+  await tools.getByRole('button', { name: '블록 삭제', exact: true }).click();
+  await expect(duplicate).toHaveCount(0);
+});

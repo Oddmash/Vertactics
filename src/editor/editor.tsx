@@ -1,9 +1,10 @@
 import { useMemo, useRef, useState } from 'react';
 import type { Annotation } from '../domain/annotation';
+import TerrainTools from './terrain-tools';
 import AnnotationTools from './annotation-tools';
 import type { SurfacePick } from './annotation-tools';
 import { mapBounds, terrainKinds, parseMap, topElevation, visibleTerrainForLayer } from '../domain/map';
-import type { MapDefinition, TerrainKind, WorldPoint } from '../domain/map';
+import type { MapDefinition, Terrain, TerrainKind, WorldPoint } from '../domain/map';
 import { createStrategy } from '../domain/strategy';
 import type { Team } from '../domain/strategy';
 import { createStrategyHistory, reduceStrategyHistory } from '../domain/strategy-history';
@@ -36,6 +37,10 @@ const Editor = () => {
   const map = catalogue.find((item) => item.id === mapId)!;
   const { min, max } = useMemo(() => mapBounds(map.terrain), [map]);
   const [importMessage, setImportMessage] = useState('');
+  const [mapEditing, setMapEditing] = useState(false);
+  const [mapMessage, setMapMessage] = useState('');
+  const [mapHistory, setMapHistory] = useState<Record<string, { past: MapDefinition[]; future: MapDefinition[] }>>({});
+  const timeline = Object.hasOwn(mapHistory, mapId) ? mapHistory[mapId]! : { past: [], future: [] };
   const importRequest = useRef(0);
   const [mode, setMode] = useState<ViewMode>('3d');
   const [reset, setReset] = useState(0);
@@ -67,6 +72,7 @@ const Editor = () => {
   }));
   const switchMap = (id: string) => {
     setTool(null);
+    setMapMessage('');
     setLayerId('');
     setSelectedId(null);
     setSelectedHeroId(null);
@@ -91,6 +97,52 @@ const Editor = () => {
     setCatalogue((current) => current.some((item) => item.id === imported.id) ? current : [...current, imported]);
     switchMap(imported.id);
     setImportMessage('');
+  };
+  const replaceMap = (next: MapDefinition) => {
+    setCatalogue((current) => current.map((item) => item.id === next.id ? next : item));
+  };
+  const updateTerrain = (terrain: unknown[], nextId: string | null) => {
+    try {
+      const metadata = map.metadata?.verification === 'verified' ? { ...map.metadata, verification: 'unverified' } : map.metadata;
+      const next = parseMap({ ...map, terrain, metadata });
+      setMapHistory((current) => ({ ...current, [mapId]: { past: [...timeline.past, map], future: [] } }));
+      replaceMap(next);
+      setSelectedId(nextId);
+      setMapMessage('');
+    } catch {
+      setMapMessage('지형 값을 확인하세요. 지도에는 블록이 한 개 이상 필요합니다.');
+    }
+  };
+  const moveMapHistory = (direction: 'undo' | 'redo') => {
+    const stack = direction === 'undo' ? timeline.past : timeline.future;
+    const next = stack.at(-1);
+    if (!next) return;
+    setMapHistory((current) => ({
+      ...current,
+      [mapId]: direction === 'undo'
+        ? { past: stack.slice(0, -1), future: [...timeline.future, map] }
+        : { past: [...timeline.past, map], future: stack.slice(0, -1) },
+    }));
+    replaceMap(next);
+    setSelectedId(null);
+    setMapMessage('');
+  };
+  const createMap = () => {
+    const id = crypto.randomUUID();
+    const created = parseMap({
+      schemaVersion: 1, id, name: '새 지도', metadata: { verification: 'synthetic' },
+      terrain: [{ id: 'base', name: '기본 바닥', kind: 'floor', origin: [-8, -1, -8], size: [16, 1, 16] }],
+    });
+    setCatalogue((current) => [...current, created]);
+    switchMap(id);
+    setMapEditing(true);
+  };
+  const copyTerrain = (terrain?: Terrain) => {
+    const id = crypto.randomUUID();
+    const item = terrain
+      ? { ...terrain, id, name: `${terrain.name} 복제`, origin: [terrain.origin[0] + 1, terrain.origin[1], terrain.origin[2] + 1] }
+      : { id, name: '새 블록', kind: 'platform', origin: [-1, 0, -1], size: [2, 1, 2], layerId: layerId || undefined };
+    updateTerrain([...map.terrain, item], id);
   };
   const { heroes, annotations } = history.present;
   const selected = visibleTerrain.find(({ id }) => id === selectedId);
@@ -151,7 +203,7 @@ const Editor = () => {
         setTool(null);
         return;
       }
-      if (locked || event.defaultPrevented || event.altKey ||
+      if (mapEditing || locked || event.defaultPrevented || event.altKey ||
         !(event.ctrlKey || event.metaKey) ||
         (event.target instanceof Element && event.target.closest('input:not([type=checkbox]):not([type=radio]), textarea, select, [contenteditable]'))) return;
       const key = event.key.toLowerCase();
@@ -169,6 +221,12 @@ const Editor = () => {
           <label>지도 <select value={mapId} onChange={(event) => switchMap(event.target.value)}>
             {catalogue.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
           </select></label>
+          <button type="button" className="reset-button" onClick={createMap}>새 지도</button>
+          <button type="button" className="reset-button" aria-pressed={mapEditing} onClick={() => {
+            setTool(null);
+            selectTerrain(null);
+            setMapEditing((current) => !current);
+          }}>지도 편집 모드</button>
           <label>지도 JSON 가져오기 <input type="file" accept=".json,application/json" onChange={(event) => {
             const file = event.target.files?.[0];
             event.target.value = '';
@@ -201,7 +259,7 @@ const Editor = () => {
               </li>
             ))}
           </ul>
-          <HeroTools
+          {!mapEditing && <HeroTools
             heroes={heroes}
             locked={locked || !showHeroes}
             selectedId={selectedHeroId}
@@ -213,7 +271,7 @@ const Editor = () => {
             onUndo={() => { setTool(null); dispatch({ type: 'undo' }); }}
             onRedo={() => { setTool(null); dispatch({ type: 'redo' }); }}
             onCancel={() => setTool(null)}
-          />
+          />}
         </aside>
         <section className="view-panel panel" aria-labelledby="view-title">
           <div className="viewport-toolbar">
@@ -275,14 +333,14 @@ const Editor = () => {
               mode={mode}
               reset={reset}
               selectedId={selectedId}
-              heroes={showHeroes ? heroes.map((hero) =>
+              heroes={!mapEditing && showHeroes ? heroes.map((hero) =>
                 tool?.kind === 'drag' && hero.id === tool.id && dragPreview ? { ...hero, position: dragPreview } : hero
               ) : []}
               snap={snap}
               selectedHeroId={selectedHeroId}
               onSelect={selectTerrain}
               onSelectHero={selectHero}
-              annotations={showAnnotations ? annotations : []}
+              annotations={!mapEditing && showAnnotations ? annotations : []}
               selectedAnnotationId={annotationId}
               onEditSurface={!locked && ((tool && tool.kind !== 'drag') || annotationPick) ? editSurface : undefined}
               onDragSurface={!locked && tool?.kind === 'drag' ? previewDrag : undefined}
@@ -334,7 +392,20 @@ const Editor = () => {
               </>
             ) : <p className="empty-selection">지도 또는 지형 목록에서 블록을 선택하세요.</p>}
           </div>
-          <AnnotationTools
+          {mapEditing ? <>
+            <TerrainTools
+              map={map}
+              selected={selected}
+              undoable={timeline.past.length > 0}
+              redoable={timeline.future.length > 0}
+              onSave={(terrain) => updateTerrain(map.terrain.map((item) => item.id === selectedId ? terrain : item), selectedId)}
+              onAdd={() => copyTerrain()}
+              onDuplicate={copyTerrain}
+              onRemove={(id) => updateTerrain(map.terrain.filter((item) => item.id !== id), null)}
+              onHistory={moveMapHistory}
+            />
+            {mapMessage && <p role="status">{mapMessage}</p>}
+          </> : <AnnotationTools
             items={annotations}
             locked={locked || !showAnnotations}
             selected={annotations.find((item) => item.id === annotationId)}
@@ -343,7 +414,7 @@ const Editor = () => {
             onSave={saveAnnotation}
             onPick={(pick) => { setTool(null); setAnnotationPick(pick); }}
             onRemove={(id) => { setAnnotationPick(null); dispatch({ type: 'remove-annotation', id }); }}
-          />
+          />}
           <div className="legend">
             <h3>범례</h3>
             <ul>
