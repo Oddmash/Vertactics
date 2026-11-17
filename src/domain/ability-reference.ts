@@ -1,3 +1,8 @@
+import officialAbilities from './official-ability-data.json';
+
+type OfficialAbility = { ko: string; descriptionKo: string; descriptionEn: string; icon: string };
+const official: Record<string, Record<string, OfficialAbility>> = officialAbilities;
+
 const summaries: Record<string, Record<string, { ko: string; en: string }>> = {
   tracer: {
     'pulse-pistols': { ko: '근거리에서 빠르게 발사하는 쌍권총입니다.', en: 'A pair of rapid-fire pistols for close combat.' },
@@ -42,55 +47,61 @@ const summaries: Record<string, Record<string, { ko: string; en: string }>> = {
 };
 
 export const getAbilitySummary = (heroId: string, abilityId: string, locale: 'ko' | 'en') =>
-  summaries[heroId]?.[abilityId]?.[locale];
+  summaries[heroId]?.[abilityId]?.[locale] ?? official[heroId]?.[abilityId]?.[locale === 'ko' ? 'descriptionKo' : 'descriptionEn'];
 
-type PatchReference = { label: string; value: number; unit?: string; patch: string; source: string };
+type Stat = [label: string, value: number | string, unit?: string];
+type PatchReference = { patch: string; values: Stat[] };
+
+const november = (...values: Stat[]): PatchReference => ({ patch: '2026-11-03', values });
+const october = (...values: Stat[]): PatchReference => ({ patch: '2026-10-06', values });
 
 const patchReferences: Record<string, Record<string, PatchReference>> = {
-  ana: {
-    'biotic-grenade': { label: '폭발 피해', value: 60, patch: '2026-11',
-      source: 'https://overwatch.blizzard.com/en-us/news/patch-notes/live/2026/11/' },
+  ana: { 'biotic-grenade': november(['폭발 피해', 60]) },
+  anran: {
+    'zhuque-fans': november(['피해량', 24]),
+    'vermillion-ascent': november(['시전 시간', 1, 's']),
   },
+  dmon: {
+    'power-barrier': november(['회복 시간', 0.3, 's'], ['최소 전개 시간', 0.25, 's']),
+    propulsors: november(['충돌 피해', 0]),
+  },
+  doctrine: {
+    'eternal-scepter': november(['주 공격 회복 시간', 0.65, 's'], ['주입 피해', 80], ['주입 치유', 110]),
+    'shrouded-momentum': november(['재사용 대기시간', 10, 's']),
+    infuse: november(['재사용 대기시간', 9, 's']),
+  },
+  brigitte: { inspire: november(['내부 재사용 대기시간', 1, 's'], ['즉시 치유', 15]) },
+  emre: { 'cyber-frag': november(['폭발까지 걸리는 시간', 0.5, 's']) },
+  genji: { deflect: november(['지속시간', 1.5, 's']) },
+  illari: {
+    'solar-rifle': november(['최대 충전 시간', 0.575, 's']),
+    'healing-pylon': november(['투사체당 치유', 50]),
+  },
+  'junker-queen': { carnage: november(['재사용 대기시간', 7, 's']) },
   ramattra: {
-    'void-accelerator-omnic-form': { label: '탄창', value: 125, patch: '2026-11',
-      source: 'https://overwatch.blizzard.com/en-us/news/patch-notes/live/2026/11/' },
-    'void-barrier-omnic-form': { label: '재사용 대기시간', value: 13, unit: 's', patch: '2026-07-30',
-      source: 'https://overwatch.blizzard.com/en-us/news/patch-notes/live/2026/07/' },
-    'ravenous-vortex': { label: '폭발 피해', value: 30, patch: '2026-07-14',
-      source: 'https://overwatch.blizzard.com/en-us/news/patch-notes/live/2026/07/' },
+    'void-accelerator-omnic-form': november(['탄창', 125]),
+    'void-barrier-omnic-form': { patch: '2026-07-30', values: [['재사용 대기시간', 13, 's']] },
+    'ravenous-vortex': { patch: '2026-07-14', values: [['폭발 피해', 30]] },
+  },
+  roadhog: { 'chain-hook': october(['대상 정지 거리', 4.5, 'm'], ['당긴 후 기절 지속시간', 0.3, 's']) },
+  sombra: {
+    'machine-pistol': october(['투사체당 피해', 7], ['피해 감소 시작 거리', 20, 'm']),
+    hotfix: november(['지속시간', 10, 's']),
+    translocator: october(['투사체 사거리', 12.25, 'm'], ['은신 지속시간', 6.5, 's']),
+    cyberspace: october(['구역 반경', 5, 'm'], ['구역 지속시간', 3, 's']),
   },
 };
 
-export const getAbilityPatchReference = (heroId: string, abilityId: string) =>
-  patchReferences[heroId]?.[abilityId];
-
-const koreanNames: Record<string, Record<string, string>> = {
-  ramattra: {
-    'void-accelerator-omnic-form': '공허 가속기 (옴닉 형태)', 'void-barrier-omnic-form': '공허 방벽 (옴닉 형태)',
-    'pummel-nemesis-form': '응징 (네메시스 형태)', 'ravenous-vortex': '탐식의 소용돌이', annihilation: '절멸',
-  },
-  tracer: { 'pulse-pistols': '펄스 쌍권총', blink: '점멸', recall: '시간 역행', 'pulse-bomb': '펄스 폭탄' },
-  ana: { 'biotic-rifle': '생체 소총', 'sleep-dart': '수면총', 'biotic-grenade': '생체 수류탄', 'nano-boost': '나노 강화제' },
-  reinhardt: { 'rocket-hammer': '로켓 해머', charge: '돌진', 'fire-strike': '화염 강타', 'barrier-field': '방벽 방패', earthshatter: '대지분쇄' },
-  genji: { shuriken: '수리검', deflect: '튕겨내기', 'swift-strike': '질풍참', dragonblade: '용검', 'cyber-agility': '사이보그의 날렵함' },
-  kiriko: { 'healing-ofuda': '치유의 부적', kunai: '쿠나이', 'swift-step': '순보', 'protection-suzu': '정화의 방울', 'kitsune-rush': '여우길' },
+export const getAbilityPatchReference = (heroId: string, abilityId: string) => {
+  const reference = patchReferences[heroId]?.[abilityId];
+  if (!reference) return undefined;
+  const monthPath = reference.patch.slice(0, 7).replace('-', '/');
+  return { ...reference, source: `https://overwatch.blizzard.com/en-us/news/patch-notes/live/${monthPath}/` };
 };
 
-export const getKoreanAbilityName = (heroId: string, abilityId: string) => koreanNames[heroId]?.[abilityId];
+export const getKoreanAbilityName = (heroId: string, abilityId: string) => official[heroId]?.[abilityId]?.ko;
 
-const iconSlots: Record<string, Record<string, string>> = {
-  genji: { shuriken: 'primary', deflect: 'ability_2', 'swift-strike': 'ability_1', dragonblade: 'ultimate', 'cyber-agility': 'passive' },
-  kiriko: { 'healing-ofuda': 'primary', kunai: 'secondary', 'swift-step': 'ability_1', 'protection-suzu': 'ability_2', 'kitsune-rush': 'ultimate' },
-  reinhardt: { 'rocket-hammer': 'primary', charge: 'ability_1', 'fire-strike': 'ability_2', 'barrier-field': 'secondary', earthshatter: 'ultimate' },
-  ramattra: { 'void-accelerator-omnic-form': 'primary', 'void-barrier-omnic-form': 'secondary', 'ravenous-vortex': 'ability_2', annihilation: 'ultimate' },
-  ana: { 'biotic-rifle': 'primary', 'sleep-dart': 'ability_1', 'biotic-grenade': 'ability_2', 'nano-boost': 'ultimate' },
-  tracer: { 'pulse-pistols': 'primary', blink: 'ability_1', recall: 'ability_2', 'pulse-bomb': 'ultimate' },
-};
-
-export const getAbilityIcon = (heroId: string, abilityId: string) => {
-  const slot = iconSlots[heroId]?.[abilityId];
-  return slot && `https://raw.githubusercontent.com/rolldeep-stepmerrily/watchpoint/bcb50e9690b11533ffbccee81f98455878f0822c/apps/web/public/icons/heroes/${heroId}/abilities/${slot}.png`;
-};
+export const getAbilityIcon = (heroId: string, abilityId: string) => official[heroId]?.[abilityId]?.icon;
 
 export const abilitySourceForLocale = (source: string, locale: 'ko' | 'en') =>
-  locale === 'ko' ? source.replace('overwatch.blizzard.com/en-us/', 'overwatch.blizzard.com/ko-kr/') : source;
+  locale === 'ko' ? source.replace(/overwatch\.blizzard\.com\/(?:en-us\/|en-gb\/)?/, 'overwatch.blizzard.com/ko-kr/') : source;

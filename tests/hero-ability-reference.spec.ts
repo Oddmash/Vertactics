@@ -10,11 +10,6 @@ test('selects heroes by portrait and reveals sourced skills in the right panel',
   page.on('request', (request) => {
     if (request.url().startsWith('https://overfast-api.tekrop.fr/heroes/')) apiRequests.push(request.url());
   });
-  await page.route('https://raw.githubusercontent.com/rolldeep-stepmerrily/watchpoint/**', (route) =>
-    route.fulfill({
-      contentType: 'image/png',
-      body: Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a9foAAAAASUVORK5CYII=', 'base64'),
-    }));
   await page.goto('./');
 
   const panel = page.getByRole('complementary', { name: '지형 정보' });
@@ -25,7 +20,7 @@ test('selects heroes by portrait and reveals sourced skills in the right panel',
   await expect(tracer.locator('img')).toHaveAttribute('src', /^https:\/\/d15f34w2p8l1cc\.cloudfront\.net\/overwatch\//);
   await expect(tracer.locator('.hero-roster-name')).toHaveText('트레이서');
   const blink = panel.getByRole('button', { name: '점멸', exact: true });
-  await expect(blink.locator('img')).toHaveAttribute('src', /tracer\/abilities\/ability_1\.png$/);
+  await expect(blink.locator('img')).toHaveAttribute('src', /^https:\/\/d15f34w2p8l1cc\.cloudfront\.net\/overwatch\/.+\.png$/);
   await blink.hover();
   const details = panel.getByRole('tooltip');
   await expect(details).toContainText('현재 이동 방향으로 순간이동합니다.');
@@ -47,13 +42,18 @@ test('selects heroes by portrait and reveals sourced skills in the right panel',
   await grenade.focus();
   await expect(details).toContainText('폭발 피해');
   await expect(details.getByText('60', { exact: true })).toBeVisible();
-  await expect(panel.getByRole('link', { name: '2026-11 패치 노트' })).toHaveAttribute('href', /2026\/11\//);
+  await expect(panel.getByRole('link', { name: '2026-11-03 패치 노트' })).toHaveAttribute('href', /2026\/11\//);
   await grenade.press('Escape');
   await expect(details).toHaveCount(0);
   await grenade.click();
   await expect(grenade).toHaveAttribute('aria-pressed', 'true');
   await page.getByRole('button', { name: '2D 탑다운' }).hover();
   await expect(details).toBeVisible();
+  await roster.getByRole('button', { name: '솜브라', exact: true }).click();
+  await panel.getByRole('button', { name: '사이버 스페이스', exact: true }).hover();
+  await expect(details.getByText('구역 반경')).toBeVisible();
+  await expect(details.getByText('5 m', { exact: true })).toBeVisible();
+  await expect(details.getByText('3 s', { exact: true })).toBeVisible();
   expect(apiRequests).toEqual([]);
 });
 

@@ -1,4 +1,5 @@
 import { expect, it } from 'vitest';
+import { getAbilityIcon, getAbilitySummary, getKoreanAbilityName } from './ability-reference';
 import owkrCatalogue from './owkr-catalogue.json';
 import { getHero, heroCatalogue, heroName, heroRoles, isCatalogueHero } from './hero-catalogue';
 
@@ -24,4 +25,15 @@ it('keeps starter placement IDs and uses the current Sombra role', () => {
 it('keeps unknown hero references readable in imported drafts', () => {
   expect(getHero('toString')).toBeUndefined();
   expect(heroName('future-hero')).toBe('future-hero');
+});
+
+it('covers each catalogue ability with bilingual text and its official icon', () => {
+  for (const [heroId, hero] of Object.entries(heroCatalogue)) {
+    for (const { id } of hero.abilities) {
+      expect(getKoreanAbilityName(heroId, id), `${heroId}:${id}`).toBeTruthy();
+      expect(getAbilitySummary(heroId, id, 'ko')).toBeTruthy();
+      expect(getAbilitySummary(heroId, id, 'en')).toBeTruthy();
+      expect(getAbilityIcon(heroId, id)).toMatch(/^https:\/\/d15f34w2p8l1cc\.cloudfront\.net\/overwatch\/[a-f0-9]+\.png$/);
+    }
+  }
 });
