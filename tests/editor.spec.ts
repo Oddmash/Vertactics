@@ -854,3 +854,33 @@ test('checks sight between chosen terrain points across walls and elevation', as
   await expect(tool).toHaveAttribute('aria-pressed', 'false');
   await expect(result).toHaveCount(0);
 });
+
+test('reports partial hero exposure above low cover in both map views', async ({ page }, testInfo) => {
+  await page.goto('/');
+  const canvas = page.getByTestId('viewport').locator('canvas');
+  await page.getByRole('button', { name: '2D 탑다운' }).click();
+  await expect(canvas).toHaveAttribute('data-view-mode', '2d');
+  const box = await canvas.boundingBox();
+  if (!box) throw new Error('Canvas has no bounds');
+  const units = Math.max(36 / box.width, 24 / box.height) * 1.22;
+  const place = async (z: number) => {
+    await page.getByRole('button', { name: '배치 시작' }).click();
+    await expect(canvas).toHaveCSS('cursor', 'crosshair');
+    await page.mouse.click(box.x + box.width / 2 - 9 / units, box.y + box.height / 2 + z / units);
+  };
+  await place(7);
+  await place(10);
+  const inspector = page.getByRole('complementary', { name: '지형 정보' });
+  await inspector.getByLabel('시야 확인 대상', { exact: true }).selectOption({ index: 1 });
+  const exposure = inspector.getByText('노출: 부분 노출 (1/3)', { exact: true });
+  await expect(exposure).toBeVisible();
+  const samples = inspector.getByRole('list', { name: '높이별 노출' });
+  await expect(samples.getByText('상단: 보임', { exact: true })).toBeVisible();
+  await expect(samples.getByText('하단: 가려짐', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: '3D 원근' }).click();
+  await expect(canvas).toHaveAttribute('data-view-mode', '3d');
+  await expect(exposure).toBeVisible();
+  await inspector.getByText('노출 판정 기준', { exact: true }).click();
+  await expect(inspector.getByText(/실제 영웅의 자세와 히트박스/)).toBeVisible();
+  await page.screenshot({ path: testInfo.outputPath('hero-partial-exposure-3d.png') });
+});

@@ -70,3 +70,16 @@ export const spatialBlockers = (terrain: Terrain[], start: WorldPoint, end: Worl
   const { collision, sight } = traceSightline(terrain, start, end);
   return { collision, sight };
 };
+
+const exposureHeights = { lower: 0.45, middle: 1.05, upper: 1.8 } as const;
+const exposureSamples = ['lower', 'middle', 'upper'] as const;
+
+export const sampleExposure = (terrain: Terrain[], observer: WorldPoint, [x, y, z]: WorldPoint) => {
+  const samples = exposureSamples.map((part) => ({
+    part,
+    visible: !traceSightline(terrain, observer, [x, y + exposureHeights[part], z]).sight,
+  }));
+  const visibleCount = samples.filter(({ visible }) => visible).length;
+  const status = visibleCount === 0 ? 'blocked' : visibleCount === samples.length ? 'clear' : 'partial';
+  return { samples, visibleCount, status } as const;
+};

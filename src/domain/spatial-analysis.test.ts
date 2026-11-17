@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest';
-import { spatialBlockers, traceSightline } from './spatial-analysis';
-import type { Terrain } from './map';
+import { sampleExposure, spatialBlockers, traceSightline } from './spatial-analysis';
+import type { Terrain, WorldPoint } from './map';
 
 const wall: Terrain = { id: 'wall', name: 'Wall', kind: 'wall', origin: [2, 0, -1], size: [1, 3, 2] };
 
@@ -24,4 +24,22 @@ it('ends a sightline at the first sight-blocking surface in world coordinates', 
     collision: glass, sight: screen, endpoint: [4, 2, 0],
   });
   expect(traceSightline([screen, glass], [0, 4, 0], [6, 4, 0]).endpoint).toEqual([6, 4, 0]);
+});
+
+it('distinguishes partial exposure, an open target and full cover', () => {
+  const lowCover: Terrain = { ...wall, size: [1, 1.6, 2] };
+  const observer: WorldPoint = [0, 1.6, 0];
+  const target: WorldPoint = [6, 0, 0];
+  expect(sampleExposure([lowCover], observer, target)).toEqual({
+    status: 'partial',
+    visibleCount: 1,
+    samples: [
+      { part: 'lower', visible: false },
+      { part: 'middle', visible: false },
+      { part: 'upper', visible: true },
+    ],
+  });
+  expect(sampleExposure([lowCover], observer, [6, 2, 0]).status).toBe('clear');
+  expect(sampleExposure([wall], observer, target).status).toBe('blocked');
+  expect(sampleExposure([{ ...wall, blocksSight: false }], observer, target).status).toBe('clear');
 });
