@@ -23,7 +23,7 @@ describe('map schema', () => {
     const wall = mapJson.terrain.find(({ kind }) => kind === 'wall');
     const stairs = mapJson.terrain.find(({ kind }) => kind === 'stairs');
     for (const item of [
-      { ...wall, origin: [, 0, 0] },
+      { ...wall, origin: Object.assign(Array<number>(3), { 1: 0, 2: 0 }) },
       { ...wall, origin: [0, Infinity, 0] },
       { ...wall, size: [1, 0, 1] },
       { ...stairs, steps: 1 },
