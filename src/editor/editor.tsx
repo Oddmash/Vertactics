@@ -1,3 +1,4 @@
+import { Button, Disclosure, Input, Select } from '../ui/controls';
 import { useLocale } from '../ui/locale';
 import LocalePicker from '../ui/locale-picker';
 import MapCatalogue from './map-catalogue';
@@ -308,20 +309,20 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
           Vertactics
         </div>
         <div className="map-catalogue" aria-label={t('지도 관리')} role="group">
-          <label>{t('지도') + ' '}<select aria-label={t('지도')} value={mapId} onChange={(event) => switchMap(event.target.value)}>
+          <label>{t('지도') + ' '}<Select aria-label={t('지도')} value={mapId} onChange={(event) => switchMap(event.target.value)}>
             {catalogue.map((item) => <option key={item.id} value={item.id}>{t(item.name)}</option>)}
-          </select></label>
-          <button type="button" className="reset-button mobile-panel-toggle" aria-expanded={mapActionsOpen}
-            aria-controls="map-actions" onClick={() => setMapActionsOpen((open) => !open)}>{t('지도 관리')}</button>
+          </Select></label>
+          <Button type="button" className="reset-button mobile-panel-toggle" aria-expanded={mapActionsOpen}
+            aria-controls="map-actions" onClick={() => setMapActionsOpen((open) => !open)}>{t('지도 관리')}</Button>
           <div className="map-actions" id="map-actions" data-expanded={mapActionsOpen}>
             <MapCatalogue onSelect={switchMap} />
-            <button type="button" className="reset-button" onClick={createMap}>{t('새 지도')}</button>
-            <button type="button" className="reset-button" aria-pressed={mapEditing} onClick={() => {
+            <Button type="button" className="reset-button" onClick={createMap}>{t('새 지도')}</Button>
+            <Button type="button" className="reset-button" aria-pressed={mapEditing} onClick={() => {
               activateTool(null);
               selectTerrain(null);
               setMapEditing((current) => !current);
-            }}>{t('지도 편집 모드')}</button>
-            <label className="file-button reset-button">{t('지도 JSON 가져오기')}<input type="file" accept=".json,application/json" onChange={(event) => {
+            }}>{t('지도 편집 모드')}</Button>
+            <label className="file-button reset-button">{t('지도 JSON 가져오기')}<Input type="file" accept=".json,application/json" onChange={(event) => {
               const file = event.target.files?.[0];
               event.target.value = '';
               if (file) void importMap(file);
@@ -350,7 +351,7 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
             <div className="viewport-actions">
               <div className="mode-switch" role="group" aria-label={t('지도 보기')}>
                 {viewportModes.map((view) => (
-                  <button
+                  <Button
                     key={view}
                     type="button"
                     aria-label={t(viewNames[view])}
@@ -358,48 +359,48 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
                     onClick={() => { setHeroViewId(undefined); setMode(view); }}
                   >
                     {view.toUpperCase()}
-                  </button>
+                  </Button>
                 ))}
               </div>
               {heroView
-                ? <button className="reset-button" type="button" onClick={() => setHeroViewId(undefined)}>{t('이전 시점으로')}</button>
-                : <button className="reset-button" type="button" onClick={() => setReset((value) => value + 1)}>
+                ? <Button className="reset-button" type="button" onClick={() => setHeroViewId(undefined)}>{t('이전 시점으로')}</Button>
+                : <Button className="reset-button" type="button" onClick={() => setReset((value) => value + 1)}>
                   {t('시점 초기화')}
-                </button>}
-              <button type="button" className="reset-button mobile-panel-toggle" aria-expanded={displayOptionsOpen}
-                aria-controls="display-options" onClick={() => setDisplayOptionsOpen((open) => !open)}>{t('표시 설정')}</button>
+                </Button>}
+              <Button type="button" className="reset-button mobile-panel-toggle" aria-expanded={displayOptionsOpen}
+                aria-controls="display-options" onClick={() => setDisplayOptionsOpen((open) => !open)}>{t('표시 설정')}</Button>
             </div>
           </div>
           {imageMessage && <p role="status">{t(imageMessage)}</p>}
           <div className="view-options display-options" id="display-options" data-expanded={displayOptionsOpen}
             role="group" aria-label={t('편집 및 표시 설정')}>
-            {map.layers && <label>{t('표시 층') + ' '}<select value={layerId} onChange={(event) => {
+            {map.layers && <label>{t('표시 층') + ' '}<Select value={layerId} onChange={(event) => {
               setLayerId(event.target.value);
               setSelectedId(null);
             }}>
               <option value="">{t('모든 층')}</option>
               {map.layers.map(({ id, name }) => <option key={id} value={id}>{t(name)}</option>)}
-            </select></label>}
-            <label><input type="checkbox" checked={snap} onChange={(event) => setSnap(event.target.checked)} />{' ' + t('격자 스냅')}</label>
-            <label><input type="checkbox" checked={locked} onChange={(event) => {
+            </Select></label>}
+            <label><Input type="checkbox" checked={snap} onChange={(event) => setSnap(event.target.checked)} />{' ' + t('격자 스냅')}</label>
+            <label><Input type="checkbox" checked={locked} onChange={(event) => {
               activateTool(null);
               setLocked(event.target.checked);
             }} />{' ' + t('편집 잠금')}</label>
-            <label><input type="checkbox" checked={showHeroes} onChange={(event) => {
+            <label><Input type="checkbox" checked={showHeroes} onChange={(event) => {
               activateTool(null);
               setShowHeroes(event.target.checked);
             }} />{' ' + t('영웅 표시')}</label>
-            <label><input type="checkbox" checked={showAnnotations} onChange={(event) => {
+            <label><Input type="checkbox" checked={showAnnotations} onChange={(event) => {
               activateTool(null);
               setShowAnnotations(event.target.checked);
             }} />{' ' + t('마커 표시')}</label>
-            <button className="reset-button" type="button" onClick={() => void saveViewport()}>{t('지도 PNG 저장')}</button>
+            <Button className="reset-button" type="button" onClick={() => void saveViewport()}>{t('지도 PNG 저장')}</Button>
           </div>
           {!mapEditing && durationMs > 0 && (!playback
-            ? <div className="view-options"><button type="button" className="reset-button" onClick={() => {
+            ? <div className="view-options"><Button type="button" className="reset-button" onClick={() => {
               activateTool(null);
               start();
-            }}>{t('전략 재생')}</button></div>
+            }}>{t('전략 재생')}</Button></div>
             : <TimelinePlaybackControls durationMs={durationMs} phaseLabel={frame?.phaseLabel ?? ''}
               timeMs={playback.timeMs} playing={playback.playing} speed={playback.speed}
               onToggle={toggle} onSeek={seek} onSpeed={changeSpeed} onExit={stop}
@@ -407,14 +408,14 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
           <nav className="canvas-tools" aria-label={t('지도 도구')}>
             <a className="reset-button" href="#terrain-title">{t('지형 목록')}</a>
             {!mapEditing && <a className="reset-button" href="#hero-tools-title">{t('영웅')}</a>}
-            <button type="button" className="reset-button" aria-pressed={measuring} onClick={() => {
+            <Button type="button" className="reset-button" aria-pressed={measuring} onClick={() => {
               activateTool(measuring ? null : { kind: 'distance' });
               if (!measuring) setMeasurement([]);
-            }}>{t('거리 측정')}</button>
-            <button type="button" className="reset-button" aria-pressed={sightPicking} onClick={() => {
+            }}>{t('거리 측정')}</Button>
+            <Button type="button" className="reset-button" aria-pressed={sightPicking} onClick={() => {
               activateTool(sightPicking ? null : { kind: 'sight' });
               if (!sightPicking || !sightSecond) setSightPoints([]);
-            }}>{t('지점 간 시야')}</button>
+            }}>{t('지점 간 시야')}</Button>
           </nav>
           <div ref={viewport} className="viewport" data-testid="viewport" tabIndex={-1}
             role="region" aria-label={t('지형 지도')}
@@ -470,7 +471,7 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
           <ul className="terrain-list">
             {visibleTerrain.map((terrain) => (
               <li key={terrain.id}>
-                <button
+                <Button
                   type="button"
                   className="terrain-button"
                   aria-pressed={selectedTerrainIds.has(terrain.id)}
@@ -479,7 +480,7 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
                   <span className={`terrain-swatch ${terrain.kind}`} aria-hidden="true" />
                   <span>{t(terrain.name)}</span>
                   <small>{formatElevation(topElevation(terrain))}</small>
-                </button>
+                </Button>
               </li>
             ))}
           </ul>
@@ -503,11 +504,11 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
               <p>{t('이전 작업 ·') + ' '}{t(recovery.saved.map.name)}</p>
               <p>{t('복구하면 해당 지도의 편집 내용이 복구본으로 바뀝니다.')}</p>
               <div className="hero-actions">
-                <button type="button" className="reset-button" onClick={() => {
+                <Button type="button" className="reset-button" onClick={() => {
                   const saved = recovery.restore();
                   if (saved) restoreDraft(saved);
-                }}>{t('이전 작업 복구')}</button>
-                <button type="button" className="reset-button" onClick={recovery.discard}>{t('복구본 지우기')}</button>
+                }}>{t('이전 작업 복구')}</Button>
+                <Button type="button" className="reset-button" onClick={recovery.discard}>{t('복구본 지우기')}</Button>
               </div>
             </> : <p role="status">{{
               idle: recovery.unreadable ? t('이전 작업 데이터를 읽을 수 없습니다.') : t('편집 내용은 이 브라우저에 자동 저장됩니다.'),
@@ -536,13 +537,13 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
                     <div><dt>{t('이동 미리보기 (X, Y, Z)')}</dt><dd>{dragPreview.map(formatNumber).join(', ')}</dd></div>
                   )}
                 </dl>
-                {selectedHeroProfile && <details>
+                {selectedHeroProfile && <Disclosure>
                   <summary>{t('영웅 정보 ·') + ' '}{t(roleNames[selectedHeroProfile.role])}</summary>
                   <ul>
                     {selectedHeroProfile.abilities.map(({ id, name }) => <li key={id}>{name}</li>)}
                   </ul>
                   <a href={selectedHeroProfile.source} target="_blank" rel="noreferrer">{t('Blizzard 영웅 정보')}</a>
-                </details>}
+                </Disclosure>}
                 {selectedHeroProfile && <AbilityPreviewTools
                   key={previewKey}
                   abilities={selectedHeroProfile.abilities}
@@ -560,7 +561,7 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
                   })}
                 />}
                 {heroes.length > 1 && <div className="spatial-probe">
-                  <label>{t('시야 확인 대상') + ' '}<select aria-label={t('시야 확인 대상')} value={sightTarget?.id ?? ''} onChange={(event) => {
+                  <label>{t('시야 확인 대상') + ' '}<Select aria-label={t('시야 확인 대상')} value={sightTarget?.id ?? ''} onChange={(event) => {
                     activateTool(null);
                     setSightPoints([]);
                     setSightTargetId(event.target.value);
@@ -569,7 +570,7 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
                     {heroes.filter((hero) => hero.id !== selectedHeroId).map((hero, index) => (
                       <option key={hero.id} value={hero.id}>{displayHero(hero.heroId)} · {index + 1}</option>
                     ))}
-                  </select></label>
+                  </Select></label>
                   {spatialProbe && <>
                     <p>{t('시야:') + ' '}{spatialProbe.sight ? t(spatialProbe.sight.name) : t('개방')}{' ' + t('· 충돌:') + ' '}{spatialProbe.collision ? t(spatialProbe.collision.name) : t('없음')}</p>
                     <p>{t('노출:') + ' '}{t(exposureLabels[spatialProbe.exposure.status])} ({spatialProbe.exposure.visibleCount}/{spatialProbe.exposure.samples.length})</p>
@@ -578,30 +579,30 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
                         <li key={part}>{t(sampleLabels[part])}: {visible ? t('보임') : t('가려짐')}</li>
                       ))}
                     </ul>
-                    <details>
+                    <Disclosure>
                       <summary>{t('노출 판정 기준')}</summary>
                       <p>{t('지도 단위 기준 0.45, 1.05, 1.8 높이의 세 점을 검사합니다. 실제 영웅의 자세와 히트박스는 반영하지 않습니다.')}</p>
                       <p>{t('모든 층의 지형이 포함되며 시야 차단과 충돌은 각각 판정합니다. 영웅은 판정의 시작점과 목표점을 제공합니다.')}</p>
-                    </details>
+                    </Disclosure>
                   </>}
                 </div>}
-                {showHeroes && <button className="reset-button" type="button" aria-pressed={Boolean(heroView)} onClick={() => {
+                {showHeroes && <Button className="reset-button" type="button" aria-pressed={Boolean(heroView)} onClick={() => {
                   activateTool(null);
                   if (!heroView) setHeroViewId(selectedHero.id);
-                }}>{t('영웅 시점')}</button>}
+                }}>{t('영웅 시점')}</Button>}
                 <fieldset className="hero-actions edit-controls" disabled={locked || !showHeroes}>
-                  <button className="reset-button" type="button" onClick={() => activateTool({ kind: 'move', id: selectedHero.id })}>{t('이동')}</button>
-                  <button className="reset-button" type="button" onClick={() => activateTool({ kind: 'drag', id: selectedHero.id })}>{t('드래그 이동')}</button>
-                  <button className="reset-button" type="button" onClick={() => dispatch({
+                  <Button className="reset-button" type="button" onClick={() => activateTool({ kind: 'move', id: selectedHero.id })}>{t('이동')}</Button>
+                  <Button className="reset-button" type="button" onClick={() => activateTool({ kind: 'drag', id: selectedHero.id })}>{t('드래그 이동')}</Button>
+                  <Button className="reset-button" type="button" onClick={() => dispatch({
                     type: 'update', id: selectedHero.id, patch: { yaw: (selectedHero.yaw + 45) % 360 },
-                  })}>{t('45° 회전')}</button>
-                  <button className="reset-button" type="button" onClick={() => dispatch({
+                  })}>{t('45° 회전')}</Button>
+                  <Button className="reset-button" type="button" onClick={() => dispatch({
                     type: 'update', id: selectedHero.id, patch: { team: selectedHero.team === 'attack' ? 'defense' : 'attack' },
-                  })}>{t('팀 전환')}</button>
-                  <button className="reset-button" type="button" onClick={() => {
+                  })}>{t('팀 전환')}</Button>
+                  <Button className="reset-button" type="button" onClick={() => {
                     activateTool(null);
                     dispatch({ type: 'remove', id: selectedHero.id });
-                  }}>{t('삭제')}</button>
+                  }}>{t('삭제')}</Button>
                 </fieldset>
               </>
             ) : selected ? (
@@ -623,14 +624,14 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
               <div><dt>{t('높이 차')}</dt><dd>{formatElevation(distance.rise)}</dd></div>
               <div><dt>{t('직선 거리')}</dt><dd>{formatNumber(distance.distance)} u</dd></div>
             </dl> : <p>{first ? t('두 번째 지점을 선택하세요.') : t('첫 번째 지점을 선택하세요.')}</p>}
-            {first && <button type="button" className="reset-button" onClick={() => setMeasurement([])}>{t('측정 지우기')}</button>}
+            {first && <Button type="button" className="reset-button" onClick={() => setMeasurement([])}>{t('측정 지우기')}</Button>}
           </section>}
           {(sightPicking || sightFirst) && <section className="hero-tools" aria-label={t('지점 간 시야 결과')}>
             <p>{t('두 지면에서') + ' '}{heroEyeHeight}{' ' + t('u 위를 연결합니다.')}</p>
             <p role="status">{terrainSight
               ? terrainSight.sight ? t('시야 차단: {0}', t(terrainSight.sight.name)) : t('시야 개방')
               : sightFirst ? t('시야 목표점을 선택하세요.') : t('시야 시작점을 선택하세요.')}</p>
-            {sightFirst && <button type="button" className="reset-button" onClick={() => setSightPoints([])}>{t('시야 지우기')}</button>}
+            {sightFirst && <Button type="button" className="reset-button" onClick={() => setSightPoints([])}>{t('시야 지우기')}</Button>}
           </section>}
           {mapEditing ? <>
             <TerrainTools
@@ -687,15 +688,15 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
               }}
             />
           </>}
-          <details className="legend">
+          <Disclosure className="legend">
             <summary>{t('지형 범례')}</summary>
             <ul>
               {terrainKinds.map((kind) => (
                 <li key={kind}><span className={`terrain-swatch ${kind}`} aria-hidden="true" />{t(kindNames[kind])}</li>
               ))}
             </ul>
-          </details>
-          <details className="legend">
+          </Disclosure>
+          <Disclosure className="legend">
             <summary id="workspace-help">{t('도움말')}</summary>
             <ul>
               <li>{t('지도나 지형 목록에서 블록을 선택하면 좌표와 높이를 확인할 수 있습니다.')}</li>
@@ -705,7 +706,7 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
               <li>{t('Vertactics는 Blizzard Entertainment와 제휴하지 않은 Overwatch 팬 프로젝트입니다.')}</li>
               <li><a href="about.html" target="_blank" rel="noopener">{t('서비스 소개')}</a></li>
             </ul>
-          </details>
+          </Disclosure>
         </aside>
       </main>
     </div>

@@ -1,3 +1,4 @@
+import { Button, Select } from '../ui/controls';
 import { useLocale } from '../ui/locale';
 import type { HeroPlacement, Team } from '../domain/strategy';
 
@@ -38,7 +39,7 @@ const HeroTools = ({
           (team === 'attack' || team === 'defense')) onPlace(hero, team);
       }}>
         <fieldset className="edit-controls" disabled={locked}>
-        <label>{t('영웅') + ' '}<select name="hero" aria-label={t('영웅')}>
+        <label>{t('영웅') + ' '}<Select name="hero" aria-label={t('영웅')}>
           {heroRoles.map((role) => (
             <optgroup key={role} label={t(roleNames[role])}>
               {Object.entries(heroCatalogue).filter(([, hero]) => hero.role === role).map(([id, hero]) => (
@@ -46,29 +47,29 @@ const HeroTools = ({
               ))}
             </optgroup>
           ))}
-        </select></label>
-        <label>{t('팀') + ' '}<select name="team">
+        </Select></label>
+        <label>{t('팀') + ' '}<Select name="team">
           {Object.entries(teamNames).map(([id, name]) => <option key={id} value={id}>{t(name)}</option>)}
-        </select></label>
-        <button className="reset-button" type="submit">{t('배치 시작')}</button>
+        </Select></label>
+        <Button className="reset-button" type="submit">{t('배치 시작')}</Button>
         </fieldset>
       </form>
       {pendingMessage && <div className="pending-edit">
         <p role="status">{pendingMessage}</p>
-        <button type="button" className="reset-button" onClick={onCancel}>{t('취소')}</button>
+        <Button type="button" className="reset-button" onClick={onCancel}>{t('취소')}</Button>
       </div>}
       <div className="hero-actions">
-        <button type="button" className="reset-button" disabled={!canUndo} onClick={onUndo}>{t('실행 취소')}</button>
-        <button type="button" className="reset-button" disabled={!canRedo} onClick={onRedo}>{t('다시 실행')}</button>
+        <Button type="button" className="reset-button" disabled={!canUndo} onClick={onUndo}>{t('실행 취소')}</Button>
+        <Button type="button" className="reset-button" disabled={!canRedo} onClick={onRedo}>{t('다시 실행')}</Button>
       </div>
       {heroes.length > 0 && <ul className="terrain-list" aria-label={t('배치한 영웅')}>
         {heroes.map((hero) => (
           <li key={hero.id}>
-            <button className="terrain-button" type="button" aria-pressed={selectedId === hero.id} onClick={() => onSelect(hero.id)}>
+            <Button className="terrain-button" type="button" aria-pressed={selectedId === hero.id} onClick={() => onSelect(hero.id)}>
               <span className={`terrain-swatch team-${hero.team}`} aria-hidden="true" />
               <span>{locale === 'en' ? getHero(hero.heroId)?.name ?? hero.heroId : heroName(hero.heroId)}</span>
               <small>{t(teamNames[hero.team])}</small>
-            </button>
+            </Button>
           </li>
         ))}
       </ul>}

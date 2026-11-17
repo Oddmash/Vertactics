@@ -1,3 +1,4 @@
+import { Button, Input, Select } from '../ui/controls';
 import { useLocale } from '../ui/locale';
 import type { FormEvent } from 'react';
 import { terrainKinds } from '../domain/map';
@@ -57,9 +58,9 @@ const TerrainTools = ({ map, selected, selectedCount, undoable, redoable, onSave
     <section className="hero-tools terrain-tools" aria-labelledby="terrain-tools-title">
       <h2 id="terrain-tools-title">{t('지도 편집')}</h2>
       <div className="hero-actions">
-        <button type="button" className="reset-button" onClick={onAdd}>{t('블록 추가')}</button>
-        <button type="button" className="reset-button" disabled={!undoable} onClick={() => onHistory('undo')}>{t('지도 실행 취소')}</button>
-        <button type="button" className="reset-button" disabled={!redoable} onClick={() => onHistory('redo')}>{t('지도 다시 실행')}</button>
+        <Button type="button" className="reset-button" onClick={onAdd}>{t('블록 추가')}</Button>
+        <Button type="button" className="reset-button" disabled={!undoable} onClick={() => onHistory('undo')}>{t('지도 실행 취소')}</Button>
+        <Button type="button" className="reset-button" disabled={!redoable} onClick={() => onHistory('redo')}>{t('지도 다시 실행')}</Button>
       </div>
       <fieldset className="edit-controls">
         <legend>{t('층 관리')}</legend>
@@ -71,8 +72,8 @@ const TerrainTools = ({ map, selected, selectedCount, undoable, redoable, onSave
           onSaveLayer({ id: crypto.randomUUID(), name: name.trim() });
           form.reset();
         }}>
-          <label>{t('새 층 이름') + ' '}<input name="layer-name" required /></label>
-          <button type="submit" className="reset-button">{t('층 추가')}</button>
+          <label>{t('새 층 이름') + ' '}<Input name="layer-name" required /></label>
+          <Button type="submit" className="reset-button">{t('층 추가')}</Button>
         </form>
         {map.layers?.map((layer) => (
           <form key={`${layer.id}:${layer.name}`} aria-label={t(layer.name)} onSubmit={(event) => {
@@ -82,45 +83,45 @@ const TerrainTools = ({ map, selected, selectedCount, undoable, redoable, onSave
               onSaveLayer({ id: layer.id, name: name.trim() });
             }
           }}>
-            <label>{t('층 이름') + ' '}<input name="layer-name" defaultValue={layer.name} required /></label>
+            <label>{t('층 이름') + ' '}<Input name="layer-name" defaultValue={layer.name} required /></label>
             <div className="hero-actions">
-              <button type="submit" className="reset-button">{t('층 이름 저장')}</button>
-              <button type="button" className="reset-button" onClick={() => onDeleteLayer(layer.id)}>{t('층 삭제')}</button>
+              <Button type="submit" className="reset-button">{t('층 이름 저장')}</Button>
+              <Button type="button" className="reset-button" onClick={() => onDeleteLayer(layer.id)}>{t('층 삭제')}</Button>
             </div>
           </form>
         ))}
       </fieldset>
       {selectedCount > 1 && <div className="hero-actions">
         <p role="status">{selectedCount}{t('개 선택')}</p>
-        <button type="button" className="reset-button" onClick={onBulkDuplicate}>{t('선택 블록 복제')}</button>
-        <button type="button" className="reset-button" onClick={onBulkRemove}>{t('선택 블록 삭제')}</button>
+        <Button type="button" className="reset-button" onClick={onBulkDuplicate}>{t('선택 블록 복제')}</Button>
+        <Button type="button" className="reset-button" onClick={onBulkRemove}>{t('선택 블록 삭제')}</Button>
       </div>}
       {selected && selectedCount === 1 && <>
         <form key={JSON.stringify(selected)} onSubmit={save}>
-          <label>{t('블록 이름') + ' '}<input name="name" required defaultValue={selected.name} /></label>
-          <label>{t('지형 유형') + ' '}<select name="kind" defaultValue={selected.kind}>
+          <label>{t('블록 이름') + ' '}<Input name="name" required defaultValue={selected.name} /></label>
+          <label>{t('지형 유형') + ' '}<Select name="kind" defaultValue={selected.kind}>
             {terrainKinds.map((kind) => <option key={kind} value={kind}>{kind}</option>)}
-          </select></label>
-          {map.layers && <label>{t('층') + ' '}<select name="layer" defaultValue={selected.layerId ?? ''}>
+          </Select></label>
+          {map.layers && <label>{t('층') + ' '}<Select name="layer" defaultValue={selected.layerId ?? ''}>
             <option value="">{t('공통 지형')}</option>
             {map.layers.map((layer) => <option key={layer.id} value={layer.id}>{t(layer.name)}</option>)}
-          </select></label>}
+          </Select></label>}
           {vectorFields.map(({ key, label }) => (
             <fieldset className="edit-controls" key={key}>
               <legend>{t(label)}</legend>
               {axisNames.map((axis, index) => (
-                <label key={axis}>{axis} <input name={key + axis} type="number" step="any"
+                <label key={axis}>{axis} <Input name={key + axis} type="number" step="any"
                   min={key === 'size' ? 0.01 : undefined} required defaultValue={selected[key][index]} /></label>
               ))}
             </fieldset>
           ))}
           <fieldset className="edit-controls">
             <legend>{t('계단·경사로 설정')}</legend>
-            <label>{t('디딤면 수') + ' '}<input name="steps" type="number" min={2} max={64} required
+            <label>{t('디딤면 수') + ' '}<Input name="steps" type="number" min={2} max={64} required
               defaultValue={selected.kind === 'stairs' ? selected.steps : 5} /></label>
-            <label>{t('상승 방향') + ' '}<select name="rises" defaultValue={(selected.kind === 'stairs' || selected.kind === 'ramp') ? selected.risesToward : '+x'}>
+            <label>{t('상승 방향') + ' '}<Select name="rises" defaultValue={(selected.kind === 'stairs' || selected.kind === 'ramp') ? selected.risesToward : '+x'}>
               {['+x', '-x', '+z', '-z'].map((axis) => <option key={axis}>{axis}</option>)}
-            </select></label>
+            </Select></label>
           </fieldset>
           <fieldset className="edit-controls terrain-properties">
             <legend>{t('지형 속성')}</legend>
@@ -130,19 +131,19 @@ const TerrainTools = ({ map, selected, selectedCount, undoable, redoable, onSave
               { key: 'blocksSight', label: t('시야 차단') },
             ].map(({ key, label }) => {
               const value = selected[key as 'walkable' | 'collision' | 'blocksSight'];
-              return <label key={key}>{label} <select name={key} defaultValue={value === undefined ? '' : value ? 'on' : 'off'}>
+              return <label key={key}>{label} <Select name={key} defaultValue={value === undefined ? '' : value ? 'on' : 'off'}>
                 <option value="">{t('기본값')}</option><option value="on">{t('켜기')}</option><option value="off">{t('끄기')}</option>
-              </select></label>;
+              </Select></label>;
             })}
-            <label>{t('재질 색상') + ' '}<input name="material" pattern="#[0-9a-fA-F]{6}" defaultValue={selected.material ?? ''} /></label>
+            <label>{t('재질 색상') + ' '}<Input name="material" pattern="#[0-9a-fA-F]{6}" defaultValue={selected.material ?? ''} /></label>
           </fieldset>
-          <button type="submit" className="reset-button">{t('블록 저장')}</button>
+          <Button type="submit" className="reset-button">{t('블록 저장')}</Button>
         </form>
         <div className="hero-actions">
-          <button type="button" className="reset-button" onClick={() => onTransform(selected.id, 'rotate')}>{t('90° 회전')}</button>
-          <button type="button" className="reset-button" onClick={() => onTransform(selected.id, 'snap')}>{t('격자에 맞추기')}</button>
-          <button type="button" className="reset-button" onClick={() => onDuplicate(selected)}>{t('블록 복제')}</button>
-          <button type="button" className="reset-button" onClick={() => onRemove(selected.id)}>{t('블록 삭제')}</button>
+          <Button type="button" className="reset-button" onClick={() => onTransform(selected.id, 'rotate')}>{t('90° 회전')}</Button>
+          <Button type="button" className="reset-button" onClick={() => onTransform(selected.id, 'snap')}>{t('격자에 맞추기')}</Button>
+          <Button type="button" className="reset-button" onClick={() => onDuplicate(selected)}>{t('블록 복제')}</Button>
+          <Button type="button" className="reset-button" onClick={() => onRemove(selected.id)}>{t('블록 삭제')}</Button>
         </div>
       </>}
     </section>

@@ -1,3 +1,4 @@
+import { Button } from './ui/controls';
 import { useLocale } from './ui/locale';
 import { useEffect, useState } from 'react';
 import Editor from './editor/editor';
@@ -41,7 +42,7 @@ const App = () => {
   if (shared) return <SharedStrategyView key={hash} draft={shared} onDuplicate={() => openEditor(shared)} />;
   return <main className="hero-tools">
     <h1>{t('공유 링크를 열 수 없습니다.')}</h1>
-    <button type="button" className="reset-button" onClick={() => openEditor()}>{t('편집기 열기')}</button>
+    <Button type="button" className="reset-button" onClick={() => openEditor()}>{t('편집기 열기')}</Button>
   </main>;
 };
 

@@ -1,3 +1,4 @@
+import { Button, Input } from '../ui/controls';
 import { useLocale } from '../ui/locale';
 import AbilityRangeReferenceForm from './ability-range-reference-form';
 import { isAbilityDuration, maxAbilityDurationSeconds, minAbilityDurationSeconds } from '../domain/ability-preview';
@@ -25,16 +26,16 @@ const AbilityPlacementTools = ({ items, selectedId, locked, pending, onSelect, o
       <h2 id="placed-abilities-title">{t('배치한 능력')}</h2>
       {pending && <div className="pending-edit">
         <p role="status">{t(pending)}</p>
-        <button type="button" className="reset-button" onClick={onCancel}>{t('능력 배치 취소')}</button>
+        <Button type="button" className="reset-button" onClick={onCancel}>{t('능력 배치 취소')}</Button>
       </div>}
       {items.length > 0 && <ul className="terrain-list">
         {items.map((item) => {
           const abilityName = getHero(item.heroId)?.abilities.find(({ id }) => id === item.abilityId)?.name ?? item.abilityId;
           return <li key={item.id}>
-            <button type="button" className="terrain-button" aria-pressed={item.id === selectedId}
+            <Button type="button" className="terrain-button" aria-pressed={item.id === selectedId}
               onClick={() => onSelect(item.id)}>
               <span>{abilityName}</span><small>{item.visible ? t('표시 중') : t('숨김')}</small>
-            </button>
+            </Button>
           </li>;
         })}
       </ul>}
@@ -55,21 +56,21 @@ const AbilityPlacementTools = ({ items, selectedId, locked, pending, onSelect, o
           onUpdate({ ...selected, durationSeconds });
         }}>
           <fieldset className="edit-controls" disabled={locked}>
-            <label>{t('배치한 영역 지속 시간 (초)') + ' '}<input name="duration" type="number"
+            <label>{t('배치한 영역 지속 시간 (초)') + ' '}<Input name="duration" type="number"
               min={minAbilityDurationSeconds} max={maxAbilityDurationSeconds} step="any" defaultValue={selected.durationSeconds}
             /></label>
-            <button type="submit" className="reset-button">{t('지속 시간 적용')}</button>
+            <Button type="submit" className="reset-button">{t('지속 시간 적용')}</Button>
           </fieldset>
         </form>}
         <fieldset className="hero-actions edit-controls" disabled={locked}>
-          <button type="button" className="reset-button" onClick={() => onMove(selected)}>{t('능력 이동')}</button>
-          <button type="button" className="reset-button"
-            onClick={() => onUpdate({ ...selected, heading: (selected.heading + 45) % 360 })}>{t('능력 45° 회전')}</button>
-          <button type="button" className="reset-button"
+          <Button type="button" className="reset-button" onClick={() => onMove(selected)}>{t('능력 이동')}</Button>
+          <Button type="button" className="reset-button"
+            onClick={() => onUpdate({ ...selected, heading: (selected.heading + 45) % 360 })}>{t('능력 45° 회전')}</Button>
+          <Button type="button" className="reset-button"
             onClick={() => onUpdate({ ...selected, visible: !selected.visible })}>
             {selected.visible ? t('능력 숨기기') : t('능력 표시하기')}
-          </button>
-          <button type="button" className="reset-button" onClick={() => onRemove(selected.id)}>{t('능력 삭제')}</button>
+          </Button>
+          <Button type="button" className="reset-button" onClick={() => onRemove(selected.id)}>{t('능력 삭제')}</Button>
         </fieldset>
         <AbilityRangeReferenceForm key={selected.id} ability={selected} locked={locked}
           onReference={(rangeReference) => onUpdate({ ...selected, rangeReference })}
