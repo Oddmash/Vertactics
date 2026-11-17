@@ -12,6 +12,7 @@ export type AbilityPreviewSettings = {
   angle: number;
   direction: number;
   verification: 'custom';
+  durationSeconds?: number;
 };
 
 export type AbilityPlacement = AbilityPreviewSettings & {
@@ -25,6 +26,12 @@ export type AbilityPlacement = AbilityPreviewSettings & {
 const inRange = (value: unknown, min: number, max: number): value is number =>
   typeof value === 'number' && value >= min && value <= max;
 
+export const minAbilityDurationSeconds = 0.1;
+export const maxAbilityDurationSeconds = 3600;
+
+export const isAbilityDuration = (value: unknown): value is number =>
+  inRange(value, minAbilityDurationSeconds, maxAbilityDurationSeconds);
+
 const hasText = (value: unknown): value is string =>
   typeof value === 'string' && value.trim().length > 0;
 
@@ -35,18 +42,19 @@ export const parseAbilityPlacements = (value: unknown): AbilityPlacement[] => {
     if (typeof item !== 'object' || item === null || Array.isArray(item)) {
       throw new Error(`Invalid abilities[${index}]`);
     }
-    const { id, heroId, abilityId, shape, range, width, angle, direction, verification, position, heading, visible } =
+    const { id, heroId, abilityId, shape, range, width, angle, direction, verification, durationSeconds, position, heading, visible } =
       item as Record<string, unknown>;
     const abilityShape = abilityShapes.find((candidate) => candidate === shape);
     if (!hasText(id) || ids.has(id) || !hasText(heroId) || !hasText(abilityId) || !abilityShape ||
       !inRange(range, 0.1, 1000) || !inRange(width, 0.1, 1000) || !inRange(angle, 1, 360) ||
       !inRange(direction, -360, 360) || verification !== 'custom' || !isWorldPoint(position) ||
+      (durationSeconds !== undefined && (shape !== 'area' || !isAbilityDuration(durationSeconds))) ||
       (typeof heading !== 'number' || heading < 0 || !(heading < 360)) || typeof visible !== 'boolean') {
       throw new Error(`Invalid or duplicate abilities[${index}]`);
     }
     ids.add(id);
     return { id, heroId, abilityId, shape: abilityShape, range, width, angle, direction, verification,
-      position: [...position], heading, visible };
+      ...(durationSeconds === undefined ? {} : { durationSeconds }), position: [...position], heading, visible };
   });
 };
 

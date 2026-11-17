@@ -66,6 +66,14 @@ describe('strategy abilities', () => {
     expect(parseStrategy({ ...empty, abilities: undefined }).abilities).toEqual([]);
   });
 
+  it('preserves optional area durations and validates shape and time together', () => {
+    const area = { ...ability, shape: 'area', durationSeconds: 3.5 };
+    expect(parseStrategy({ ...empty, abilities: [area] }).abilities).toEqual([area]);
+    for (const patch of [{ shape: 'cone' }, { durationSeconds: 0 }, { durationSeconds: Infinity }, { durationSeconds: 3601 }]) {
+      expect(() => parseStrategy({ ...empty, abilities: [{ ...area, ...patch }] })).toThrow(/abilities/);
+    }
+  });
+
   it('rejects duplicate ids, invalid geometry and unrecognized provenance', () => {
     expect(() => parseStrategy({ ...empty, abilities: [ability, ability] })).toThrow(/abilities/);
     for (const patch of [{ width: Infinity }, { heading: NaN }, { position: [0, 0] }, { verification: 'verified' }]) {
