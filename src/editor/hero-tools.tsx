@@ -20,17 +20,13 @@ type Props = {
   catalogueId: CatalogueHero;
   onChooseHero: (id: CatalogueHero) => void;
   pendingMessage: string;
-  canUndo: boolean;
-  canRedo: boolean;
   onPlace: (heroId: CatalogueHero, team: Team) => void;
   onSelect: (id: string) => void;
-  onUndo: () => void;
-  onRedo: () => void;
   onCancel: () => void;
 };
 
 const HeroTools = ({
-  heroes, locked, selectedId, catalogueId, onChooseHero, pendingMessage, canUndo, canRedo, onPlace, onSelect, onUndo, onRedo, onCancel,
+  heroes, locked, selectedId, catalogueId, onChooseHero, pendingMessage, onPlace, onSelect, onCancel,
 }: Props) => {
   const { locale, t } = useLocale();
   const selectedProfile = heroCatalogue[catalogueId];
@@ -88,14 +84,10 @@ const HeroTools = ({
         <p role="status">{pendingMessage}</p>
         <Button type="button" className="reset-button" onClick={onCancel}>{t('취소')}</Button>
       </div>}
-      <div className="hero-actions">
-        <Button type="button" className="reset-button" disabled={!canUndo} onClick={onUndo}>{t('실행 취소')}</Button>
-        <Button type="button" className="reset-button" disabled={!canRedo} onClick={onRedo}>{t('다시 실행')}</Button>
-      </div>
-      {heroes.length > 0 && <ul className="terrain-list" aria-label={t('배치한 영웅')}>
+      {heroes.length > 0 && <ul className="placed-hero-strip" aria-label={t('배치한 영웅')}>
         {heroes.map((hero) => (
           <li key={hero.id}>
-            <Button className="terrain-button" type="button" aria-pressed={selectedId === hero.id} onClick={() => onSelect(hero.id)}>
+            <Button className="placed-hero-chip" type="button" aria-pressed={selectedId === hero.id} onClick={() => onSelect(hero.id)}>
               <span className={`terrain-swatch team-${hero.team}`} aria-hidden="true" />
               <span>{locale === 'en' ? getHero(hero.heroId)?.name ?? hero.heroId : heroName(hero.heroId)}</span>
               <small>{t(teamNames[hero.team])}</small>

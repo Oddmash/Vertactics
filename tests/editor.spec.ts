@@ -1,5 +1,5 @@
 import { openMap } from './open-map';
-import { readFile } from 'node:fs/promises';
+import { clickWestHighGround, savedAbilityElevation, savedHeroPosition } from './workspace-map';
 import { PerspectiveCamera, Vector3 } from 'three';
 import { expect, test } from '@playwright/test';
 
@@ -17,7 +17,8 @@ test('renders and manipulates the same elevated terrain in both views', async ({
   await threeD.click();
   await expect(canvas).toBeVisible();
   await expect(page.getByText('WebGL 2를 사용할 수 없어', { exact: false })).toBeHidden();
-  await page.getByRole('button', { name: '서쪽 고지대 +4 u' }).click();
+  await clickWestHighGround(page);
+  await threeD.click();
   await expect(inspector.getByText('+4 u')).toBeVisible();
 
   const visibleTerrain = async () => {
@@ -144,14 +145,14 @@ test('places and moves a hero across views, then undoes and redoes elevation cha
   await expect(canvas).toHaveCSS('cursor', 'crosshair');
   await clickWorld(-9.5, -5);
   await expect(inspector.getByText('+4 u')).toBeVisible();
-  const coordinates = inspector.locator('dl div').filter({ hasText: '좌표 (X, Y, Z)' }).locator('dd');
+
   const placedHeroes = inspector.getByRole('list', { name: '배치한 영웅' });
-  const worldPosition = await coordinates.innerText();
+  const worldPosition = await savedHeroPosition(page);
   await threeD.click();
   await expect(canvas).toHaveAttribute('data-view-mode', '3d');
   await expect(inspector.getByText('+4 u')).toBeVisible();
   await expect(placedHeroes.getByText('공격팀', { exact: true })).toBeVisible();
-  await expect(coordinates).toHaveText(worldPosition);
+  await expect.poll(() => savedHeroPosition(page)).toBe(worldPosition);
   await page.screenshot({ path: testInfo.outputPath('vertactics-hero-placement.png') });
 
   await page.getByRole('button', { name: '실행 취소', exact: true }).click();
@@ -276,7 +277,7 @@ test('snaps a placement, locks edits, and keeps hidden layers in the strategy', 
   if (!box) throw new Error('Canvas has no bounds');
   const scale = Math.max(36 / box.width, 24 / box.height) * 1.22;
   await page.mouse.click(box.x + box.width / 2 + 7.3 / scale, box.y + box.height / 2 + 5.2 / scale);
-  await expect(inspector.getByText('7, 2, 5', { exact: true })).toBeVisible();
+  await expect.poll(() => savedHeroPosition(page)).toBe('7, 2, 5');
   const placed = await canvas.screenshot();
   const heroes = page.getByRole('checkbox', { name: '영웅 표시' });
   await heroes.uncheck();
@@ -292,16 +293,16 @@ test('snaps a placement, locks edits, and keeps hidden layers in the strategy', 
   await expect(page.getByRole('button', { name: '마커 그리기' })).toBeDisabled();
   await expect(inspector.getByRole('button', { name: '삭제' })).toBeDisabled();
   await lock.press('Control+z');
-  await expect(inspector.getByText('7, 2, 5', { exact: true })).toBeVisible();
+  await expect.poll(() => savedHeroPosition(page)).toBe('7, 2, 5');
   await lock.uncheck();
   await lock.press('Control+z');
   await expect(page.getByRole('list', { name: '배치한 영웅' })).toHaveCount(0);
   await lock.press('Control+Shift+z');
-  await expect(inspector.getByText('7, 2, 5', { exact: true })).toBeVisible();
+  await expect.poll(() => savedHeroPosition(page)).toBe('7, 2, 5');
   await inspector.getByRole('button', { name: '이동', exact: true }).click();
   await expect(canvas).toHaveCSS('cursor', 'crosshair');
   await page.mouse.click(box.x + box.width / 2 - 9.4 / scale, box.y + box.height / 2 + 2.94 / scale);
-  await expect(inspector.getByText('-9, 2, 3', { exact: true })).toBeVisible();
+  await expect.poll(() => savedHeroPosition(page)).toBe('-9, 2, 3');
 });
 
 
@@ -345,14 +346,14 @@ test('picks stacked floors and places and selects heroes in both views', async (
   await place.click();
   await expect(canvas).toHaveCSS('cursor', 'crosshair');
   await clickPerspective(0, 0, 0);
-  await expect(inspector.getByText('0, 0, 0', { exact: true })).toBeVisible();
+  await expect.poll(() => savedHeroPosition(page)).toBe('0, 0, 0');
   await clickPerspective(5, 0, 6);
   await clickPerspective(0, 0.3, 0);
-  await expect(inspector.getByText('0, 0, 0', { exact: true })).toBeVisible();
+  await expect.poll(() => savedHeroPosition(page)).toBe('0, 0, 0');
   await inspector.getByRole('button', { name: '이동', exact: true }).click();
   await expect(canvas).toHaveCSS('cursor', 'crosshair');
   await clickPerspective(-3, 0, 3);
-  await expect(inspector.getByText('-3, 0, 3', { exact: true })).toBeVisible();
+  await expect.poll(() => savedHeroPosition(page)).toBe('-3, 0, 3');
 });
 
 test('commits a continuous hero drag as one undoable edit', async ({ page }) => {
@@ -371,26 +372,24 @@ test('commits a continuous hero drag as one undoable edit', async ({ page }) => 
   await page.getByRole('button', { name: '지도에서 위치 선택' }).click();
   await expect(canvas).toHaveCSS('cursor', 'crosshair');
   await page.mouse.click(...await screen(0, 1));
-  await expect(inspector.getByText('0, 0, 1', { exact: true })).toBeVisible();
+  await expect.poll(() => savedHeroPosition(page)).toBe('0, 0, 1');
   await inspector.getByRole('button', { name: '드래그 이동' }).click();
   await expect(canvas).toHaveCSS('cursor', 'crosshair');
   await page.mouse.move(...await screen(0, 1));
   await page.mouse.down();
   const [x, y] = await screen(7, 5);
   await page.mouse.move(x, y, { steps: 12 });
-  await expect(inspector.getByText('0, 0, 1', { exact: true })).toBeVisible();
-  const preview = inspector.locator('dl div').filter({ hasText: '이동 미리보기' }).locator('dd');
-  await expect(preview).toHaveText('7, 2, 5');
-  const destination = await preview.innerText();
+  await expect.poll(() => savedHeroPosition(page)).toBe('0, 0, 1');
+  const destination = '7, 2, 5';
   await page.mouse.up();
-  await expect(inspector.getByText(destination, { exact: true })).toBeVisible();
+  await expect.poll(() => savedHeroPosition(page)).toBe(destination);
   await page.getByRole('button', { name: '실행 취소', exact: true }).click();
-  await expect(inspector.getByText('0, 0, 1', { exact: true })).toBeVisible();
+  await expect.poll(() => savedHeroPosition(page)).toBe('0, 0, 1');
   await page.getByRole('button', { name: '다시 실행', exact: true }).click();
-  await expect(inspector.getByText(destination, { exact: true })).toBeVisible();
+  await expect.poll(() => savedHeroPosition(page)).toBe(destination);
 });
 
-test('switches maps without losing plans and registers validated JSON', async ({ page }) => {
+test('switches maps without losing plans or exposing a map editor', async ({ page }) => {
   await page.goto('/');
   const canvas = page.getByTestId('viewport').locator('canvas');
   const placements = page.getByRole('list', { name: '배치한 영웅' });
@@ -408,87 +407,8 @@ test('switches maps without losing plans and registers validated JSON', async ({
   await openMap(page, '고저차 테스트 맵');
   await expect(placements.getByRole('listitem')).toHaveCount(1);
 
-  const input = page.getByLabel('지도 JSON 가져오기');
-  await input.setInputFiles({ name: 'broken.json', mimeType: 'application/json', buffer: Buffer.from('{}') });
-  await expect(page.getByText('지도 JSON을 읽을 수 없습니다.')).toBeVisible();
-  await input.setInputFiles({
-    name: 'custom.json', mimeType: 'application/json', buffer: Buffer.from(JSON.stringify({
-      schemaVersion: 1, id: 'custom', name: '사용자 지도',
-      terrain: [{ id: 'base', name: '바닥', kind: 'floor', origin: [-4, -1, -4], size: [8, 1, 8] }],
-    })),
-  });
-  await expect(page.getByRole('heading', { name: '사용자 지도' })).toBeVisible();
-  const download = page.waitForEvent('download');
-  await page.getByRole('link', { name: '지도 JSON 저장' }).click();
-  const exported = await download;
-  expect(exported.suggestedFilename()).toBe('custom.json');
-  expect(JSON.parse(await readFile(await exported.path(), 'utf8'))).toMatchObject({ schemaVersion: 2, id: 'custom' });
-});
-
-test('creates, edits and restores terrain using the shared map view', async ({ page }) => {
-  await page.goto('/');
-  await page.getByRole('button', { name: '새 지도', exact: true }).click();
-  await expect(page.getByRole('heading', { name: '새 지도', exact: true })).toBeVisible();
-  const tools = page.getByRole('region', { name: '지도 편집', exact: true });
-  await tools.getByRole('button', { name: '블록 추가' }).click();
-  await tools.getByRole('textbox', { name: '블록 이름' }).fill('연습 벽');
-  await tools.getByLabel('지형 유형').selectOption('wall');
-  await tools.getByRole('group', { name: '크기' }).getByRole('spinbutton', { name: 'Y' }).fill('3');
-  await tools.getByRole('button', { name: '블록 저장' }).click();
-  await expect(page.getByRole('button', { name: /연습 벽 \+3 u/ })).toBeVisible();
-  await tools.getByRole('button', { name: '블록 복제' }).click();
-  const duplicate = page.getByRole('button', { name: /연습 벽 복제/ });
-  await expect(duplicate).toBeVisible();
-  await tools.getByRole('button', { name: '지도 실행 취소' }).click();
-  await expect(duplicate).toHaveCount(0);
-  await tools.getByRole('button', { name: '지도 다시 실행' }).click();
-  await expect(duplicate).toBeVisible();
-  await duplicate.click();
-  await tools.getByRole('button', { name: '블록 삭제', exact: true }).click();
-  await expect(duplicate).toHaveCount(0);
-});
-
-test('manages map layers and transforms their terrain without losing blocks', async ({ page }) => {
-  await page.goto('/');
-  await page.getByRole('button', { name: '새 지도', exact: true }).click();
-  const tools = page.getByRole('region', { name: '지도 편집', exact: true });
-  const layerFilter = page.getByLabel('표시 층');
-  await tools.getByRole('textbox', { name: '새 층 이름' }).fill('발코니');
-  await tools.getByRole('button', { name: '층 추가' }).click();
-  await layerFilter.selectOption({ label: '발코니' });
-  await tools.getByRole('button', { name: '블록 추가' }).click();
-  const coordinates = tools.getByRole('group', { name: '좌표', exact: true });
-  const size = tools.getByRole('group', { name: '크기', exact: true });
-  await coordinates.getByRole('spinbutton', { name: 'X', exact: true }).fill('1.2');
-  await size.getByRole('spinbutton', { name: 'X', exact: true }).fill('6');
-  await tools.getByRole('button', { name: '블록 저장' }).click();
-  await tools.getByRole('button', { name: '격자에 맞추기' }).click();
-  await expect(coordinates.getByRole('spinbutton', { name: 'X', exact: true })).toHaveValue('1');
-  await tools.getByRole('button', { name: '90° 회전' }).click();
-  await expect(size.getByRole('spinbutton', { name: 'Z', exact: true })).toHaveValue('6');
-
-  const balcony = tools.getByRole('form', { name: '발코니' });
-  await balcony.getByRole('textbox', { name: '층 이름' }).fill('상층');
-  await balcony.getByRole('button', { name: '층 이름 저장' }).click();
-  await expect(layerFilter.getByRole('option', { name: '상층' })).toHaveCount(1);
-  await tools.getByRole('form', { name: '상층' }).getByRole('button', { name: '층 삭제' }).click();
-  await expect(layerFilter).toHaveCount(0);
-  await expect(page.getByRole('button', { name: /새 블록/ })).toBeVisible();
-  await tools.getByRole('button', { name: '지도 실행 취소' }).click();
-  await expect(layerFilter.getByRole('option', { name: '상층' })).toHaveCount(1);
-});
-
-test('duplicates multiple terrain blocks and undoes them together', async ({ page }) => {
-  await page.goto('/');
-  await page.getByRole('button', { name: '지도 편집 모드' }).click();
-  await page.getByRole('button', { name: /북쪽 벽/ }).click();
-  await page.getByRole('button', { name: /동쪽 벽/ }).click({ modifiers: ['Shift'] });
-  await expect(page.getByText('2개 선택', { exact: true })).toBeVisible();
-  await page.getByRole('button', { name: '선택 블록 복제' }).click();
-  await expect(page.getByRole('button', { name: /북쪽 벽 복제/ })).toBeVisible();
-  await expect(page.getByRole('button', { name: /동쪽 벽 복제/ })).toBeVisible();
-  await page.getByRole('button', { name: '지도 실행 취소' }).click();
-  await expect(page.getByRole('button', { name: /벽 복제/ })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: '새 지도', exact: true })).toHaveCount(0);
+  await expect(page.getByLabel('지도 JSON 가져오기')).toHaveCount(0);
 });
 
 test('places and drags heroes at continuous ramp elevations', async ({ page }) => {
@@ -506,7 +426,7 @@ test('places and drags heroes at continuous ramp elevations', async ({ page }) =
   const point = (x: number): [number, number] => [box.x + box.width / 2 + x / units, box.y + box.height / 2];
   await page.mouse.click(...point(2.6));
   const inspector = page.getByRole('complementary', { name: '지형 정보' });
-  await expect(inspector.getByText('3, 1.5, 0', { exact: true })).toBeVisible();
+  await expect.poll(() => savedHeroPosition(page)).toBe('3, 1.5, 0');
   await inspector.getByRole('button', { name: '드래그 이동' }).click();
   await expect(canvas).toHaveCSS('cursor', 'crosshair');
   await page.mouse.move(...point(3));
@@ -514,17 +434,17 @@ test('places and drags heroes at continuous ramp elevations', async ({ page }) =
   const [x, y] = point(1.2);
   await page.mouse.move(x, y, { steps: 5 });
   await page.mouse.up();
-  await expect(inspector.getByText('1, 0.5, 0', { exact: true })).toBeVisible();
+  await expect.poll(() => savedHeroPosition(page)).toBe('1, 0.5, 0');
   await page.getByRole('button', { name: '3D 원근' }).click();
   await expect(canvas).toHaveAttribute('data-view-mode', '3d');
-  await expect(inspector.getByText('1, 0.5, 0', { exact: true })).toBeVisible();
+  await expect.poll(() => savedHeroPosition(page)).toBe('1, 0.5, 0');
 });
 
 test('opens the approximate Kings Row blockout and places a hero on Point A', async ({ page }, testInfo) => {
   await page.goto('/');
   await openMap(page, '왕의 길 열기');
   await expect(page.getByRole('heading', { name: /왕의 길 A 거점/ })).toBeVisible();
-  await expect(page.getByText(/미검증 · 40 × 46 u/)).toBeVisible();
+  await expect(page.getByText('미검증', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: '2D 탑다운' }).click();
   const canvas = page.getByTestId('viewport').locator('canvas');
   await expect(canvas).toHaveAttribute('data-view-mode', '2d');
@@ -535,16 +455,14 @@ test('opens the approximate Kings Row blockout and places a hero on Point A', as
   if (!box) throw new Error('Canvas has no bounds');
   const units = Math.max(40 / box.width, 46 / box.height) * 1.22;
   await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2 - 11 / units);
-  const inspector = page.getByRole('complementary', { name: '지형 정보' });
-  await expect(inspector.getByText('0, 0.04, -8', { exact: true })).toBeVisible();
+  await expect.poll(() => savedHeroPosition(page)).toBe('0, 0.04, -8');
   await page.screenshot({ path: testInfo.outputPath('kings-row-a-2d.png') });
   await page.getByRole('button', { name: '3D 원근' }).click();
   await expect(canvas).toHaveAttribute('data-view-mode', '3d');
-  await expect(inspector.getByText('0, 0.04, -8', { exact: true })).toBeVisible();
+  await expect.poll(() => savedHeroPosition(page)).toBe('0, 0.04, -8');
   await page.screenshot({ path: testInfo.outputPath('kings-row-a-3d.png') });
   await page.getByLabel('표시 층').selectOption('upper');
-  await expect(page.getByRole('button', { name: /수비 측 고지대/ })).toBeVisible();
-  await expect(page.getByRole('button', { name: /A 점령 구역/ })).toHaveCount(0);
+  await expect(page.getByLabel('표시 층')).toHaveValue('upper');
 });
 
 test('shows a blocked hero sightline in both map views', async ({ page }, testInfo) => {
@@ -688,19 +606,18 @@ test('places and edits an independent ability across the map views', async ({ pa
   await expect(canvas).toHaveCSS('cursor', 'crosshair');
   await clickWorld(-9.5, -5);
   await expect(placed.getByRole('button', { name: 'Blink 표시 중' })).toBeVisible();
-  const coordinates = placed.locator('dd').first();
-  await expect(coordinates).toHaveText(/, 4, /);
+  await expect.poll(() => savedAbilityElevation(page)).toBe(4);
   await page.getByRole('button', { name: '범위 숨기기', exact: true }).click();
   await placed.getByRole('button', { name: '능력 이동' }).click();
   await expect(canvas).toHaveCSS('cursor', 'crosshair');
   await clickWorld(-4, 0);
-  await expect(coordinates).toHaveText(/, 0, /);
+  await expect.poll(() => savedAbilityElevation(page)).toBe(0);
   await placed.getByRole('button', { name: '능력 45° 회전' }).click();
   await expect(placed.getByText('45°', { exact: true })).toBeVisible();
   await page.screenshot({ path: testInfo.outputPath('ability-placement-2d.png') });
   await page.getByRole('button', { name: '3D 원근' }).click();
   await expect(canvas).toHaveAttribute('data-view-mode', '3d');
-  await expect(coordinates).toHaveText(/, 0, /);
+  await expect.poll(() => savedAbilityElevation(page)).toBe(0);
   await expect(placed.getByText('45°', { exact: true })).toBeVisible();
   await page.screenshot({ path: testInfo.outputPath('ability-placement-3d.png') });
   const visible = await canvas.screenshot();

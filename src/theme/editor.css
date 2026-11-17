@@ -957,3 +957,68 @@ ul { padding: 0; list-style: none; }
   width: 100%;
   min-width: 0;
 }
+
+.editor .display-options label {
+  min-block-size: var(--size-touch);
+  gap: var(--space-sm);
+}
+.editor .ui-select {
+  vertical-align: middle;
+  text-align: center;
+}
+@supports (appearance: base-select) and selector(::picker(select)) {
+  .editor .ui-select {
+    align-items: center;
+    justify-content: center;
+    padding-inline: var(--space-sm);
+  }
+  .editor .ui-select > selectedcontent { margin-inline: auto; }
+  .editor .ui-select option { align-items: center; }
+}
+.marker-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-sm);
+}
+.marker-actions .reset-button { min-height: var(--size-touch); }
+
+.editor[data-fullscreen="true"] {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  overflow: auto;
+  background: var(--color-app);
+}
+.editor:fullscreen { background: var(--color-app); }
+.workspace-history { display: flex; gap: var(--space-xs); margin-inline-start: auto; }
+.workspace-history .reset-button { min-inline-size: var(--size-control); font-size: 18px; line-height: 1; }
+.editor-workspace > :is(.terrain-panel, .inspector-panel) {
+  border-color: transparent;
+  background: var(--color-app);
+}
+.editor-workspace > :is(.terrain-panel, .inspector-panel) > .panel-heading {
+  padding-block: var(--space-sm);
+  background: transparent;
+}
+.editor-workspace .hero-roster { border: 0; background: transparent; }
+.editor-workspace .hero-roster-card { border-color: transparent; background: transparent; }
+.editor-workspace .hero-roster-card:hover { background: var(--color-control); }
+.editor-workspace .hero-roster-card[aria-pressed="true"] { border-color: var(--color-action); }
+.placed-hero-strip { display: flex; flex-wrap: wrap; gap: var(--space-xs); }
+.placed-hero-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-height: var(--size-control);
+  padding: var(--space-xs) var(--space-sm);
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  font-size: 11px;
+}
+.placed-hero-chip small { color: var(--color-muted); }
+.placed-hero-chip:is(:hover, [aria-pressed="true"]) { background: var(--color-control); }
+.editor-workspace .hero-inspector > dl { padding-inline: 0; background: transparent; }
+@media (pointer: coarse) {
+  .placed-hero-chip, .workspace-history .reset-button { min-height: var(--size-touch); }
+}

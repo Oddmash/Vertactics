@@ -6,12 +6,13 @@ import { pickTerrainSurface } from '../domain/surface-height';
 
 type Props = {
   snap: boolean;
+  sampleStart?: boolean;
   onPreview?: (point: WorldPoint | null) => void;
   onFinish?: (point: WorldPoint | null) => void;
   externalDrop?: { type: string; finish: (data: string, point: WorldPoint) => void };
 };
 
-const SurfaceDrag = ({ snap, onPreview, onFinish, externalDrop }: Props) => {
+const SurfaceDrag = ({ snap, sampleStart, onPreview, onFinish, externalDrop }: Props) => {
   const { camera, gl, scene } = useThree();
   const pointerId = useRef<number | null>(null);
 
@@ -36,7 +37,12 @@ const SurfaceDrag = ({ snap, onPreview, onFinish, externalDrop }: Props) => {
     };
 
     const start = (event: PointerEvent) => {
-      if (event.button === 0) pointerId.current = event.pointerId;
+      if (event.button !== 0 || pointerId.current !== null) return;
+      pointerId.current = event.pointerId;
+      if (sampleStart) {
+        canvas.setPointerCapture(event.pointerId);
+        onPreview?.(getPoint(event));
+      }
     };
     const move = (event: PointerEvent) => {
       if (event.pointerId === pointerId.current) onPreview?.(getPoint(event));
@@ -46,6 +52,7 @@ const SurfaceDrag = ({ snap, onPreview, onFinish, externalDrop }: Props) => {
       pointerId.current = null;
       onFinish?.(getPoint(event));
     };
+    const cancel = () => { pointerId.current = null; };
     const dragOver = (event: DragEvent) => {
       if (!externalDrop || !event.dataTransfer?.types.includes(externalDrop.type)) return;
       event.preventDefault();
@@ -61,6 +68,8 @@ const SurfaceDrag = ({ snap, onPreview, onFinish, externalDrop }: Props) => {
       canvas.addEventListener('pointerdown', start);
       canvas.addEventListener('pointermove', move);
       canvas.addEventListener('pointerup', finish);
+      canvas.addEventListener('pointercancel', cancel);
+      if (!sampleStart) canvas.addEventListener('pointerleave', cancel);
     }
     canvas.addEventListener('dragover', dragOver);
     canvas.addEventListener('drop', drop);
@@ -68,10 +77,12 @@ const SurfaceDrag = ({ snap, onPreview, onFinish, externalDrop }: Props) => {
       canvas.removeEventListener('pointerdown', start);
       canvas.removeEventListener('pointermove', move);
       canvas.removeEventListener('pointerup', finish);
+      canvas.removeEventListener('pointercancel', cancel);
+      canvas.removeEventListener('pointerleave', cancel);
       canvas.removeEventListener('dragover', dragOver);
       canvas.removeEventListener('drop', drop);
     };
-  }, [camera, gl, scene, snap, onPreview, onFinish, externalDrop]);
+  }, [camera, gl, scene, snap, sampleStart, onPreview, onFinish, externalDrop]);
 
   return null;
 };
