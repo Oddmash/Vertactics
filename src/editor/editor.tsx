@@ -30,7 +30,7 @@ import type { StrategyAction } from '../domain/strategy-history';
 import type { ViewMode } from '../render/map-camera';
 import MapViewport from '../render/map-viewport';
 import HeroTools, { roleNames, teamNames } from './hero-tools';
-import { getHero, heroName } from '../domain/hero-catalogue';
+import { getHero, heroName, isCatalogueHero } from '../domain/hero-catalogue';
 import type { CatalogueHero } from '../domain/hero-catalogue';
 
 type SurfaceTool =
@@ -114,6 +114,7 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
     setAdditionalTerrain([]);
   };
   const selectedTerrainIds = new Set(selectedId ? [selectedId, ...additionalTerrain] : additionalTerrain);
+  const [catalogueHeroId, setCatalogueHeroId] = useState<CatalogueHero>('tracer');
   const [selectedHeroId, setSelectedHeroId] = useState<string | null>(null);
   const [dragPreview, setDragPreview] = useState<WorldPoint | null>(null);
   const [selectedAbilityId, setSelectedAbilityId] = useState<string | null>(null);
@@ -232,6 +233,8 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
   };
 
   const selectHero = (id: string) => {
+    const heroId = heroes.find((hero) => hero.id === id)?.heroId;
+    if (heroId && isCatalogueHero(heroId)) setCatalogueHeroId(heroId);
     setSelectedId(null);
     setSelectedHeroId(id);
     setHeroViewId((current) => current === id ? current : undefined);
@@ -484,19 +487,6 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
               </li>
             ))}
           </ul>
-          {!mapEditing && <HeroTools
-            heroes={heroes}
-            locked={locked || !showHeroes}
-            selectedId={selectedHeroId}
-            pendingMessage={tool?.kind === 'place' ? t('배치할 지면을 클릭하세요.') : tool?.kind === 'drag' ? t('지도에서 누른 채 끌어 이동하세요.') : tool?.kind === 'move' ? t('이동할 지면을 클릭하세요.') : ''}
-            canUndo={!locked && history.past.length > 0}
-            canRedo={!locked && history.future.length > 0}
-            onPlace={(heroId, team) => activateTool({ kind: 'place', heroId, team })}
-            onSelect={(id) => { activateTool(null); selectHero(id); }}
-            onUndo={() => { activateTool(null); dispatch({ type: 'undo' }); }}
-            onRedo={() => { activateTool(null); dispatch({ type: 'redo' }); }}
-            onCancel={() => activateTool(null)}
-          />}
           <StrategyDraftTools draft={draft} onRestore={restoreDraft} />
           <StrategyFileTools draft={draft} onImport={(imported) => restoreDraft(imported, true)} />
           <section className="hero-tools" aria-label={t('작업 복구')}>
@@ -523,6 +513,24 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
           />}
         </aside>
         <aside className="inspector-panel panel" aria-labelledby="inspector-title">
+          {!mapEditing && <HeroTools
+            heroes={heroes}
+            locked={locked || !showHeroes}
+            selectedId={selectedHeroId}
+            catalogueId={catalogueHeroId}
+            onChooseHero={(id) => {
+              if (tool?.kind === 'place' && tool.heroId !== id) activateTool(null);
+              setCatalogueHeroId(id);
+            }}
+            pendingMessage={tool?.kind === 'place' ? t('배치할 지면을 클릭하세요.') : tool?.kind === 'drag' ? t('지도에서 누른 채 끌어 이동하세요.') : tool?.kind === 'move' ? t('이동할 지면을 클릭하세요.') : ''}
+            canUndo={!locked && history.past.length > 0}
+            canRedo={!locked && history.future.length > 0}
+            onPlace={(heroId, team) => activateTool({ kind: 'place', heroId, team })}
+            onSelect={(id) => { activateTool(null); selectHero(id); }}
+            onUndo={() => { activateTool(null); dispatch({ type: 'undo' }); }}
+            onRedo={() => { activateTool(null); dispatch({ type: 'redo' }); }}
+            onCancel={() => activateTool(null)}
+          />}
           <div className="panel-heading"><h2 id="inspector-title" tabIndex={-1}>{t('지형 정보')}</h2></div>
           <div className="inspector-body" role="status">
             {selectedHero ? (

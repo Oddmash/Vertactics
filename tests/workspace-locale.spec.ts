@@ -10,7 +10,9 @@ test('switches language without clearing selection and restores a save in Englis
 
   await page.getByRole('button', { name: '2D top-down' }).click();
   await expect(page.getByRole('complementary', { name: 'Terrain details' }).getByText('+4 u')).toBeVisible();
-  await expect(page.getByRole('option', { name: 'Reinhardt' })).toBeAttached();
+  const roster = page.getByRole('group', { name: 'Choose a hero' });
+  await page.getByRole('group', { name: 'Hero role' }).getByRole('button', { name: 'Tank', exact: true }).click();
+  await expect(roster.getByRole('button', { name: 'Reinhardt', exact: true })).toBeVisible();
 
   const local = page.getByRole('region', { name: 'Local strategies' });
   await local.getByLabel('Strategy name').fill('Bus approach');

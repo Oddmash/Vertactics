@@ -138,6 +138,7 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 - [x] 8.08d Rebuild hero, ability, terrain, and analysis controls around active tool and selection states
 - [x] 8.08e Adapt tool and inspector access for narrow screens and verify touch targets and canvas space
 - [x] 8.08f Verify keyboard, responsive layouts, 2D and 3D view continuity, and save and restore in a browser, then capture the redesigned workspace
+- [ ] 8.08g Add patch-verified ability descriptions and statistics across the hero roster. The sidebar links to official hero profiles and shows sourced descriptions and statistics where verified. Portrait URLs come from the OWKR manifest and point to Blizzard's CDN.
 - [x] 8.09a After reviewing the integrated Phase 8 UI, open a separate PR to refactor workspace state and module boundaries around the verified workflows
 - [x] 8.09b Keep map and strategy switching, restoration, and document commands under workspace ownership. Give UI panels the data and actions they need
 - [x] 8.09c Keep world rules and document validation independent of React, rendering, and browser storage. Verify existing editor, playback, and save and restore flows after the refactor
