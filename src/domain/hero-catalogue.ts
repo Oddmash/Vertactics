@@ -107,6 +107,7 @@ const heroDetails = {
     abilities: [
       { id: 'peacekeeper', name: 'Peacekeeper' },
       { id: 'combat-roll', name: 'Combat Roll' },
+      { id: 'flashbang', name: 'Flashbang' },
       { id: 'deadeye', name: 'Deadeye' },
     ],
   },

@@ -745,7 +745,9 @@ ul { padding: 0; list-style: none; }
 .hero-ability-detail p { color: var(--color-muted); }
 .hero-ability-sources { display: flex; flex-wrap: wrap; gap: var(--space-sm); font-size: 11px; }
 .hero-ability-sources a { color: var(--color-accent); }
-.hero-ability-stat { display: flex; gap: var(--space-sm); }
+.hero-ability-stat { display: grid; gap: var(--space-xs); }
+.hero-ability-stat > div { display: flex; justify-content: space-between; gap: var(--space-sm); }
+.hero-ability-stat small { display: block; color: var(--color-muted); }
 .hero-ability-stat dd { color: var(--color-action); }
 
 .location-picker {
