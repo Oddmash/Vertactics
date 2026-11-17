@@ -23,7 +23,7 @@
 - For rendering changes, verify the real canvas, both modes, and any affected picking or elevation behavior. Capture the actual application.
 - Check off only verified requirements in SPEC. Record the command or evidence and distinguish local checks, remote CI, and deployment.
 - Make one reviewable change per commit. Push the topic branch with a fast-forward and open a PR for each independently reviewable change. Include its SPEC IDs, verification evidence, and known gaps.
-- Leave merging to the user unless they authorize merging that PR. Confirm the PR head SHA and CI result. Record blockers and continue independent work on a separate branch.
+- Confirm that all CI workflows for the current PR head have passed and that the PR can merge. Merge the verified head, preserving logical commits. If CI fails or the PR is blocked, resolve what you can and continue independent work on a separate branch.
 
 | Work | Instructions |
 | --- | --- |
