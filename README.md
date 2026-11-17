@@ -4,7 +4,7 @@
 
 **Explore Overwatch tactics in 2D and see the elevation in 3D.**
 
-Vertactics is a map tool for planning approaches, cover, and high-ground positions. The demo includes two fictional training maps with walls, stairs, and high ground.
+Vertactics is a map tool for planning approaches, cover, and high-ground positions. Try two fictional training maps or a schematic reconstruction of King’s Row Point A.
 
 ## Explore the map
 
@@ -26,6 +26,6 @@ Choose a map or import a validated map JSON file. In **Map edit mode**, add, edi
 
 The layer selector exposes independently walkable surfaces in the elevation lab. Use **Drag move** to preview a hero’s landing and commit the move when you release the pointer.
 
-[Map, hero placement, and marker screenshots](https://github.com/qtaghdi/Vertactics/actions/runs/44032978306/artifacts/14306041191) · [Development and contribution](development.md)
+[Map, hero placement, and marker screenshots](https://github.com/qtaghdi/Vertactics/actions/runs/44035946473/artifacts/14306728587) · [Development and contribution](development.md)
 
 Vertactics is an unofficial fan project and is unaffiliated with Blizzard Entertainment.

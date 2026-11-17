@@ -4,7 +4,7 @@
 
 See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [the development guide](development.md). Check an item when its stated scope has been verified. Track implementation, browser behavior, CI and deployment separately.
 
-**Current phase** Phase 4. Continue with the first objective of King’s Row, reference verification and map-system acceptance.
+**Current phase** Phase 4. The Point A schematic and map-system checks are complete. Live-game geometry and clearance verification remain open before Phase 4 closes.
 
 ## Phase 1 · Project setup
 
@@ -19,8 +19,8 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 - [x] 1.09 Write product README, contributor guide, agent instructions and phase checklist
 - [x] 1.10 Commit the pnpm lockfile and verify a frozen CI install
 - [x] 1.11a Document installation, execution, testing and contribution
-- [ ] 1.11b Prepare issue and PR templates and a release process
-- [ ] 1.12 Choose a source licence and document third-party assets
+- [x] 1.11b Prepare issue and PR templates and a release process
+- [x] 1.12 Choose a source licence and document third-party assets
 
 ## Phase 2 · Rendering foundation
 
@@ -67,7 +67,7 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 - [x] 4.03a Add buildings, columns, railings, doorway openings, and drop-zone markers
 - [x] 4.03b Model walkable ramps and their sloped surfaces
 - [x] 4.04a Add rotation, material, and walkability controls with validated collision and sight flags
-- [ ] 4.04b Consume collision and sight flags in spatial analysis
+- [x] 4.04b Consume collision and sight flags in spatial analysis
 - [x] 4.05 Share the renderer between map editing and tactical planning
 - [x] 4.06a Create and open maps and add, delete and duplicate blocks
 - [x] 4.06b Select multiple objects
@@ -75,10 +75,11 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 - [x] 4.07b Edit positions and layer assignments, rotate and snap terrain, and manage layer definitions
 - [x] 4.08a Support undo and redo, validated JSON import and export, and immediate preview
 - [x] 4.08b Migrate map documents across schema versions
-- [ ] 4.09 Record acceptable references for the first objective of King's Row
-- [ ] 4.10 Build and compare approaches, high ground, cover, objective, floors and placement areas
+- [x] 4.09 Record acceptable references for the first objective of King's Row
+- [x] 4.10a Build the schematic Point A map, compare its landmarks with public references and verify it in the editor
+- [ ] 4.10b Verify dimensions, elevations and hero clearance against the live game client
 - [x] 4.11 Verify floor switching, overlapping selection and map registration, editing and import
-- [ ] 4.12 Evaluate GLB and glTF and define loading boundaries if needed
+- [x] 4.12 Evaluate GLB and glTF and define loading boundaries if needed
 
 ## Phase 5 · Heroes and abilities
 
@@ -146,3 +147,4 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 | Layer and multi-selection editing | 30 unit tests and 11 Chromium scenarios passed. Verified layer creation, renaming and deletion, rotation, grid snapping, and batched duplication and undo. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44033821083) |
 | Terrain structures | 31 unit tests and 11 Chromium scenarios passed. Doorway geometry preserves an opening and map JSON validates terrain properties. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44034026109) |
 | Ramps and map schema | 37 unit tests and 12 Chromium scenarios passed. Verified ramp placement, dragging and elevation after snapping. Legacy v1 imports export as v2. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44034705436) |
+| Phase 1–4 audit | 39 unit tests and 14 Chromium scenarios passed, including Point A placement, floor switching and hero obstruction. GitHub issue and PR templates, release steps, licensing and the optional GLB loading boundary are in place. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44035786865) |

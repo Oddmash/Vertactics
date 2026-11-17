@@ -4,7 +4,7 @@
 
 **오버워치 전장을 위에서 보고, 높낮이는 3D로 확인하세요.**
 
-Vertactics는 진입로, 엄폐물, 고지대를 살펴보고 전술을 구상하는 지도 도구입니다. 가상 훈련 지도 두 개에서 벽, 계단, 고지대를 둘러볼 수 있습니다.
+Vertactics는 진입로, 엄폐물, 고지대를 살펴보고 전술을 구상하는 지도 도구입니다. 가상 훈련 지도 두 개와 왕의 길 A 거점 근사 지도를 둘러볼 수 있습니다.
 
 ## 지도 둘러보기
 
@@ -28,6 +28,6 @@ Vertactics는 진입로, 엄폐물, 고지대를 살펴보고 전술을 구상�
 
 고저차 테스트 맵에서 표시 층을 바꾸면 겹친 지면을 각각 선택할 수 있습니다. **드래그 이동**은 착지점을 미리 표시하고 포인터를 놓을 때 이동을 확정합니다.
 
-[지도, 영웅 배치와 마커 화면](https://github.com/qtaghdi/Vertactics/actions/runs/44032978306/artifacts/14306041191) · [개발 및 기여](development.ko.md)
+[지도, 영웅 배치와 마커 화면](https://github.com/qtaghdi/Vertactics/actions/runs/44035946473/artifacts/14306728587) · [개발 및 기여](development.ko.md)
 
 Vertactics는 Blizzard Entertainment와 제휴하지 않은 팬 프로젝트입니다.

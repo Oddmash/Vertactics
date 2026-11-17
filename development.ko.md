@@ -57,6 +57,6 @@ Playwright는 `dist`의 프로덕션 빌드를 프리뷰 서버로 실행합니�
 
 소스 코드는 [MIT 라이선스](LICENSE)를 사용합니다. 앱은 직접 만든 단순 지형을 사용하며 Blizzard나 커뮤니티의 이미지, 텍스처, 아이콘, 모델을 포함하지 않습니다. Overwatch와 왕의 길은 Blizzard Entertainment의 표장입니다. 링크한 참고 자료에는 각각의 이용 조건이 적용됩니다.
 
-왕의 길 A 거점은 [StatBanana 지도](https://overwatch.statbanana.com/images)의 진입로와 광장, [Overwatch Wiki](https://overwatch.fandom.com/wiki/King%27s_Row)의 동상과 호텔, [A 거점 해설](https://seesaawiki.jp/overwatchwiki/d/KING%27S%20ROW)의 아치·호텔 우회로·고지대를 대조해 단순화했습니다. 점령 구역과 엄폐물, 선택 가능한 상층을 포함합니다. 현재 게임 클라이언트에서 거리, 높이, 영웅 통과 폭을 실측하지 않았습니다.
+왕의 길 A 거점은 [StatBanana 지도](https://overwatch.statbanana.com/images)의 진입로와 광장, [Overwatch Wiki](https://overwatch.fandom.com/wiki/King%27s_Row)의 동상과 호텔, [A 거점 해설](https://seesaawiki.jp/overwatchwiki/d/KING%27S%20ROW)의 아치·호텔 우회로·고지대를 대조해 단순화했습니다. 점령 구역과 엄폐물, 선택 가능한 상층을 포함합니다. 공개 인게임 화면에서 동상과 호텔이 같은 광장에 접한 배치를 확인했습니다. [인게임 화면](https://altertime.es/article/date-un-paseo-por-el-pasado-con-overwatch-clasico) 현재 게임 클라이언트에서 거리, 높이, 영웅 통과 폭을 실측하지 않았습니다.
 
 지도 편집과 분석에는 검증된 JSON과 절차적 지형을 사용합니다. GLB·glTF는 시각 에셋이 필요해질 때 별도 렌더링 경계에서 검토합니다. 그때는 허용된 자체 포함 GLB에 파일 크기와 리소스 한도를 적용하고 외부 리소스 로딩을 막습니다. 편집·배치·분석 데이터는 JSON에서 관리합니다. [Khronos 명세](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html)상 GLB도 외부 리소스를 참조할 수 있습니다.
