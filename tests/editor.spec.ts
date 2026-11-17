@@ -194,3 +194,44 @@ test('edits route waypoints and carries the annotation across views and history'
   await page.getByRole('button', { name: '실행 취소', exact: true }).click();
   await expect(points).toHaveCount(3);
 });
+
+
+test('draws each marker shape and edits a note in the shared view', async ({ page }, testInfo) => {
+  const errors: string[] = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  await page.goto('/');
+  const canvas = page.getByTestId('viewport').locator('canvas');
+  const tools = page.getByRole('region', { name: '전술 마커' });
+  await page.getByRole('button', { name: '2D 탑다운' }).click();
+  await expect(canvas).toHaveAttribute('data-view-mode', '2d');
+
+  const click = async (x: number, z: number) => {
+    const box = await canvas.boundingBox();
+    if (!box) throw new Error('Canvas has no bounds');
+    const scale = Math.max(36 / box.width, 24 / box.height) * 1.22;
+    await page.mouse.click(box.x + box.width / 2 + x / scale, box.y + box.height / 2 + z / scale);
+  };
+  const markerList = tools.getByRole('list', { name: '배치한 마커' });
+  for (const [index, kind] of ['line', 'circle', 'area', 'note'].entries()) {
+    await tools.getByLabel('유형').selectOption(kind);
+    await tools.getByRole('button', { name: '마커 그리기' }).click();
+    await expect(canvas).toHaveCSS('cursor', 'crosshair');
+    await click(-4, 1 + index * 2);
+    if (kind !== 'note') {
+      await expect(tools.getByText('두 번째 지점을 클릭하세요.')).toBeVisible();
+      await click(0, 2 + index * 2);
+    }
+    await expect(markerList.getByRole('listitem')).toHaveCount(index + 1);
+  }
+
+  await tools.getByRole('textbox', { name: '이름' }).fill('집결 지점');
+  await tools.getByRole('button', { name: '이름 저장' }).click();
+  await expect(markerList.getByText('집결 지점')).toBeVisible();
+  await page.getByRole('button', { name: '3D 원근' }).click();
+  await expect(canvas).toHaveAttribute('data-view-mode', '3d');
+  await expect(markerList.getByText('집결 지점')).toBeVisible();
+  await page.screenshot({ path: testInfo.outputPath('vertactics-markers.png') });
+  await tools.getByRole('button', { name: '마커 삭제' }).click();
+  await expect(markerList.getByRole('listitem')).toHaveCount(3);
+  expect(errors).toEqual([]);
+});

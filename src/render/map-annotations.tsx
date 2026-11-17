@@ -35,16 +35,16 @@ const AnnotationShape = ({ item, selected }: { item: Annotation; selected: boole
 
   return (
     <group>
-      {positions.length > 0 && <lineSegments raycast={skipRaycast}>
+      {positions.length > 0 && <lineSegments raycast={skipRaycast} renderOrder={2}>
         <bufferGeometry>
           <bufferAttribute attach="attributes-position" args={[positions, 3]} />
         </bufferGeometry>
-        <lineBasicMaterial color={color} depthTest={false} />
+        <lineBasicMaterial color={color} depthTest={false} depthWrite={false} />
       </lineSegments>}
       {item.points.map(([x, y, z], index) => (
-        <mesh key={index} position={[x, y + lift, z]} raycast={skipRaycast}>
+        <mesh key={index} position={[x, y + lift, z]} raycast={skipRaycast} renderOrder={3}>
           <sphereGeometry args={[item.kind === 'note' ? 0.36 : 0.22, 12, 8]} />
-          <meshBasicMaterial color={color} depthTest={false} />
+          <meshBasicMaterial color={color} depthTest={false} depthWrite={false} />
         </mesh>
       ))}
     </group>
