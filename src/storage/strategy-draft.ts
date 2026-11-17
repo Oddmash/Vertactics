@@ -10,7 +10,11 @@ export type StrategyDraft = {
 };
 
 const storeName = 'drafts';
-const draftKey = 'workspace';
+export type SavedStrategyDraft = {
+  id: string;
+  updatedAt: number;
+  draft: StrategyDraft;
+};
 
 const parseDraft = (value: unknown): StrategyDraft => {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) {
@@ -61,12 +65,43 @@ const transactDraft = async <T,>(
   }
 };
 
-export const saveStrategyDraft = async (draft: StrategyDraft): Promise<void> => {
-  const snapshot = parseDraft(draft);
-  await transactDraft('readwrite', (store) => store.put(snapshot, draftKey));
+export const saveStrategyDraft = async (
+  draft: StrategyDraft,
+  title: string,
+  existingId?: string,
+): Promise<SavedStrategyDraft> => {
+  const id = existingId ?? crypto.randomUUID();
+  const snapshot = parseDraft({ ...draft, strategy: { ...draft.strategy, id, title } });
+  const saved = { id, updatedAt: Date.now(), draft: snapshot };
+  await transactDraft('readwrite', (store) => existingId ? store.put(saved, id) : store.add(saved, id));
+  return saved;
 };
 
-export const loadStrategyDraft = async (): Promise<StrategyDraft | undefined> => {
-  const value: unknown = await transactDraft('readonly', (store) => store.get(draftKey));
-  return value === undefined ? undefined : parseDraft(value);
+export const deleteStrategyDraft = async (id: string): Promise<void> => {
+  await transactDraft('readwrite', (store) => store.delete(id));
+};
+
+export const listStrategyDrafts = async (): Promise<{ drafts: SavedStrategyDraft[]; unreadable: number }> => {
+  const values: unknown[] = await transactDraft('readonly', (store) => store.getAll());
+  const drafts: SavedStrategyDraft[] = [];
+  let unreadable = 0;
+  for (const value of values) {
+    try {
+      if (typeof value !== 'object' || value === null) throw new Error('Invalid saved strategy');
+      if ('draft' in value) {
+        const draft = parseDraft(value.draft);
+        if (!('id' in value) || value.id !== draft.strategy.id ||
+          !('updatedAt' in value) || typeof value.updatedAt !== 'number' ||
+          !Number.isFinite(value.updatedAt)) throw new Error('Invalid saved strategy metadata');
+        drafts.push({ id: value.id, updatedAt: value.updatedAt, draft });
+      } else {
+        const draft = parseDraft(value);
+        drafts.push({ id: 'workspace', updatedAt: 0, draft });
+      }
+    } catch {
+      unreadable++;
+    }
+  }
+  drafts.sort((first, second) => second.updatedAt - first.updatedAt || first.id.localeCompare(second.id));
+  return { drafts, unreadable };
 };
