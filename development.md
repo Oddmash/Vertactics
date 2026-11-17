@@ -39,11 +39,20 @@ Map JSON is validated on import. The editor opens v1 and v2 files and exports v2
 
 ## Contribute
 
-1. Find the relevant requirements and checks in [SPEC.md](SPEC.md).
-2. Follow [AGENTS.md](AGENTS.md) and run the checks affected by your change.
-3. Verify both views in a browser after editing terrain or map interactions.
-4. Open a pull request explaining the change and its verification. Include screenshots for visual changes.
+1. Find the relevant requirements and checks in [SPEC.md](SPEC.md), then branch from the latest `origin/main`.
+2. Keep commits focused. Open a pull request for each independently reviewable change and record the related SPEC IDs, verification, and remaining gaps.
+3. Verify both views in a browser after changing terrain or map interactions. Attach screenshots for visual changes.
+4. Wait for the `verify` check and review before merging.
 
+## GitHub Actions
+
+| Trigger | Checks |
+| --- | --- |
+| Pull request with only root, `docs/` or `skills/` Markdown, or the PR template | Check the diff for whitespace errors |
+| Pull request with other changes | Check the diff, then install from the lockfile and run type checking, lint, unit tests, the production build, and Chromium |
+| Push to `main` or manual run | Run the full application checks |
+
+The `verify` job reports the result in every case. A newer revision cancels older runs of the same PR.
 
 ## Releases
 

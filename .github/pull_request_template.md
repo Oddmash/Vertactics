@@ -1,5 +1,7 @@
 ## Changes
 
+## Related issue or SPEC items
+
 ## Verification
 
 - [ ] Ran relevant checks
@@ -8,4 +10,4 @@
 
 ## Screenshots or test evidence
 
-## Compatibility notes
+## Compatibility and remaining work
