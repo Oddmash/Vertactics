@@ -1,3 +1,5 @@
+import ViewportCapture from './viewport-capture';
+import type { ViewportCaptureRef } from './viewport-capture';
 import MapSightline from './map-sightline';
 import type { Sightline } from './map-sightline';
 import MapAbilityPreview from './map-ability-preview';
@@ -49,6 +51,7 @@ const SurfaceCursor = ({ editing }: { editing: boolean }) => {
 
 type Props = {
   map: MapDefinition;
+  capture: ViewportCaptureRef;
   mode: ViewMode;
   reset: number;
   selectedTerrainIds: ReadonlySet<string>;
@@ -70,7 +73,7 @@ type Props = {
 };
 
 const MapViewport = ({
-  map, mode, reset, selectedTerrainIds, onSelect, heroes, selectedHeroId, onSelectHero, onEditSurface,
+  map, capture, mode, reset, selectedTerrainIds, onSelect, heroes, selectedHeroId, onSelectHero, onEditSurface,
   annotations, selectedAnnotationId, snap, layerId, onDragSurface, onDropSurface, abilities, abilityPreview, sightline, heroView,
 }: Props) => {
   const bounds = useMemo(() => mapBounds(map.terrain), [map]);
@@ -96,6 +99,7 @@ const MapViewport = ({
         fallback={<Fallback />}
         onPointerMissed={() => { if (!onEditSurface && !onDragSurface) onSelect(null); }}
       >
+        <ViewportCapture capture={capture} />
         <color attach="background" args={[tokens.color.viewport]} />
         <ambientLight intensity={1.15} />
         <directionalLight position={[-15, 24, 10]} intensity={1.5} />
