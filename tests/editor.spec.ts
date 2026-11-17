@@ -12,7 +12,7 @@ test('renders and manipulates the same elevated terrain in both views', async ({
   const inspector = page.getByRole('complementary', { name: '지형 정보' });
   await expect(threeD).toHaveAttribute('aria-pressed', 'true');
   await expect(canvas).toBeVisible();
-  await expect(page.getByText('WebGL 2를 사용할 수 없어', { exact: false })).toHaveCount(0);
+  await expect(page.getByText('WebGL 2를 사용할 수 없어', { exact: false })).toBeHidden();
   await page.getByRole('button', { name: '서쪽 고지대 +4 u' }).click();
   await expect(inspector.getByText('+4 u')).toBeVisible();
 
