@@ -91,9 +91,9 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 - [x] 5.04a Render circle, sphere, cone, line, rectangle, vector and ground area outlines
 - [ ] 5.04b Represent persistent areas and their durations
 - [x] 5.05a Select, rotate, show and hide a hero-anchored preview
-- [ ] 5.05b Place, move, rotate and remove independent ability objects
+- [x] 5.05b Place, move, rotate and remove independent ability objects
 - [x] 5.06a Share preview position, direction and elevation across 2D and 3D
-- [ ] 5.06b Share independent ability placement across 2D and 3D
+- [x] 5.06b Share independent ability placement across 2D and 3D
 - [x] 5.07a Label custom range values and their map units
 - [ ] 5.07b Label measured and estimated values with their sources
 - [x] 5.08a Test preview shape geometry and browser view switching
@@ -158,3 +158,4 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 | Terrain measurement | 40 unit tests and 15 Chromium scenarios passed. A two-point measurement reports horizontal distance, signed elevation change, and straight-line distance in map units across views. Live game comparison remains open. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44036751794) |
 | Starter hero catalogue | 42 unit tests and 16 Chromium scenarios passed. Verify grouped roles, placement, and sourced ability names in the inspector. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44037981117) |
 | Hero ability previews | 45 unit tests and 17 Chromium scenarios passed. Verified custom ranges and view switching using a hero-anchored cone. Type checks, lint and the production build passed. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44039103823) · [2D and 3D screenshots](https://github.com/qtaghdi/Vertactics/actions/runs/44039103823/artifacts/14309061041) |
+| Independent ability placement | 47 unit tests and 18 Chromium scenarios passed. Verified high-ground placement, moving, rotation, view switching, visibility, removal, and undo. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44040575157) · [2D and 3D screenshots](https://github.com/qtaghdi/Vertactics/actions/runs/44040575157/artifacts/14308738616) |
