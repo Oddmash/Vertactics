@@ -355,6 +355,9 @@ const Editor = () => {
                   <div><dt>좌표 (X, Y, Z)</dt><dd>{selectedHero.position.map(formatNumber).join(', ')}</dd></div>
                   <div><dt>높이</dt><dd>{formatElevation(selectedHero.position[1])}</dd></div>
                   <div><dt>방향</dt><dd>{selectedHero.yaw}°</dd></div>
+                  {tool?.kind === 'drag' && dragPreview && (
+                    <div><dt>이동 미리보기 (X, Y, Z)</dt><dd>{dragPreview.map(formatNumber).join(', ')}</dd></div>
+                  )}
                 </dl>
                 <fieldset className="hero-actions edit-controls" disabled={locked || !showHeroes}>
                   <button className="reset-button" type="button" onClick={() => setTool({ kind: 'move', id: selectedHero.id })}>이동</button>

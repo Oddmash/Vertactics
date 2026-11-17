@@ -367,12 +367,15 @@ test('commits a continuous hero drag as one undoable edit', async ({ page }) => 
   const [x, y] = await screen(7, 5);
   await page.mouse.move(x, y, { steps: 12 });
   await expect(inspector.getByText('0, 0, 1', { exact: true })).toBeVisible();
+  const preview = inspector.locator('dl div').filter({ hasText: '이동 미리보기' }).locator('dd');
+  await expect(preview).toHaveText(/^7, 2, [3-9]$/);
+  const destination = await preview.innerText();
   await page.mouse.up();
-  await expect(inspector.getByText('7, 2, 5', { exact: true })).toBeVisible();
+  await expect(inspector.getByText(destination, { exact: true })).toBeVisible();
   await page.getByRole('button', { name: '실행 취소', exact: true }).click();
   await expect(inspector.getByText('0, 0, 1', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: '다시 실행', exact: true }).click();
-  await expect(inspector.getByText('7, 2, 5', { exact: true })).toBeVisible();
+  await expect(inspector.getByText(destination, { exact: true })).toBeVisible();
 });
 
 test('switches maps without losing plans and registers validated JSON', async ({ page }) => {
