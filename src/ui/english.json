@@ -356,5 +356,8 @@
   "공격 고지대 계단": "Attacker high ground stairs",
   "수비 측 고지대": "Defender high ground",
   "수비 고지대 계단": "Defender high ground stairs",
-  "거점 뒤 엄폐": "Rear point cover"
+  "거점 뒤 엄폐": "Rear point cover",
+  "표시 설정": "Display options",
+  "선택한 영웅을 지도에서 끌어 이동하세요.": "Drag the selected hero on the map.",
+  "지도에서 지점을 선택하세요. Esc로 취소합니다.": "Select a point on the map. Press Esc to cancel."
 }

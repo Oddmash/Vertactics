@@ -8,7 +8,18 @@ test('keeps the map, controls and selected terrain accessible on a narrow touch 
   const viewport = page.getByTestId('viewport');
   const canvas = viewport.locator('canvas');
   await expect(canvas).toBeVisible();
-  await expect.poll(() => viewport.evaluate((element) => element.clientHeight)).toBeGreaterThan(260);
+  await expect.poll(() => viewport.evaluate((element) => element.clientHeight)).toBeGreaterThan(370);
+  await expect.poll(() => viewport.evaluate((element) => element.getBoundingClientRect().top)).toBeLessThan(430);
+  const mapActions = page.getByRole('button', { name: '지도 관리' });
+  const displayOptions = page.getByRole('button', { name: '표시 설정', exact: true });
+  await expect(page.getByRole('button', { name: '새 지도', exact: true })).toBeHidden();
+  await mapActions.tap();
+  await expect(page.getByRole('button', { name: '새 지도', exact: true })).toBeVisible();
+  await mapActions.tap();
+  await expect(page.getByRole('button', { name: '지도 PNG 저장' })).toBeHidden();
+  await displayOptions.tap();
+  await expect(page.getByRole('button', { name: '지도 PNG 저장' })).toBeVisible();
+  await displayOptions.tap();
   await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
   await page.screenshot({ path: testInfo.outputPath('vertactics-narrow-3d.png') });
 
@@ -23,6 +34,10 @@ test('keeps the map, controls and selected terrain accessible on a narrow touch 
   await expect(canvas).toBeVisible();
   await page.getByRole('link', { name: '지도 보기' }).tap();
   await page.screenshot({ path: testInfo.outputPath('vertactics-narrow-2d.png') });
+  await page.getByRole('button', { name: '거리 측정' }).tap();
+  await expect(viewport).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('button', { name: '거리 측정' })).toHaveAttribute('aria-pressed', 'false');
   await page.getByRole('link', { name: '속성' }).tap();
   await expect(page.getByRole('heading', { name: '지형 정보' })).toBeFocused();
   await expect(page.getByRole('complementary', { name: '지형 정보' }).getByText('+4 u')).toBeVisible();

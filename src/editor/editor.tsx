@@ -64,6 +64,9 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
   const { catalogue, map, history, timeline, draft, recovery, importMessage, mapMessage, editStrategy } = workspace;
   const mapId = map.id;
   const { min, max } = useMemo(() => mapBounds(map.terrain), [map]);
+  const [mapActionsOpen, setMapActionsOpen] = useState(false);
+  const [displayOptionsOpen, setDisplayOptionsOpen] = useState(false);
+  const viewport = useRef<HTMLDivElement>(null);
   const captureViewport = useRef<(() => Promise<Blob>) | null>(null);
   const [imageMessage, setImageMessage] = useState('');
   const saveViewport = async () => {
@@ -128,6 +131,10 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
   const activateTool = useCallback((next: SurfaceTool | null) => {
     changeSurfaceTool(next);
     leavePresentation();
+    if (next && window.matchMedia('(max-width: 680px)').matches) {
+      viewport.current?.focus({ preventScroll: true });
+      viewport.current?.scrollIntoView({ block: 'center' });
+    }
   }, [changeSurfaceTool, leavePresentation]);
   const dispatch = useCallback((action: StrategyAction) => {
     stop();
@@ -303,19 +310,23 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
           <label>{t('지도') + ' '}<select aria-label={t('지도')} value={mapId} onChange={(event) => switchMap(event.target.value)}>
             {catalogue.map((item) => <option key={item.id} value={item.id}>{t(item.name)}</option>)}
           </select></label>
-          <button type="button" className="reset-button" onClick={createMap}>{t('새 지도')}</button>
-          <button type="button" className="reset-button" aria-pressed={mapEditing} onClick={() => {
-            activateTool(null);
-            selectTerrain(null);
-            setMapEditing((current) => !current);
-          }}>{t('지도 편집 모드')}</button>
-          <label>{t('지도 JSON 가져오기') + ' '}<input type="file" accept=".json,application/json" onChange={(event) => {
-            const file = event.target.files?.[0];
-            event.target.value = '';
-            if (file) void importMap(file);
-          }} /></label>
-          <a className="reset-button" download={`${map.id}.json`}
-            href={`data:application/json;charset=utf-8,${encodeURIComponent(JSON.stringify(map, null, 2))}`}>{t('지도 JSON 저장')}</a>
+          <button type="button" className="reset-button mobile-panel-toggle" aria-expanded={mapActionsOpen}
+            aria-controls="map-actions" onClick={() => setMapActionsOpen((open) => !open)}>{t('지도 관리')}</button>
+          <div className="map-actions" id="map-actions" data-expanded={mapActionsOpen}>
+            <button type="button" className="reset-button" onClick={createMap}>{t('새 지도')}</button>
+            <button type="button" className="reset-button" aria-pressed={mapEditing} onClick={() => {
+              activateTool(null);
+              selectTerrain(null);
+              setMapEditing((current) => !current);
+            }}>{t('지도 편집 모드')}</button>
+            <label className="file-button reset-button">{t('지도 JSON 가져오기')}<input type="file" accept=".json,application/json" onChange={(event) => {
+              const file = event.target.files?.[0];
+              event.target.value = '';
+              if (file) void importMap(file);
+            }} /></label>
+            <a className="reset-button" download={`${map.id}.json`}
+              href={`data:application/json;charset=utf-8,${encodeURIComponent(JSON.stringify(map, null, 2))}`}>{t('지도 JSON 저장')}</a>
+          </div>
           {importMessage && <span role="status">{t(importMessage)}</span>}
         </div>
         <nav className="workspace-links" aria-label={t('작업 공간')}>
@@ -353,11 +364,13 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
                 : <button className="reset-button" type="button" onClick={() => setReset((value) => value + 1)}>
                   {t('시점 초기화')}
                 </button>}
-              <button className="reset-button" type="button" onClick={() => void saveViewport()}>{t('지도 PNG 저장')}</button>
+              <button type="button" className="reset-button mobile-panel-toggle" aria-expanded={displayOptionsOpen}
+                aria-controls="display-options" onClick={() => setDisplayOptionsOpen((open) => !open)}>{t('표시 설정')}</button>
             </div>
           </div>
           {imageMessage && <p role="status">{t(imageMessage)}</p>}
-          <div className="view-options" role="group" aria-label={t('편집 및 표시 설정')}>
+          <div className="view-options display-options" id="display-options" data-expanded={displayOptionsOpen}
+            role="group" aria-label={t('편집 및 표시 설정')}>
             {map.layers && <label>{t('표시 층') + ' '}<select value={layerId} onChange={(event) => {
               setLayerId(event.target.value);
               setSelectedId(null);
@@ -378,6 +391,7 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
               activateTool(null);
               setShowAnnotations(event.target.checked);
             }} />{' ' + t('마커 표시')}</label>
+            <button className="reset-button" type="button" onClick={() => void saveViewport()}>{t('지도 PNG 저장')}</button>
           </div>
           {!mapEditing && durationMs > 0 && (!playback
             ? <div className="view-options"><button type="button" className="reset-button" onClick={() => {
@@ -400,7 +414,8 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
               if (!sightPicking || !sightSecond) setSightPoints([]);
             }}>{t('지점 간 시야')}</button>
           </nav>
-          <div className="viewport" data-testid="viewport"
+          <div ref={viewport} className="viewport" data-testid="viewport" tabIndex={-1}
+            role="region" aria-label={t('지형 지도')}
             onPointerCancel={() => { if (tool?.kind === 'drag') changeSurfaceTool(null); }}
             onPointerLeave={(event) => { if (tool?.kind === 'drag' && event.buttons === 1) changeSurfaceTool(null); }}
           >
@@ -432,6 +447,9 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
               onDragSurface={!locked && tool?.kind === 'drag' ? setDragPreview : undefined}
               onDropSurface={!locked && tool?.kind === 'drag' ? finishDrag : undefined}
             />
+            {tool && <p className="tool-status" role="status">{t(tool.kind === 'drag'
+              ? '선택한 영웅을 지도에서 끌어 이동하세요.'
+              : '지도에서 지점을 선택하세요. Esc로 취소합니다.')}</p>}
             <span className="view-label" aria-hidden="true">{heroView ? t('{0} 시점', displayHero(heroView.heroId)) : t(viewNames[mode])}</span>
             {!heroView && mode === '2d' && <span className="north-label" aria-label={t('위쪽은 북쪽')}>↑ N</span>}
           </div>

@@ -55,7 +55,7 @@ const StrategyFileTools = ({ draft, onImport }: Props) => {
   return (
     <section className="hero-tools" aria-label={t('전략 파일')}>
       <h2>{t('전략 파일')}</h2>
-      <label className="strategy-name">{t('전략 JSON 가져오기') + ' '}<input type="file" accept=".json,application/json" onChange={(event) => {
+      <label className="file-button reset-button">{t('전략 JSON 가져오기')}<input type="file" accept=".json,application/json" onChange={(event) => {
         const file = event.target.files?.[0];
         event.target.value = '';
         if (file) void read(file);
