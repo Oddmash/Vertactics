@@ -135,7 +135,7 @@ test('places and moves a hero across views, then undoes and redoes elevation cha
   await clickWorld(6, -8.6);
   await expect(page.getByText('배치할 지면을 클릭하세요.')).toBeVisible();
   await clickWorld(0, 0);
-  await expect(inspector.getByText('트레이서')).toBeVisible();
+  await expect(inspector.getByRole('heading', { name: '트레이서', exact: true })).toBeVisible();
   await expect(inspector.getByText('0 u', { exact: true })).toBeVisible();
 
   await inspector.getByRole('button', { name: '이동', exact: true }).click();

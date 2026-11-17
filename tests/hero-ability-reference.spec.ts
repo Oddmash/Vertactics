@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-test('selects heroes by portrait and reveals sourced skills in the right panel', async ({ page }, testInfo) => {
+test('selects heroes by portrait and reveals sourced skills in the right panel', async ({ page }) => {
   await page.route('https://d15f34w2p8l1cc.cloudfront.net/overwatch/*.png', (route) =>
     route.fulfill({
       contentType: 'image/png',
@@ -36,5 +36,4 @@ test('selects heroes by portrait and reveals sourced skills in the right panel',
   await expect(grenade).toHaveAttribute('aria-pressed', 'true');
   await page.getByRole('button', { name: '2D 탑다운' }).hover();
   await expect(details).toBeVisible();
-  await page.screenshot({ path: testInfo.outputPath('hero-ability-sidebar.png') });
 });
