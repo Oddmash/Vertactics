@@ -465,3 +465,16 @@ test('manages map layers and transforms their terrain without losing blocks', as
   await tools.getByRole('button', { name: '지도 실행 취소' }).click();
   await expect(layerFilter.getByRole('option', { name: '상층' })).toHaveCount(1);
 });
+
+test('duplicates multiple terrain blocks and undoes them together', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: '지도 편집 모드' }).click();
+  await page.getByRole('button', { name: /북쪽 벽/ }).click();
+  await page.getByRole('button', { name: /동쪽 벽/ }).click({ modifiers: ['Shift'] });
+  await expect(page.getByText('2개 선택', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: '선택 블록 복제' }).click();
+  await expect(page.getByRole('button', { name: /북쪽 벽 복제/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /동쪽 벽 복제/ })).toBeVisible();
+  await page.getByRole('button', { name: '지도 실행 취소' }).click();
+  await expect(page.getByRole('button', { name: /벽 복제/ })).toHaveCount(0);
+});

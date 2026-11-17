@@ -51,7 +51,13 @@ const Editor = () => {
   const [locked, setLocked] = useState(false);
   const [showHeroes, setShowHeroes] = useState(true);
   const [showAnnotations, setShowAnnotations] = useState(true);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedId, setPrimaryId] = useState<string | null>(null);
+  const [additionalTerrain, setAdditionalTerrain] = useState<string[]>([]);
+  const setSelectedId = (id: string | null) => {
+    setPrimaryId(id);
+    setAdditionalTerrain([]);
+  };
+  const selectedTerrainIds = new Set(selectedId ? [selectedId, ...additionalTerrain] : additionalTerrain);
   const [selectedHeroId, setSelectedHeroId] = useState<string | null>(null);
   const [tool, setHeroTool] = useState<EditTool | null>(null);
   const [dragPreview, setDragPreview] = useState<WorldPoint | null>(null);
@@ -162,8 +168,15 @@ const Editor = () => {
   const selected = visibleTerrain.find(({ id }) => id === selectedId);
   const selectedHero = heroes.find(({ id }) => id === selectedHeroId);
 
-  const selectTerrain = (id: string | null) => {
-    setSelectedId(id);
+  const selectTerrain = (id: string | null, extend = false) => {
+    if (mapEditing && extend && id && selectedId) {
+      if (id === selectedId) {
+        setPrimaryId(additionalTerrain[0] ?? null);
+        setAdditionalTerrain(additionalTerrain.slice(1));
+      } else {
+        setAdditionalTerrain((items) => items.includes(id) ? items.filter((item) => item !== id) : [...items, id]);
+      }
+    } else setSelectedId(id);
     setSelectedHeroId(null);
   };
 
@@ -256,8 +269,8 @@ const Editor = () => {
                 <button
                   type="button"
                   className="terrain-button"
-                  aria-pressed={selectedId === terrain.id}
-                  onClick={() => { setTool(null); selectTerrain(terrain.id); }}
+                  aria-pressed={selectedTerrainIds.has(terrain.id)}
+                  onClick={(event) => { setTool(null); selectTerrain(terrain.id, event.shiftKey || event.metaKey || event.ctrlKey); }}
                 >
                   <span className={`terrain-swatch ${terrain.kind}`} aria-hidden="true" />
                   <span>{terrain.name}</span>
@@ -338,7 +351,7 @@ const Editor = () => {
               layerId={layerId}
               mode={mode}
               reset={reset}
-              selectedId={selectedId}
+              selectedTerrainIds={selectedTerrainIds}
               heroes={!mapEditing && showHeroes ? heroes.map((hero) =>
                 tool?.kind === 'drag' && hero.id === tool.id && dragPreview ? { ...hero, position: dragPreview } : hero
               ) : []}
@@ -406,6 +419,7 @@ const Editor = () => {
             <TerrainTools
               map={map}
               selected={selected}
+              selectedCount={selectedTerrainIds.size}
               undoable={timeline.past.length > 0}
               redoable={timeline.future.length > 0}
               onSave={(terrain) => updateTerrain(map.terrain.map((item) => item.id === selectedId ? terrain : item), selectedId)}
@@ -417,6 +431,14 @@ const Editor = () => {
               )}
               onSaveLayer={saveLayer}
               onDeleteLayer={deleteLayer}
+              onBulkRemove={() => updateTerrain(map.terrain.filter((item) => !selectedTerrainIds.has(item.id)), null)}
+              onBulkDuplicate={() => updateTerrain([
+                ...map.terrain,
+                ...map.terrain.filter((item) => selectedTerrainIds.has(item.id)).map((item) => ({
+                  ...item, id: crypto.randomUUID(), name: `${item.name} 복제`,
+                  origin: [item.origin[0] + 1, item.origin[1], item.origin[2] + 1],
+                })),
+              ], null)}
               onRemove={(id) => updateTerrain(map.terrain.filter((item) => item.id !== id), null)}
               onHistory={moveMapHistory}
             />

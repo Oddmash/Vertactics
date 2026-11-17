@@ -46,8 +46,8 @@ type Props = {
   map: MapDefinition;
   mode: ViewMode;
   reset: number;
-  selectedId: string | null;
-  onSelect: (id: string | null) => void;
+  selectedTerrainIds: ReadonlySet<string>;
+  onSelect: (id: string | null, extend?: boolean) => void;
   heroes: HeroPlacement[];
   selectedHeroId: string | null;
   annotations: Annotation[];
@@ -61,7 +61,7 @@ type Props = {
 };
 
 const MapViewport = ({
-  map, mode, reset, selectedId, onSelect, heroes, selectedHeroId, onSelectHero, onEditSurface,
+  map, mode, reset, selectedTerrainIds, onSelect, heroes, selectedHeroId, onSelectHero, onEditSurface,
   annotations, selectedAnnotationId, snap, layerId, onDragSurface, onDropSurface,
 }: Props) => {
   const bounds = useMemo(() => mapBounds(map.terrain), [map]);
@@ -120,7 +120,7 @@ const MapViewport = ({
                       if (point) onEditSurface(point);
                       return;
                     }
-                    onSelect(terrain.id);
+                    onSelect(terrain.id, event.shiftKey || event.metaKey || event.ctrlKey);
                   }}
                 >
                   <boxGeometry />
@@ -128,7 +128,7 @@ const MapViewport = ({
                     color={tokens.color[terrain.kind]}
                     roughness={0.92}
                     emissive={tokens.color.accent}
-                    emissiveIntensity={selectedId === terrain.id ? 0.26 : 0}
+                    emissiveIntensity={selectedTerrainIds.has(terrain.id) ? 0.26 : 0}
                   />
                   <lineSegments raycast={skipRaycast}>
                     <edgesGeometry args={[unitBox]} />

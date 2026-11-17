@@ -5,6 +5,7 @@ import type { MapDefinition, MapLayer, Terrain, WorldPoint } from '../domain/map
 type Props = {
   map: MapDefinition;
   selected: Terrain | undefined;
+  selectedCount: number;
   undoable: boolean;
   redoable: boolean;
   onSave: (terrain: unknown) => void;
@@ -14,13 +15,15 @@ type Props = {
   onTransform: (id: string, transform: 'rotate' | 'snap') => void;
   onSaveLayer: (layer: MapLayer) => void;
   onDeleteLayer: (id: string) => void;
+  onBulkRemove: () => void;
+  onBulkDuplicate: () => void;
   onHistory: (direction: 'undo' | 'redo') => void;
 };
 
 const axisNames = ['X', 'Y', 'Z'] as const;
 const vectorFields = [{ key: 'origin', label: '좌표' }, { key: 'size', label: '크기' }] as const;
 
-const TerrainTools = ({ map, selected, undoable, redoable, onSave, onAdd, onDuplicate, onRemove, onHistory, onTransform, onSaveLayer, onDeleteLayer }: Props) => {
+const TerrainTools = ({ map, selected, selectedCount, undoable, redoable, onSave, onAdd, onDuplicate, onRemove, onHistory, onTransform, onSaveLayer, onDeleteLayer, onBulkRemove, onBulkDuplicate }: Props) => {
   const save = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     if (!selected) return;
@@ -77,7 +80,12 @@ const TerrainTools = ({ map, selected, undoable, redoable, onSave, onAdd, onDupl
           </form>
         ))}
       </fieldset>
-      {selected && <>
+      {selectedCount > 1 && <div className="hero-actions">
+        <p role="status">{selectedCount}개 선택</p>
+        <button type="button" className="reset-button" onClick={onBulkDuplicate}>선택 블록 복제</button>
+        <button type="button" className="reset-button" onClick={onBulkRemove}>선택 블록 삭제</button>
+      </div>}
+      {selected && selectedCount === 1 && <>
         <form key={JSON.stringify(selected)} onSubmit={save}>
           <label>블록 이름 <input name="name" required defaultValue={selected.name} /></label>
           <label>지형 유형 <select name="kind" defaultValue={selected.kind}>
