@@ -17,14 +17,7 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: 24
-      - run: pnpm install --no-frozen-lockfile
-      - uses: actions/upload-artifact@v6
-        with:
-          name: pnpm-lockfile
-          path: pnpm-lock.yaml
-          if-no-files-found: error
-      - name: Export bootstrap lockfile
-        run: gzip -n -c pnpm-lock.yaml | base64 -w 120 | sed 's/^/LOCKFILE_CHUNK /'
+      - run: pnpm install --frozen-lockfile
       - run: pnpm typecheck
       - run: pnpm lint
       - run: pnpm test
