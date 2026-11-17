@@ -43,3 +43,18 @@ Map JSON is validated on import. The editor opens v1 and v2 files and exports v2
 2. Follow [AGENTS.md](AGENTS.md) and run the checks affected by your change.
 3. Verify both views in a browser after editing terrain or map interactions.
 4. Open a pull request explaining the change and its verification. Include screenshots for visual changes.
+
+
+## Releases
+
+1. Land the release changes on `main` and verify that CI is green for the release commit.
+2. Update the package version and the reader-facing guides. Record changes to the map and strategy formats.
+3. Tag the verified commit as `vMAJOR.MINOR.PATCH` and publish release notes in GitHub Releases. Include compatibility changes and the verification run.
+
+## Map references and assets
+
+The source code is available under the [MIT licence](LICENSE). Vertactics uses original schematic terrain meshes and no Blizzard or community textures, icons, models or overhead images in the application. Overwatch and King's Row are Blizzard Entertainment marks. Linked reference material remains subject to its own terms.
+
+The King's Row Point A blockout uses the [StatBanana overhead survey](https://overwatch.statbanana.com/images) to cross-check the approach and plaza, the [Overwatch Wiki entry](https://overwatch.fandom.com/wiki/King%27s_Row) for the statue and Alderworth Hotel, and the [Point A breakdown](https://seesaawiki.jp/overwatchwiki/d/KING%27S%20ROW) for the choke, hotel bypass and balconies. The blockout has a separate objective surface, cover, and a selectable upper layer. Its dimensions, elevation and hero clearance have not been measured against the current game client.
+
+Map editing and analysis use validated JSON and procedural geometry. GLB and glTF are deferred because the current map workflow needs editable collision and walkable surfaces. If a visual asset workflow is needed, import curated self-contained GLB files through a separate render-only boundary with byte and resource limits. Keep external resource fetching disabled and retain JSON as the source for editing, placement and analysis. The [Khronos specification](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html) allows external references even in GLB containers.

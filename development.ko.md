@@ -45,3 +45,18 @@ Playwright는 `dist`의 프로덕션 빌드를 프리뷰 서버로 실행합니�
 2. [AGENTS.md](AGENTS.md)의 개발 규칙에 따라 변경하고 관련 테스트를 실행합니다.
 3. 지형과 편집기 상호작용을 바꿨다면 브라우저에서 2D와 3D를 확인합니다.
 4. 변경과 검증 결과를 설명하는 PR을 엽니다. UI 변경에는 해당 화면을 첨부합니다.
+
+
+## 릴리스
+
+1. 릴리스 변경을 `main`에 반영하고 해당 커밋의 CI가 통과했는지 확인합니다.
+2. 패키지 버전과 사용자 문서를 갱신합니다. 지도·전략 형식의 변경을 기록합니다.
+3. 검증된 커밋에 `vMAJOR.MINOR.PATCH` 태그를 만들고 GitHub Releases에 호환성 변경과 검증 실행을 적습니다.
+
+## 지도 참고 자료와 자산
+
+소스 코드는 [MIT 라이선스](LICENSE)를 사용합니다. 앱은 직접 만든 단순 지형을 사용하며 Blizzard나 커뮤니티의 이미지, 텍스처, 아이콘, 모델을 포함하지 않습니다. Overwatch와 왕의 길은 Blizzard Entertainment의 표장입니다. 링크한 참고 자료에는 각각의 이용 조건이 적용됩니다.
+
+왕의 길 A 거점은 [StatBanana 지도](https://overwatch.statbanana.com/images)의 진입로와 광장, [Overwatch Wiki](https://overwatch.fandom.com/wiki/King%27s_Row)의 동상과 호텔, [A 거점 해설](https://seesaawiki.jp/overwatchwiki/d/KING%27S%20ROW)의 아치·호텔 우회로·고지대를 대조해 단순화했습니다. 점령 구역과 엄폐물, 선택 가능한 상층을 포함합니다. 현재 게임 클라이언트에서 거리, 높이, 영웅 통과 폭을 실측하지 않았습니다.
+
+지도 편집과 분석에는 검증된 JSON과 절차적 지형을 사용합니다. GLB·glTF는 시각 에셋이 필요해질 때 별도 렌더링 경계에서 검토합니다. 그때는 허용된 자체 포함 GLB에 파일 크기와 리소스 한도를 적용하고 외부 리소스 로딩을 막습니다. 편집·배치·분석 데이터는 JSON에서 관리합니다. [Khronos 명세](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html)상 GLB도 외부 리소스를 참조할 수 있습니다.
