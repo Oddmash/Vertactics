@@ -4,7 +4,7 @@ import { MOUSE, OrthographicCamera, PerspectiveCamera, TOUCH, Vector3 } from 'th
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { heroEyeHeight } from '../domain/strategy';
 import type { HeroPlacement } from '../domain/strategy';
-import type { mapBounds } from '../domain/map';
+import type { mapBounds, WorldPoint } from '../domain/map';
 
 export type ViewMode = '2d' | '3d';
 
@@ -14,9 +14,10 @@ type Props = {
   reset: number;
   pointerEditing: boolean;
   heroView?: HeroPlacement;
+  focusPoint?: WorldPoint;
 };
 
-const MapCamera = ({ mode, bounds, reset, pointerEditing, heroView }: Props) => {
+const MapCamera = ({ mode, bounds, reset, pointerEditing, heroView, focusPoint }: Props) => {
   const { gl, set, get, invalidate, size } = useThree();
   const heroCamera = useMemo(() => Object.assign(new PerspectiveCamera(66), { manual: true }), []);
   const controls = useRef<OrbitControls | null>(null);
@@ -66,10 +67,10 @@ const MapCamera = ({ mode, bounds, reset, pointerEditing, heroView }: Props) => 
   }, [camera, heroView, pointerEditing, span]);
 
   useLayoutEffect(() => {
-    const target = new Vector3(...bounds.center);
+    const target = new Vector3(...(mode === '2d' && focusPoint ? focusPoint : bounds.center));
     camera.near = span * 0.002;
     camera.far = span * 12;
-    camera.zoom = 1;
+    camera.zoom = mode === '2d' && focusPoint ? 2.8 : 1;
 
     if (camera instanceof OrthographicCamera) {
       camera.position.copy(target).add(new Vector3(0, span * 2, 0));
@@ -85,7 +86,7 @@ const MapCamera = ({ mode, bounds, reset, pointerEditing, heroView }: Props) => 
     camera.updateProjectionMatrix();
     camera.updateMatrixWorld();
     invalidate();
-  }, [bounds.center, camera, invalidate, reset, span]);
+  }, [bounds.center, camera, focusPoint, invalidate, mode, reset, span]);
 
   useLayoutEffect(() => {
     if (aspect <= 0) return;

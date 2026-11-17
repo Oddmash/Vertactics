@@ -20,6 +20,7 @@ import type { HeroPlacement } from '../domain/strategy';
 import tokens from '../theme/tokens.json';
 import MapCamera from './map-camera';
 import type { ViewMode } from './map-camera';
+import type { MapLocation } from '../map/competitive-overviews';
 
 const unitBox = new BoxGeometry();
 const ramps = { '+x': rampGeometry('+x'), '-x': rampGeometry('-x'), '+z': rampGeometry('+z'), '-z': rampGeometry('-z') };
@@ -103,11 +104,14 @@ type Props = {
   onDragSurface?: (position: WorldPoint | null) => void;
   onDropSurface?: (position: WorldPoint | null) => void;
   externalDrop?: { type: string; finish: (data: string, position: WorldPoint) => void };
+  locations?: MapLocation[];
+  focusedLocation?: MapLocation;
 };
 
 const MapViewport = ({
   map, capture, mode, reset, selectedTerrainIds, onSelect, heroes, selectedHeroId, onSelectHero, onEditSurface,
   annotations, selectedAnnotationId, snap, layerId, onDragSurface, onDropSurface, externalDrop, abilities, abilityPreview, sightline, heroView,
+  locations, focusedLocation,
 }: Props) => {
   const { t } = useLocale();
   const bounds = useMemo(() => mapBounds(map.terrain), [map]);
@@ -141,7 +145,8 @@ const MapViewport = ({
         <ambientLight intensity={1.15} />
         <directionalLight position={[-15, 24, 10]} intensity={1.5} />
         <directionalLight position={[18, 8, -15]} intensity={0.35} />
-        <MapCamera mode={mode} bounds={bounds} reset={reset} heroView={heroView} pointerEditing={Boolean(onDragSurface)} />
+        <MapCamera mode={mode} bounds={bounds} reset={reset} heroView={heroView} pointerEditing={Boolean(onDragSurface)}
+          focusPoint={focusedLocation?.point} />
         <SurfaceCursor editing={Boolean(onEditSurface || onDragSurface)} />
         {(onDropSurface || externalDrop) && <SurfaceDrag snap={snap} onPreview={onDragSurface} onFinish={onDropSurface} externalDrop={externalDrop} />}
         <gridHelper
@@ -194,6 +199,12 @@ const MapViewport = ({
           position={abilityPreview.hero.position} heading={abilityPreview.hero.yaw}
         />}
         {sightline && <MapSightline {...sightline} />}
+        {mode === '2d' && locations?.map(({ id, point: [x, y, z] }) => (
+          <mesh key={id} position={[x, y + 0.05, z]} rotation={[-Math.PI / 2, 0, 0]}>
+            <ringGeometry args={[2.25, 2.65, 36]} />
+            <meshBasicMaterial color={id === focusedLocation?.id ? tokens.color.action : tokens.color.accent} />
+          </mesh>
+        ))}
         <MapAnnotations items={annotations} selectedId={selectedAnnotationId} />
         {heroes.filter(({ id }) => id !== heroView?.id).map(({ id, position, yaw, team }) => (
           <group

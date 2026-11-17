@@ -11,8 +11,6 @@ const modeNames = {
   flashpoint: '플래시포인트',
 };
 
-const editorMapIds: Record<string, string> = { 'kings-row': 'kings-row-a' };
-
 const MapCatalogue = ({ onSelect }: { onSelect: (id: string) => void }) => {
   const dialog = useRef<HTMLDialogElement>(null);
   const { locale, t } = useLocale();
@@ -42,17 +40,14 @@ const MapCatalogue = ({ onSelect }: { onSelect: (id: string) => void }) => {
               <ul role="list">
                 {owkrCatalogue.maps.filter((map) => map.mode === mode).map(({ id, nameKo, nameEn }) => {
                   const name = locale === 'ko' ? nameKo : nameEn;
-                  const editorMapId = editorMapIds[id];
                   return (
                     <li key={id}>
                       <div>
                         <span>{name}</span>
-                        <small>{t(editorMapId ? 'A 거점 근사 지도' : '지형 준비 중')}</small>
+                        <small>{t('2D 전술 도식')}</small>
                       </div>
-                      {editorMapId && (
-                        <Button type="button" className="reset-button" onClick={() => selectMap(editorMapId)}
-                          aria-label={t('{0} 열기', name)}>{t('열기')}</Button>
-                      )}
+                      <Button type="button" className="reset-button" onClick={() => selectMap(id)}
+                        aria-label={t('{0} 열기', name)}>{t('열기')}</Button>
                     </li>
                   );
                 })}

@@ -1,7 +1,7 @@
 import { Button } from '../ui/controls';
 import { useLocale } from '../ui/locale';
 import LocalePicker from '../ui/locale-picker';
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import type { StrategyDraft } from '../domain/strategy-draft';
 import MapViewport from '../render/map-viewport';
 import type { ViewMode } from '../render/map-camera';
@@ -9,11 +9,16 @@ import { sampleTimeline, timelineDuration } from '../domain/timeline-playback';
 import { downloadFile, fileStem } from './download-file';
 import TimelinePlaybackControls from './timeline-playback-controls';
 import useTimelinePlayback from './use-timeline-playback';
+import { competitiveOverview } from '../map/competitive-overviews';
+import MapLocationPicker from './map-location-picker';
 
 const SharedStrategyView = ({ draft, onDuplicate }: { draft: StrategyDraft; onDuplicate: () => void }) => {
   const { t } = useLocale();
   const { map, strategy } = draft;
-  const [mode, setMode] = useState<ViewMode>('3d');
+  const overview = useMemo(() => competitiveOverview(map), [map]);
+  const [locationId, setLocationId] = useState('');
+  const [viewMode, setMode] = useState<ViewMode>('3d');
+  const mode = overview ? '2d' : viewMode;
   const [reset, setReset] = useState(0);
   const [message, setMessage] = useState('');
   const capture = useRef<(() => Promise<Blob>) | null>(null);
@@ -36,11 +41,15 @@ const SharedStrategyView = ({ draft, onDuplicate }: { draft: StrategyDraft; onDu
           <div className="viewport-toolbar">
             <div><h1 id="shared-title">{strategy.title}</h1><p>{t(map.name)}</p></div>
             <div className="viewport-actions">
-              <div className="mode-switch" role="group" aria-label={t('지도 보기')}>
+              {overview ? <MapLocationPicker locations={overview.locations} value={locationId} onChange={setLocationId} />
+              : <div className="mode-switch" role="group" aria-label={t('지도 보기')}>
                 <Button type="button" aria-label={t('2D 탑다운')} aria-pressed={mode === '2d'} onClick={() => setMode('2d')}>2D</Button>
                 <Button type="button" aria-label={t('3D 원근')} aria-pressed={mode === '3d'} onClick={() => setMode('3d')}>3D</Button>
-              </div>
-              <Button type="button" className="reset-button" onClick={() => setReset((value) => value + 1)}>{t('시점 초기화')}</Button>
+              </div>}
+              <Button type="button" className="reset-button" onClick={() => {
+                setLocationId('');
+                setReset((value) => value + 1);
+              }}>{t('시점 초기화')}</Button>
               <Button type="button" className="reset-button" onClick={() =>
                 downloadFile(new Blob([JSON.stringify(draft)], { type: 'application/json' }), `${stem}-strategy.json`)
               }>{t('전략 JSON 내보내기')}</Button>
@@ -63,6 +72,7 @@ const SharedStrategyView = ({ draft, onDuplicate }: { draft: StrategyDraft; onDu
             : <div className="view-options"><Button type="button" className="reset-button" onClick={start}>{t('전략 재생')}</Button></div>)}
           <div className="viewport" data-testid="viewport">
             <MapViewport map={map} capture={capture} mode={mode} reset={reset} layerId="" snap={false}
+              locations={overview?.locations} focusedLocation={overview?.locations.find(({ id }) => id === locationId)}
               selectedTerrainIds={new Set()} selectedHeroId={null} selectedAnnotationId={null}
               heroes={frame?.heroes ?? strategy.heroes} abilities={frame?.abilities ?? strategy.abilities}
               annotations={strategy.annotations} sightline={null} onSelect={() => {}} onSelectHero={() => {}}
