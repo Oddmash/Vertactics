@@ -414,9 +414,6 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
               if (!sightPicking || !sightSecond) setSightPoints([]);
             }}>{t('지점 간 시야')}</button>
           </nav>
-          {tool && <p className="tool-status" role="status">{t(tool.kind === 'drag'
-            ? '선택한 영웅을 지도에서 끌어 이동하세요.'
-            : '지도에서 지점을 선택하세요. Esc로 취소합니다.')}</p>}
           <div ref={viewport} className="viewport" data-testid="viewport" tabIndex={-1}
             role="region" aria-label={t('지형 지도')}
             onPointerCancel={() => { if (tool?.kind === 'drag') changeSurfaceTool(null); }}
@@ -450,6 +447,9 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
               onDragSurface={!locked && tool?.kind === 'drag' ? setDragPreview : undefined}
               onDropSurface={!locked && tool?.kind === 'drag' ? finishDrag : undefined}
             />
+            {tool && <p className="tool-status" role="status">{t(tool.kind === 'drag'
+              ? '선택한 영웅을 지도에서 끌어 이동하세요.'
+              : '지도에서 지점을 선택하세요. Esc로 취소합니다.')}</p>}
             <span className="view-label" aria-hidden="true">{heroView ? t('{0} 시점', displayHero(heroView.heroId)) : t(viewNames[mode])}</span>
             {!heroView && mode === '2d' && <span className="north-label" aria-label={t('위쪽은 북쪽')}>↑ N</span>}
           </div>

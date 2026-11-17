@@ -382,7 +382,22 @@ ul { padding: 0; list-style: none; }
 .workspace-links a { min-width: 0; max-width: 100%; white-space: normal; overflow-wrap: anywhere; }
 .view-panel .display-options { align-items: center; }
 .view-panel .display-options .reset-button { min-height: var(--size-control); }
-.editor .view-panel .tool-status { color: var(--color-accent); font-size: 12px; }
+.tool-status {
+  position: absolute;
+  bottom: var(--space-md);
+  left: var(--space-md);
+  right: var(--space-md);
+  width: fit-content;
+  max-width: calc(100% - 2 * var(--space-md));
+  padding: var(--space-xs) var(--space-sm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-panel);
+  color: var(--color-accent);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+  pointer-events: none;
+}
 
 @media (max-width: 680px) {
   .map-catalogue { flex-basis: 100%; }
