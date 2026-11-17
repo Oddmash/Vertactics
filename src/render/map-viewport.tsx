@@ -20,6 +20,7 @@ import type { HeroPlacement } from '../domain/strategy';
 import tokens from '../theme/tokens.json';
 import MapCamera from './map-camera';
 import HeroPortraitMarker from './hero-portrait-marker';
+import { getHero } from '../domain/hero-catalogue';
 import type { ViewMode } from './map-camera';
 import type { MapLocation } from '../map/competitive-overviews';
 
@@ -115,7 +116,7 @@ const MapViewport = ({
   annotations, selectedAnnotationId, snap, layerId, onDragSurface, onDropSurface, sampleDragStart, externalDrop, abilities, abilityPreview, sightline, heroView,
   locations, focusedLocation,
 }: Props) => {
-  const { t } = useLocale();
+  const { locale, t } = useLocale();
   const bounds = useMemo(() => mapBounds(map.terrain), [map]);
   const blocks = useMemo(() => visibleTerrainForLayer(map.terrain, layerId).map((terrain) => ({
     terrain,
@@ -227,7 +228,9 @@ const MapViewport = ({
                 emissiveIntensity={id === selectedHeroId ? 0.6 : 0}
               />
             </mesh>
-            <HeroPortraitMarker key={heroId} heroId={heroId} />
+            <HeroPortraitMarker heroId={heroId}
+              label={(locale === 'ko' ? getHero(heroId)?.localizedName : getHero(heroId)?.name) ?? heroId}
+              color={tokens.team[team]} selected={id === selectedHeroId} />
             <mesh position={[0, 0.46, -0.75]} rotation={[-Math.PI / 2, 0, 0]}>
               <coneGeometry args={[0.3, 0.7, 3]} />
               <meshBasicMaterial color={tokens.team[team]} />

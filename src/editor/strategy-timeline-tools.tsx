@@ -3,6 +3,7 @@ import { useLocale } from '../ui/locale';
 import { useState } from 'react';
 import type { StrategyDocument } from '../domain/strategy';
 import type { StrategyPhase } from '../domain/strategy-timeline';
+import { getKoreanAbilityName } from '../domain/ability-reference';
 import { getHero } from '../domain/hero-catalogue';
 
 type Props = {
@@ -14,12 +15,12 @@ type Props = {
 const readMs = (data: FormData, name: string) => Math.round(Number(data.get(name)) * 1000);
 
 const StrategyTimelineTools = ({ strategy, locked, onChange }: Props) => {
-  const { t } = useLocale();
+  const { locale, t } = useLocale();
   const [selectedId, setSelectedId] = useState('');
   const [message, setMessage] = useState('');
   const { timeline, heroes, abilities } = strategy;
   const abilityLabels = new Map(abilities.map(({ id, heroId, abilityId }, index) => {
-    const name = getHero(heroId)?.abilities.find((ability) => ability.id === abilityId)?.name ?? abilityId;
+    const name = (locale === 'ko' ? getKoreanAbilityName(heroId, abilityId) : undefined) ?? getHero(heroId)?.abilities.find((ability) => ability.id === abilityId)?.name ?? abilityId;
     return [id, `${name} · ${index + 1}`];
   }));
   const selected = timeline.find(({ id }) => id === selectedId) ?? timeline[0];

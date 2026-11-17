@@ -1,4 +1,5 @@
-import { useRef, useState } from 'react';
+import LoadingImage from '../ui/loading-image';
+import { useRef } from 'react';
 import type { MapDefinition } from '../domain/map';
 import owkrCatalogue from '../domain/owkr-catalogue.json';
 import previewImages from '../domain/map-preview-images.json';
@@ -22,7 +23,6 @@ const MapCatalogue = ({ maps, selectedId, onSelect }: {
   onSelect: (id: string) => void;
 }) => {
   const dialog = useRef<HTMLDialogElement>(null);
-  const [failedImages, setFailedImages] = useState<ReadonlySet<string>>(() => new Set());
   const { locale, t } = useLocale();
   const selectMap = (id: string) => {
     onSelect(id);
@@ -56,9 +56,7 @@ const MapCatalogue = ({ maps, selectedId, onSelect }: {
                   return (
                     <li key={id} className="map-card">
                       <div className="map-card-image">
-                        {thumbnail && !failedImages.has(id) && <img src={thumbnail} alt="" width="320" height="180" loading="lazy"
-                          referrerPolicy="no-referrer"
-                          onError={() => setFailedImages((current) => new Set([...current, id]))} />}
+                        {thumbnail && <LoadingImage src={thumbnail} width={320} height={180} />}
                       </div>
                       {editorId ? <Button type="button" className="reset-button map-card-action"
                         onClick={() => selectMap(editorId)} aria-label={t('{0} 열기', name)}

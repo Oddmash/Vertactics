@@ -26,10 +26,6 @@
     </header>
     <main id="main">
       <section class="hero" aria-labelledby="hero-title">
-        <figure class="hero-map">
-          <img src="https://overfast-api.tekrop.fr/static/maps/kings-row.jpg" alt="" fetchpriority="high" />
-          <figcaption><span lang="en">KING’S ROW</span> / 오버워치 전장 이미지</figcaption>
-        </figure>
         <div class="hero-copy shell">
           <p class="product-category">오버워치 전술 플래너</p>
           <h1 id="hero-title">다음 교전을<br />지도 위에서 준비하세요.</h1>
@@ -38,21 +34,28 @@
             전술 편집기 열기 <span aria-hidden="true">↗</span>
           </a>
         </div>
+        <figure class="hero-map">
+          <img src="%BASE_URL%product/editor-2d.png" alt="좌측 전략 도구, 중앙 2D 지도, 우측 영웅 선택이 보이는 Vertactics 편집기" width="1440" height="900" fetchpriority="high" />
+          <figcaption>실제 편집기 · 2D 전술 보기</figcaption>
+        </figure>
       </section>
       <section class="workflow shell" id="workflow" aria-labelledby="workflow-title">
         <h2 id="workflow-title">전술은 이렇게 만드세요.</h2>
         <ol class="workflow-list">
           <li>
             <h3>진입로와 고지대를 확인하세요.</h3>
-            <p>2D에서 경로와 엄폐물의 위치를 살펴보고, 3D로 전환해 계단과 고지대의 높이를 확인하세요. 지형을 선택하면 높이를 볼 수 있습니다. 편집기 전체를 전체 화면으로 전환해 지도와 도구를 넓게 펼칠 수 있습니다.</p>
+            <p>2D에서 경로와 엄폐물의 위치를 살펴보고, 3D로 전환해 계단과 고지대의 높이를 확인하세요. 지형을 선택하면 높이를 볼 수 있습니다. 전체 화면을 켜면 지도와 편집 도구를 함께 화면 가득 펼쳐 볼 수 있습니다.</p>
+            <img src="%BASE_URL%product/editor-elevation.png" alt="계단과 고지대를 입체적으로 표시한 3D 편집 화면" width="1440" height="900" loading="lazy" />
           </li>
           <li>
             <h3>영웅을 놓고 교전 위치를 비교하세요.</h3>
-            <p>영웅을 공격팀이나 수비팀에 배치하고, 웨이포인트로 이동 경로를 만들고, 두 점을 선택해 직선을 긋거나 펜으로 자유롭게 표시하세요. 거리·높이 차를 재거나, 두 지점 사이 시야를 어느 지형이 가리는지 확인할 수 있습니다. 스킬 범위는 직접 값을 입력해 미리 볼 수 있습니다.</p>
+            <p>영웅을 공격팀이나 수비팀에 배치하고, 웨이포인트로 이동 경로를 만들고, 두 점을 선택해 직선을 긋거나 펜으로 자유롭게 표시하세요. 거리·높이 차를 재거나, 두 지점 사이 시야를 어느 지형이 가리는지 확인할 수 있습니다. 영웅을 선택하면 스킬 설명과 출처가 확인된 수치를 볼 수 있습니다.</p>
+            <img src="%BASE_URL%product/editor-markers.png" alt="전장 위에 원과 선 마커를 표시한 편집 화면" width="1440" height="900" loading="lazy" />
           </li>
           <li>
             <h3>진입 순서를 기록하고 공유하세요.</h3>
             <p>타임라인에 단계별 영웅 위치와 능력 사용을 기록하세요. 팀원은 읽기 전용 링크에서 지도를 보고 타임라인을 재생할 수 있습니다. 작업은 같은 브라우저에 저장하거나 JSON으로 내보낼 수 있습니다.</p>
+            <img src="%BASE_URL%product/editor-route.png" alt="웨이포인트와 이동 경로가 보이는 편집 화면" width="1440" height="900" loading="lazy" />
           </li>
         </ol>
       </section>
@@ -64,9 +67,10 @@
       </section>
     </main>
     <footer class="site-footer shell">
-      <p>Vertactics는 Blizzard Entertainment와 제휴하지 않은 독립 오버워치 팬 프로젝트입니다. 전장 이미지 © Blizzard Entertainment.</p>
+      <p>Vertactics는 Blizzard Entertainment와 제휴하지 않은 독립 오버워치 팬 프로젝트입니다. 영웅 이미지 © Blizzard Entertainment.</p>
       <a href="https://github.com/qtaghdi/Vertactics">GitHub <span aria-hidden="true">↗</span></a>
     </footer>
     <script type="module" src="/src/theme/index.ts"></script>
+    <script type="module" src="/src/landing-images.ts"></script>
   </body>
 </html>
