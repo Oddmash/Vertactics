@@ -1,3 +1,5 @@
+import type { AbilityPlacement } from './ability-preview';
+import type { StrategyPhase } from './strategy-timeline';
 import { describe, expect, it } from 'vitest';
 import { createStrategy } from './strategy';
 import type { HeroPlacement } from './strategy';
@@ -38,4 +40,26 @@ describe('strategy history', () => {
     })).toBe(placed);
     expect(reduceStrategyHistory(initial, { type: 'undo' })).toBe(initial);
   });
+});
+
+it('records timeline changes and restores dependent poses and events on undo', () => {
+  const ability: AbilityPlacement = {
+    id: 'ability-1', heroId: 'tracer', abilityId: 'blink', shape: 'vector', range: 8, width: 1,
+    angle: 60, direction: 0, verification: 'custom', position: [1, 2, 3], heading: 0, visible: true,
+  };
+  const placedHero = reduceStrategyHistory(initial, { type: 'place', hero });
+  const placedAbility = reduceStrategyHistory(placedHero, { type: 'set-ability', ability });
+  const phase: StrategyPhase = {
+    id: 'entry', label: 'Entry', durationMs: 3000,
+    poses: [{ heroPlacementId: hero.id, position: [3, 4, 5], yaw: 45 }],
+    events: [{ id: 'flash', abilityPlacementId: ability.id, offsetMs: 1000, durationMs: 500 }],
+  };
+  const recording = reduceStrategyHistory(placedAbility, { type: 'set-timeline', timeline: [phase] });
+  expect(reduceStrategyHistory(recording, { type: 'set-timeline', timeline: [phase] })).toBe(recording);
+  const removedHero = reduceStrategyHistory(recording, { type: 'remove', id: hero.id });
+  expect(removedHero.present.timeline).toEqual([{ ...phase, poses: [] }]);
+  expect(reduceStrategyHistory(removedHero, { type: 'undo' }).present.timeline).toEqual([phase]);
+  const removedAbility = reduceStrategyHistory(recording, { type: 'remove-ability', id: ability.id });
+  expect(removedAbility.present.timeline).toEqual([{ ...phase, events: [] }]);
+  expect(reduceStrategyHistory(removedAbility, { type: 'undo' }).present.timeline).toEqual([phase]);
 });

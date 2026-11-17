@@ -1,3 +1,4 @@
+import type { StrategyPhase } from './strategy-timeline';
 import type { AbilityPlacement } from './ability-preview';
 import type { Annotation } from './annotation';
 import { parseStrategy } from './strategy';
@@ -17,6 +18,7 @@ export type StrategyAction =
   | { type: 'remove-annotation'; id: string }
   | { type: 'set-ability'; ability: AbilityPlacement }
   | { type: 'remove-ability'; id: string }
+  | { type: 'set-timeline'; timeline: StrategyPhase[] }
   | { type: 'undo' }
   | { type: 'redo' };
 
@@ -42,6 +44,12 @@ export const reduceStrategyHistory = (
     return next ? { past: [...past, present], present: next, future: remaining } : history;
   }
 
+  if (action.type === 'set-timeline') {
+    const next = parseStrategy({ ...present, timeline: action.timeline });
+    if (JSON.stringify(next.timeline) === JSON.stringify(present.timeline)) return history;
+    return { past: [...past, present], present: next, future: [] };
+  }
+
   if (action.type === 'set-annotation' || action.type === 'remove-annotation') {
     const id = action.type === 'set-annotation' ? action.annotation.id : action.id;
     const index = present.annotations.findIndex((item) => item.id === id);
@@ -62,7 +70,10 @@ export const reduceStrategyHistory = (
       : existing
         ? present.abilities.map((item) => item.id === id ? action.ability : item)
         : [...present.abilities, action.ability];
-    return { past: [...past, present], present: parseStrategy({ ...present, abilities }), future: [] };
+    const timeline = action.type === 'remove-ability'
+      ? present.timeline.map((phase) => ({ ...phase, events: phase.events.filter((event) => event.abilityPlacementId !== id) }))
+      : present.timeline;
+    return { past: [...past, present], present: parseStrategy({ ...present, abilities, timeline }), future: [] };
   }
 
   let heroes: HeroPlacement[];
@@ -82,9 +93,12 @@ export const reduceStrategyHistory = (
     }
   }
 
+  const timeline = action.type === 'remove'
+    ? present.timeline.map((phase) => ({ ...phase, poses: phase.poses.filter((pose) => pose.heroPlacementId !== action.id) }))
+    : present.timeline;
   return {
     past: [...past, present],
-    present: parseStrategy({ ...present, heroes }),
+    present: parseStrategy({ ...present, heroes, timeline }),
     future: [],
   };
 };
