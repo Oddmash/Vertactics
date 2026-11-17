@@ -277,3 +277,5 @@ ul { padding: 0; list-style: none; }
 .terrain-swatch.railing { background: var(--color-railing); }
 .terrain-swatch.doorway { background: var(--color-doorway); }
 .terrain-swatch.drop-zone { background: var(--color-drop-zone); }
+.spatial-probe { display: grid; gap: var(--space-xs); margin-block: var(--space-sm); font-size: 12px; }
+.spatial-probe select { max-width: 100%; }

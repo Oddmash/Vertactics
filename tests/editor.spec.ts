@@ -510,3 +510,48 @@ test('places and drags heroes at continuous ramp elevations', async ({ page }) =
   await expect(canvas).toHaveAttribute('data-view-mode', '3d');
   await expect(inspector.getByText('1, 0.5, 0', { exact: true })).toBeVisible();
 });
+
+test('opens the approximate Kings Row blockout and places a hero on Point A', async ({ page }) => {
+  await page.goto('/');
+  await page.getByLabel('지도', { exact: true }).selectOption('kings-row-a');
+  await expect(page.getByRole('heading', { name: /왕의 길 A 거점/ })).toBeVisible();
+  await expect(page.getByText(/미검증 · 40 × 46 u/)).toBeVisible();
+  await page.getByRole('button', { name: '2D 탑다운' }).click();
+  const canvas = page.getByTestId('viewport').locator('canvas');
+  await expect(canvas).toHaveAttribute('data-view-mode', '2d');
+  await page.getByRole('checkbox', { name: '격자 스냅' }).check();
+  await page.getByRole('button', { name: '배치 시작' }).click();
+  await expect(canvas).toHaveCSS('cursor', 'crosshair');
+  const box = await canvas.boundingBox();
+  if (!box) throw new Error('Canvas has no bounds');
+  const units = Math.max(40 / box.width, 46 / box.height) * 1.22;
+  await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2 - 11 / units);
+  const inspector = page.getByRole('complementary', { name: '지형 정보' });
+  await expect(inspector.getByText('0, 0.04, -8', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: '3D 원근' }).click();
+  await expect(canvas).toHaveAttribute('data-view-mode', '3d');
+  await expect(inspector.getByText('0, 0.04, -8', { exact: true })).toBeVisible();
+  await page.getByLabel('표시 층').selectOption('upper');
+  await expect(page.getByRole('button', { name: /수비 측 고지대/ })).toBeVisible();
+  await expect(page.getByRole('button', { name: /A 점령 구역/ })).toHaveCount(0);
+});
+
+test('shows obstruction between hero positions', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: '2D 탑다운' }).click();
+  const canvas = page.getByTestId('viewport').locator('canvas');
+  await expect(canvas).toHaveAttribute('data-view-mode', '2d');
+  const add = async (z: number) => {
+    await page.getByRole('button', { name: '배치 시작' }).click();
+    await expect(canvas).toHaveCSS('cursor', 'crosshair');
+    const box = await canvas.boundingBox();
+    if (!box) throw new Error('Canvas has no bounds');
+    const units = Math.max(36 / box.width, 24 / box.height) * 1.22;
+    await page.mouse.click(box.x + box.width / 2 + 6 / units, box.y + box.height / 2 + z / units);
+  };
+  await add(-11);
+  await expect(page.getByRole('list', { name: '배치한 영웅' }).getByRole('listitem')).toHaveCount(1);
+  await add(-6);
+  await page.getByLabel('시야 확인 대상').selectOption({ index: 1 });
+  await expect(page.getByText('시야: 북쪽 벽 · 충돌: 북쪽 벽')).toBeVisible();
+});

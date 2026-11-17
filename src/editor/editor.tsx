@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import type { Annotation } from '../domain/annotation';
 import { rotateTerrain, snapTerrain } from '../domain/terrain-edit';
+import { spatialBlockers } from '../domain/spatial-analysis';
 import TerrainTools from './terrain-tools';
 import AnnotationTools from './annotation-tools';
 import type { SurfacePick } from './annotation-tools';
@@ -55,6 +56,7 @@ const Editor = () => {
   const visibleTerrain = visibleTerrainForLayer(map.terrain, layerId);
   const [snap, setSnap] = useState(false);
   const [locked, setLocked] = useState(false);
+  const [sightTargetId, setSightTargetId] = useState('');
   const [showHeroes, setShowHeroes] = useState(true);
   const [showAnnotations, setShowAnnotations] = useState(true);
   const [selectedId, setPrimaryId] = useState<string | null>(null);
@@ -87,6 +89,7 @@ const Editor = () => {
     setLayerId('');
     setSelectedId(null);
     setSelectedHeroId(null);
+    setSightTargetId('');
     setAnnotationId(null);
     setMapId(id);
   };
@@ -174,6 +177,11 @@ const Editor = () => {
   const selected = visibleTerrain.find(({ id }) => id === selectedId);
   const selectedHero = heroes.find(({ id }) => id === selectedHeroId);
 
+  const sightTarget = heroes.find((hero) => hero.id === sightTargetId && hero.id !== selectedHeroId);
+  const spatialProbe = selectedHero && sightTarget ? (() => {
+    const eye = ([x, y, z]: WorldPoint): WorldPoint => [x, y + 1.6, z];
+    return spatialBlockers(map.terrain, eye(selectedHero.position), eye(sightTarget.position));
+  })() : null;
   const selectTerrain = (id: string | null, extend = false) => {
     if (mapEditing && extend && id && selectedId) {
       if (id === selectedId) {
@@ -394,6 +402,15 @@ const Editor = () => {
                     <div><dt>이동 미리보기 (X, Y, Z)</dt><dd>{dragPreview.map(formatNumber).join(', ')}</dd></div>
                   )}
                 </dl>
+                {heroes.length > 1 && <div className="spatial-probe">
+                  <label>시야 확인 대상 <select value={sightTarget?.id ?? ''} onChange={(event) => setSightTargetId(event.target.value)}>
+                    <option value="">대상 선택</option>
+                    {heroes.filter((hero) => hero.id !== selectedHeroId).map((hero, index) => (
+                      <option key={hero.id} value={hero.id}>{heroName(hero.heroId)} · {index + 1}</option>
+                    ))}
+                  </select></label>
+                  {spatialProbe && <p>시야: {spatialProbe.sight?.name ?? '개방'} · 충돌: {spatialProbe.collision?.name ?? '없음'}</p>}
+                </div>}
                 <fieldset className="hero-actions edit-controls" disabled={locked || !showHeroes}>
                   <button className="reset-button" type="button" onClick={() => setTool({ kind: 'move', id: selectedHero.id })}>이동</button>
                   <button className="reset-button" type="button" onClick={() => setTool({ kind: 'drag', id: selectedHero.id })}>드래그 이동</button>
