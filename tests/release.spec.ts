@@ -17,7 +17,10 @@ test('serves the editor, favicon, preview metadata and static recovery page', as
 
   const about = await page.goto('./about.html');
   expect(about?.ok()).toBe(true);
-  await expect(page.getByRole('heading', { name: 'Vertactics', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('전장의 높낮이까지,');
+  await expect(page.getByRole('radio', { name: '3D' })).toBeChecked();
+  await page.locator('label[for="view-flat"]').click();
+  await expect(page.getByRole('radio', { name: '2D' })).toBeChecked();
   await page.getByRole('link', { name: /Open map editor/ }).click();
   await expect(page).toHaveTitle('Vertactics');
 
