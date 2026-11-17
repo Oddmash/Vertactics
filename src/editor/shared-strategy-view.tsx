@@ -14,7 +14,7 @@ const SharedStrategyView = ({ draft, onDuplicate }: { draft: StrategyDraft; onDu
   const [message, setMessage] = useState('');
   const capture = useRef<(() => Promise<Blob>) | null>(null);
   const durationMs = timelineDuration(strategy.timeline);
-  const [playback, setPlayback] = useTimelinePlayback(durationMs);
+  const { state: playback, start, stop, toggle, seek, changeSpeed } = useTimelinePlayback(durationMs);
   const frame = playback ? sampleTimeline(strategy, playback.timeMs) : null;
   const stem = fileStem(map.id);
 
@@ -53,16 +53,8 @@ const SharedStrategyView = ({ draft, onDuplicate }: { draft: StrategyDraft; onDu
           {durationMs > 0 && (playback
             ? <TimelinePlaybackControls durationMs={durationMs} phaseLabel={frame?.phaseLabel ?? ''}
               timeMs={playback.timeMs} playing={playback.playing} speed={playback.speed}
-              onToggle={() => setPlayback({
-                ...playback, timeMs: playback.timeMs >= durationMs ? 0 : playback.timeMs, playing: !playback.playing,
-              })}
-              onSeek={(timeMs) => setPlayback({ ...playback, timeMs, playing: false })}
-              onSpeed={(speed) => setPlayback((state) => state && { ...state, speed })}
-              onExit={() => setPlayback(null)} exitLabel="재생 종료"
-            />
-            : <div className="view-options"><button type="button" className="reset-button" onClick={() =>
-              setPlayback({ timeMs: 0, playing: true, speed: 1 })
-            }>전략 재생</button></div>)}
+              onToggle={toggle} onSeek={seek} onSpeed={changeSpeed} onExit={stop} exitLabel="재생 종료" />
+            : <div className="view-options"><button type="button" className="reset-button" onClick={start}>전략 재생</button></div>)}
           <div className="viewport" data-testid="viewport">
             <MapViewport map={map} capture={capture} mode={mode} reset={reset} layerId="" snap={false}
               selectedTerrainIds={new Set()} selectedHeroId={null} selectedAnnotationId={null}

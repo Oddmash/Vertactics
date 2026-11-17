@@ -131,7 +131,7 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
   const draft: StrategyDraft = { version: 1, map, strategy: history.present };
   const recovery = useWorkspaceRecovery(draft, workspaceRevision);
   const durationMs = timelineDuration(history.present.timeline);
-  const [playback, setPlayback] = useTimelinePlayback(durationMs);
+  const { state: playback, start, stop, toggle, seek, changeSpeed } = useTimelinePlayback(durationMs);
   const frame = playback ? sampleTimeline(history.present, playback.timeMs) : null;
   const changeSurfaceTool = useCallback((next: SurfaceTool | null) => {
     setSurfaceTool(next);
@@ -139,21 +139,21 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
     setSightPoints((points) => points.length === 2 ? points : []);
   }, []);
   const leavePresentation = useCallback(() => {
-    setPlayback(null);
+    stop();
     setHeroViewId(undefined);
-  }, [setPlayback]);
+  }, [stop]);
   const activateTool = useCallback((next: SurfaceTool | null) => {
     changeSurfaceTool(next);
     leavePresentation();
   }, [changeSurfaceTool, leavePresentation]);
   const dispatch = useCallback((action: StrategyAction) => {
-    setPlayback(null);
+    stop();
     markWorkspaceChanged();
     setHistories((current) => ({
       ...current,
       [mapId]: reduceStrategyHistory(Object.hasOwn(current, mapId) ? current[mapId]! : initialHistory, action),
     }));
-  }, [initialHistory, mapId, markWorkspaceChanged, setPlayback]);
+  }, [initialHistory, mapId, markWorkspaceChanged, stop]);
   const switchMap = (id: string) => {
     activateTool(null);
     setMapMessage('');
@@ -517,18 +517,11 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
           {!mapEditing && durationMs > 0 && (!playback
             ? <div className="view-options"><button type="button" className="reset-button" onClick={() => {
               activateTool(null);
-              setPlayback({ timeMs: 0, playing: true, speed: 1 });
+              start();
             }}>전략 재생</button></div>
             : <TimelinePlaybackControls durationMs={durationMs} phaseLabel={frame?.phaseLabel ?? ''}
               timeMs={playback.timeMs} playing={playback.playing} speed={playback.speed}
-              onToggle={() => setPlayback({
-                ...playback,
-                timeMs: playback.timeMs >= durationMs ? 0 : playback.timeMs,
-                playing: !playback.playing,
-              })}
-              onSeek={(timeMs) => setPlayback({ ...playback, timeMs, playing: false })}
-              onSpeed={(speed) => setPlayback((state) => state && { ...state, speed })}
-              onExit={() => setPlayback(null)}
+              onToggle={toggle} onSeek={seek} onSpeed={changeSpeed} onExit={stop}
             />)}
           <div className="viewport" data-testid="viewport"
             onPointerCancel={() => { if (tool?.kind === 'drag') changeSurfaceTool(null); }}

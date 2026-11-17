@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 type PlaybackState = { timeMs: number; playing: boolean; speed: number };
 
@@ -24,7 +24,17 @@ const useTimelinePlayback = (durationMs: number) => {
     return () => cancelAnimationFrame(frame);
   }, [durationMs, playing]);
 
-  return [state, setState] as const;
+  const start = () => setState({ timeMs: 0, playing: true, speed: 1 });
+  const stop = useCallback(() => setState(null), []);
+  const toggle = () => setState((current) => current && {
+    ...current,
+    timeMs: current.timeMs >= durationMs ? 0 : current.timeMs,
+    playing: !current.playing,
+  });
+  const seek = (timeMs: number) => setState((current) => current && { ...current, timeMs, playing: false });
+  const changeSpeed = (speed: number) => setState((current) => current && { ...current, speed });
+
+  return { state, start, stop, toggle, seek, changeSpeed };
 };
 
 export default useTimelinePlayback;
