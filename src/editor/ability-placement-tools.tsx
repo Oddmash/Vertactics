@@ -41,7 +41,6 @@ const AbilityPlacementTools = ({ items, selectedId, locked, pending, onSelect, o
       </ul>}
       {selected && <>
         <dl>
-          <div><dt>{t('능력 좌표 (X, Y, Z)')}</dt><dd>{selected.position.map((axis) => Number(axis.toFixed(2))).join(', ')}</dd></div>
           <div><dt>{t('능력 방향')}</dt><dd>{(selected.heading + selected.direction + 360) % 360}°</dd></div>
           {selected.shape === 'area' && <div><dt>{t('지속 시간')}</dt>
             <dd>{selected.durationSeconds === undefined ? t('미설정') : t('{0}초', selected.durationSeconds)}</dd>

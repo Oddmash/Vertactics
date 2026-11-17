@@ -1,4 +1,11 @@
 {
+  "전체 화면": "Fullscreen",
+  "전체 화면 종료": "Exit fullscreen",
+  "마커": "Markers",
+  "펜": "Pen",
+  "두 점으로 직선": "Two-point line",
+  "지도에서 끌어서 그리세요. Esc로 취소합니다.": "Drag on the map to draw. Press Esc to cancel.",
+  "지도에서 지형이나 배치한 영웅을 선택하세요.": "Select terrain or a placed hero on the map.",
   "스킬을 가리키거나 선택해 설명을 확인하세요.": "Hover or select a skill to read its details.",
   "전장 변경": "Change map",
   "2D 지형 대조 중": "2D layout pending verification",

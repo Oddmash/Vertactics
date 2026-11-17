@@ -16,15 +16,13 @@ import AbilityPlacementTools from './ability-placement-tools';
 import AbilityPreviewTools from './ability-preview-tools';
 import type { AbilityPlacement, AbilityPreviewSettings } from '../domain/ability-preview';
 import { measureSegment } from '../domain/measurement';
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Annotation } from '../domain/annotation';
-import { rotateTerrain, snapTerrain } from '../domain/terrain-edit';
 import { traceHeroSightline, traceTerrainSightline } from '../domain/spatial-analysis';
-import TerrainTools from './terrain-tools';
 import AnnotationTools from './annotation-tools';
 import type { SurfacePick } from './annotation-tools';
-import { mapBounds, terrainKinds, topElevation, visibleTerrainForLayer } from '../domain/map';
-import type { MapDefinition, MapLayer, Terrain, TerrainKind, WorldPoint } from '../domain/map';
+import { terrainKinds, topElevation, visibleTerrainForLayer } from '../domain/map';
+import type { TerrainKind, WorldPoint } from '../domain/map';
 import { heroEyeHeight } from '../domain/strategy';
 import type { Team } from '../domain/strategy';
 import type { StrategyAction } from '../domain/strategy-history';
@@ -38,7 +36,7 @@ import { competitiveOverview, terrainLocations } from '../map/competitive-overvi
 type SurfaceTool =
   | { kind: 'place'; heroId: CatalogueHero; team: Team }
   | { kind: 'move' | 'drag'; id: string }
-  | { kind: 'distance' | 'sight' }
+  | { kind: 'distance' | 'sight' | 'pen' }
   | { kind: 'ability' | 'annotation'; pick: SurfacePick };
 
 const kindNames: Record<TerrainKind, string> = {
@@ -65,16 +63,31 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
   const formatElevation = (value: number) => `${value > 0 ? '+' : ''}${formatNumber(value)} u`;
   const displayHero = (id: string) => locale === 'en' ? getHero(id)?.name ?? id : heroName(id);
   const workspace = useWorkspaceDocuments(initialDraft);
-  const { catalogue, map, history, timeline, draft, recovery, importMessage, mapMessage, editStrategy } = workspace;
+  const { catalogue, map, history, draft, recovery, editStrategy } = workspace;
   const mapId = map.id;
   const overview = useMemo(() => competitiveOverview(map), [map]);
   const [locationId, setLocationId] = useState('');
   const locations = useMemo(() => overview?.locations ?? terrainLocations(map), [map, overview]);
   const focusedLocation = locations.find(({ id }) => id === locationId);
-  const { min, max } = useMemo(() => mapBounds(map.terrain), [map]);
-  const [mapActionsOpen, setMapActionsOpen] = useState(false);
   const [displayOptionsOpen, setDisplayOptionsOpen] = useState(false);
   const viewport = useRef<HTMLDivElement>(null);
+  const editorRoot = useRef<HTMLDivElement>(null);
+  const [fullScreen, setFullScreen] = useState(false);
+  useEffect(() => {
+    const syncFullscreen = () => setFullScreen(document.fullscreenElement === editorRoot.current);
+    document.addEventListener('fullscreenchange', syncFullscreen);
+    return () => document.removeEventListener('fullscreenchange', syncFullscreen);
+  }, []);
+  const toggleFullscreen = () => {
+    if (fullScreen) {
+      setFullScreen(false);
+      if (document.fullscreenElement === editorRoot.current) void document.exitFullscreen().catch(() => {});
+      return;
+    }
+    setFullScreen(true);
+    const request = editorRoot.current?.requestFullscreen?.();
+    if (request) void request.catch(() => {});
+  };
   const captureViewport = useRef<(() => Promise<Blob>) | null>(null);
   const [imageMessage, setImageMessage] = useState('');
   const saveViewport = async () => {
@@ -87,7 +100,6 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
       setImageMessage('지도 화면을 PNG로 저장할 수 없습니다.');
     }
   };
-  const [mapEditing, setMapEditing] = useState(false);
   const [tool, setSurfaceTool] = useState<SurfaceTool | null>(null);
   const measuring = tool?.kind === 'distance';
   const sightPicking = tool?.kind === 'sight';
@@ -114,15 +126,12 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
   const [sightTargetId, setSightTargetId] = useState('');
   const [showHeroes, setShowHeroes] = useState(true);
   const [showAnnotations, setShowAnnotations] = useState(true);
-  const [selectedId, setPrimaryId] = useState<string | null>(null);
-  const [additionalTerrain, setAdditionalTerrain] = useState<string[]>([]);
-  const setSelectedId = (id: string | null) => {
-    setPrimaryId(id);
-    setAdditionalTerrain([]);
-  };
-  const selectedTerrainIds = new Set(selectedId ? [selectedId, ...additionalTerrain] : additionalTerrain);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const selectedTerrainIds = new Set(selectedId ? [selectedId] : []);
   const [catalogueHeroId, setCatalogueHeroId] = useState<CatalogueHero>('tracer');
   const [selectedHeroId, setSelectedHeroId] = useState<string | null>(null);
+  const penPoints = useRef<WorldPoint[]>([]);
+  const [penPreview, setPenPreview] = useState<WorldPoint[]>([]);
   const [dragPreview, setDragPreview] = useState<WorldPoint | null>(null);
   const [selectedAbilityId, setSelectedAbilityId] = useState<string | null>(null);
   const [annotationId, setAnnotationId] = useState<string | null>(null);
@@ -132,6 +141,8 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
   const changeSurfaceTool = useCallback((next: SurfaceTool | null) => {
     setSurfaceTool(next);
     setDragPreview(null);
+    penPoints.current = [];
+    setPenPreview([]);
     setSightPoints((points) => points.length === 2 ? points : []);
   }, []);
   const leavePresentation = useCallback(() => {
@@ -172,70 +183,26 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
       Object.entries(current).filter(([key]) => JSON.parse(key)[0] !== saved.map.id),
     ));
     resetMapView();
-    setMapEditing(false);
     setReset((value) => value + 1);
-  };
-  const importMap = async (file: File) => {
-    if (await workspace.importMap(file)) resetMapView();
-  };
-  const syncTerrainView = (next: MapDefinition | undefined, nextId: string | null) => {
-    if (!next) return;
-    setSelectedId(nextId);
-    if (layerId && !next.layers?.some((layer) => layer.id === layerId)) setLayerId('');
-  };
-  const updateTerrain = (terrain: unknown[], nextId: string | null, layers = map.layers) =>
-    syncTerrainView(workspace.updateTerrain(terrain, layers), nextId);
-  const moveMapHistory = (direction: 'undo' | 'redo') => syncTerrainView(workspace.moveMapHistory(direction), null);
-  const saveLayer = (layer: MapLayer) => {
-    const layers = map.layers ?? [];
-    updateTerrain(map.terrain, selectedId, layers.some((item) => item.id === layer.id)
-      ? layers.map((item) => item.id === layer.id ? layer : item)
-      : [...layers, layer]);
-  };
-  const deleteLayer = (id: string) => {
-    updateTerrain(
-      map.terrain.map((item) => item.layerId === id ? { ...item, layerId: undefined } : item),
-      selectedId,
-      map.layers?.filter((layer) => layer.id !== id),
-    );
-  };
-  const createMap = () => {
-    workspace.createMap(t('새 지도'), t('기본 바닥'));
-    resetMapView();
-    setMapEditing(true);
-  };
-  const copyTerrain = (terrain?: Terrain) => {
-    const id = crypto.randomUUID();
-    const item = terrain
-      ? { ...terrain, id, name: t('{0} 복제', terrain.name), origin: [terrain.origin[0] + 1, terrain.origin[1], terrain.origin[2] + 1] }
-      : { id, name: t('새 블록'), kind: 'platform', origin: [-1, 0, -1], size: [2, 1, 2], layerId: layerId || undefined };
-    updateTerrain([...map.terrain, item], id);
   };
   const { heroes, annotations, abilities } = history.present;
   const selected = visibleTerrain.find(({ id }) => id === selectedId);
   const selectedHero = heroes.find(({ id }) => id === selectedHeroId);
 
-  const heroView = !overview && !mapEditing && showHeroes && selectedHero?.id === heroViewId ? selectedHero : undefined;
+  const heroView = !overview && showHeroes && selectedHero?.id === heroViewId ? selectedHero : undefined;
   const selectedHeroProfile = selectedHero && getHero(selectedHero.heroId);
   const previewKey = selectedHero ? JSON.stringify([mapId, selectedHero.id]) : '';
   const activeAbility = abilityPreviews[previewKey];
   const sightTarget = heroes.find((hero) => hero.id === sightTargetId && hero.id !== selectedHeroId);
-  const spatialProbe = !mapEditing && showHeroes && selectedHero && sightTarget
+  const spatialProbe = showHeroes && selectedHero && sightTarget
     ? traceHeroSightline(map.terrain, selectedHero, sightTarget) : null;
   const terrainSight = sightFirst && sightSecond ? traceTerrainSightline(map.terrain, sightFirst, sightSecond) : null;
   const activeSight = sightPicking || sightFirst ? terrainSight : spatialProbe;
   const sightOverlay: Annotation[] = sightFirst && !sightSecond ? [{
     id: 'sight-start', kind: 'note', label: t('시야 시작점'), points: [sightFirst],
   }] : [];
-  const selectTerrain = (id: string | null, extend = false) => {
-    if (mapEditing && extend && id && selectedId) {
-      if (id === selectedId) {
-        setPrimaryId(additionalTerrain[0] ?? null);
-        setAdditionalTerrain(additionalTerrain.slice(1));
-      } else {
-        setAdditionalTerrain((items) => items.includes(id) ? items.filter((item) => item !== id) : [...items, id]);
-      }
-    } else setSelectedId(id);
+  const selectTerrain = (id: string | null) => {
+    setSelectedId(id);
     setSelectedHeroId(null);
     setHeroViewId(undefined);
   };
@@ -257,6 +224,26 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
     dispatch({ type: 'set-annotation', annotation });
     selectAnnotation(annotation.id);
   };
+
+  const drawPen = (point: WorldPoint | null) => {
+    if (!point) return;
+    const points = penPoints.current;
+    const last = points.at(-1);
+    if (last && Math.hypot(point[0] - last[0], point[2] - last[2]) < 0.15) return;
+    const next = points.length < 64 ? points : points.filter((_, index) => index % 2 === 0);
+    penPoints.current = [...next, point];
+    setPenPreview(penPoints.current);
+  };
+  const finishPen = (point: WorldPoint | null) => {
+    drawPen(point);
+    if (penPoints.current.length < 2) {
+      changeSurfaceTool(null);
+      return;
+    }
+    saveAnnotation({ id: crypto.randomUUID(), kind: 'pen', label: t('펜'), points: penPoints.current });
+  };
+  const penOverlay: Annotation[] = penPreview.length > 1
+    ? [{ id: 'pen-preview', kind: 'pen', label: t('펜'), points: penPreview }] : [];
 
   const saveAbility = (ability: AbilityPlacement) => {
     activateTool(null);
@@ -283,7 +270,7 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
 
   const dropHero = (data: string, position: WorldPoint) => {
     const [heroId, team, extra] = data.split(':');
-    if (locked || mapEditing || !showHeroes || !heroId || extra !== undefined ||
+    if (locked || !showHeroes || !heroId || extra !== undefined ||
       !isCatalogueHero(heroId) || (team !== 'attack' && team !== 'defense')) return;
     activateTool(null);
     placeHero(heroId, team, position);
@@ -312,13 +299,17 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
   };
 
   return (
-    <div className="editor" onKeyDown={(event) => {
+    <div ref={editorRoot} className="editor" data-fullscreen={fullScreen} onKeyDown={(event) => {
       if (event.key === 'Escape' && (frame || heroView || tool)) {
         event.preventDefault();
         activateTool(null);
         return;
       }
-      if (mapEditing || locked || event.defaultPrevented || event.altKey ||
+      if (event.key === 'Escape' && fullScreen && !document.fullscreenElement) {
+        setFullScreen(false);
+        return;
+      }
+      if (locked || event.defaultPrevented || event.altKey ||
         !(event.ctrlKey || event.metaKey) ||
         (event.target instanceof Element && event.target.closest('input:not([type=checkbox]):not([type=radio]), textarea, select, [contenteditable]'))) return;
       const key = event.key.toLowerCase();
@@ -334,24 +325,6 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
         </a>
         <div className="map-catalogue" aria-label={t('지도 관리')} role="group">
           <MapCatalogue maps={catalogue} selectedId={mapId} onSelect={switchMap} />
-          <Button type="button" className="reset-button mobile-panel-toggle" aria-expanded={mapActionsOpen}
-            aria-controls="map-actions" onClick={() => setMapActionsOpen((open) => !open)}>{t('지도 관리')}</Button>
-          <div className="map-actions" id="map-actions" data-expanded={mapActionsOpen}>
-            <Button type="button" className="reset-button" onClick={createMap}>{t('새 지도')}</Button>
-            <Button type="button" className="reset-button" aria-pressed={mapEditing} onClick={() => {
-              activateTool(null);
-              selectTerrain(null);
-              setMapEditing((current) => !current);
-            }}>{t('지도 편집 모드')}</Button>
-            <label className="file-button reset-button">{t('지도 JSON 가져오기')}<Input type="file" accept=".json,application/json" onChange={(event) => {
-              const file = event.target.files?.[0];
-              event.target.value = '';
-              if (file) void importMap(file);
-            }} /></label>
-            <a className="reset-button" download={`${map.id}.json`}
-              href={`data:application/json;charset=utf-8,${encodeURIComponent(JSON.stringify(map, null, 2))}`}>{t('지도 JSON 저장')}</a>
-          </div>
-          {importMessage && <span role="status">{t(importMessage)}</span>}
         </div>
         <nav className="workspace-links" aria-label={t('작업 공간')}>
           <a className="reset-button" href="#view-title">{t('지도 보기')}</a>
@@ -368,8 +341,7 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
               <h1 id="view-title" tabIndex={-1}>{t(map.name)}</h1>
               <p className="world-size">
                 {overview ? t('2D 전술 도식 · 위치와 축척은 참고용') :
-                  (map.metadata?.verification === 'verified' ? t('검증됨') : map.metadata?.verification === 'synthetic' ? t('가상 지도') : t('미검증')) +
-                  ` · ${max[0] - min[0]} × ${max[2] - min[2]} u`}</p>
+                  (map.metadata?.verification === 'verified' ? t('검증됨') : map.metadata?.verification === 'synthetic' ? t('가상 지도') : t('미검증'))}</p>
             </div>
             <div className="viewport-actions">
               {mode === '2d' && locations.length > 0 && <MapLocationPicker locations={locations} value={locationId} onChange={setLocationId} />}
@@ -394,6 +366,9 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
                 }}>
                   {t('시점 초기화')}
                 </Button>}
+              <Button className="reset-button fullscreen-action" type="button" aria-pressed={fullScreen} onClick={toggleFullscreen}>
+                {t(fullScreen ? '전체 화면 종료' : '전체 화면')}
+              </Button>
               <Button type="button" className="reset-button mobile-panel-toggle" aria-expanded={displayOptionsOpen}
                 aria-controls="display-options" onClick={() => setDisplayOptionsOpen((open) => !open)}>{t('표시 설정')}</Button>
             </div>
@@ -423,7 +398,7 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
             }} />{' ' + t('마커 표시')}</label>
             <Button className="reset-button" type="button" onClick={() => void saveViewport()}>{t('지도 PNG 저장')}</Button>
           </div>
-          {!mapEditing && durationMs > 0 && (!playback
+          {durationMs > 0 && (!playback
             ? <div className="view-options"><Button type="button" className="reset-button" onClick={() => {
               activateTool(null);
               start();
@@ -433,8 +408,16 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
               onToggle={toggle} onSeek={seek} onSpeed={changeSpeed} onExit={stop}
             />)}
           <nav className="canvas-tools" aria-label={t('지도 도구')}>
-            <a className="reset-button" href="#terrain-title">{t('지형 목록')}</a>
-            {!mapEditing && <a className="reset-button" href="#hero-tools-title">{t('영웅')}</a>}
+            <a className="reset-button" href="#hero-tools-title">{t('영웅')}</a>
+            <a className="reset-button" href="#annotation-title">{t('마커')}</a>
+            <div className="workspace-history">
+              <Button className="reset-button" aria-label={t('실행 취소')} title={t('실행 취소')}
+                disabled={locked || !history.past.length}
+                onClick={() => { activateTool(null); dispatch({ type: 'undo' }); }}>↶</Button>
+              <Button className="reset-button" aria-label={t('다시 실행')} title={t('다시 실행')}
+                disabled={locked || !history.future.length}
+                onClick={() => { activateTool(null); dispatch({ type: 'redo' }); }}>↷</Button>
+            </div>
             <Button type="button" className="reset-button" aria-pressed={measuring} onClick={() => {
               activateTool(measuring ? null : { kind: 'distance' });
               if (!measuring) setMeasurement([]);
@@ -446,7 +429,7 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
           </nav>
           <div ref={viewport} className="viewport" data-testid="viewport" tabIndex={-1}
             role="region" aria-label={t('지형 지도')}
-            onPointerCancel={() => { if (tool?.kind === 'drag') changeSurfaceTool(null); }}
+            onPointerCancel={() => { if (tool?.kind === 'drag' || tool?.kind === 'pen') changeSurfaceTool(null); }}
             onPointerLeave={(event) => { if (tool?.kind === 'drag' && event.buttons === 1) changeSurfaceTool(null); }}
           >
             <MapViewport
@@ -460,7 +443,7 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
               heroView={heroView}
               reset={reset}
               selectedTerrainIds={selectedTerrainIds}
-              heroes={!mapEditing && showHeroes ? (frame?.heroes ?? heroes).map((hero) =>
+              heroes={showHeroes ? (frame?.heroes ?? heroes).map((hero) =>
                 tool?.kind === 'drag' && hero.id === tool.id && dragPreview ? { ...hero, position: dragPreview } : hero
               ) : []}
               snap={snap}
@@ -468,19 +451,20 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
               sightline={!frame && activeSight ? {
                 start: activeSight.start, end: activeSight.endpoint, blocked: Boolean(activeSight.sight),
               } : null}
-              abilities={mapEditing ? [] : frame?.abilities ?? abilities}
-              abilityPreview={!frame && !mapEditing && showHeroes && selectedHero && activeAbility
+              abilities={frame?.abilities ?? abilities}
+              abilityPreview={!frame && showHeroes && selectedHero && activeAbility
                 ? { hero: selectedHero, settings: activeAbility } : undefined}
-              onSelect={(id, extend) => { if (!frame) selectTerrain(id, extend); }}
+              onSelect={(id) => { if (!frame) selectTerrain(id); }}
               onSelectHero={(id) => { if (!frame) selectHero(id); }}
-              annotations={[...(!mapEditing && showAnnotations ? annotations : []), ...measurementOverlay, ...sightOverlay]}
+              annotations={[...(showAnnotations ? annotations : []), ...measurementOverlay, ...sightOverlay, ...penOverlay]}
               selectedAnnotationId={annotationId}
-              onEditSurface={measuring || sightPicking || (!locked && tool && tool.kind !== 'drag') ? editSurface : undefined}
-              onDragSurface={!locked && tool?.kind === 'drag' ? setDragPreview : undefined}
-              onDropSurface={!locked && tool?.kind === 'drag' ? finishDrag : undefined}
-              externalDrop={!locked && !mapEditing && showHeroes ? { type: heroDragType, finish: dropHero } : undefined}
+              onEditSurface={measuring || sightPicking || (!locked && tool && tool.kind !== 'drag' && tool.kind !== 'pen') ? editSurface : undefined}
+              onDragSurface={locked ? undefined : tool?.kind === 'pen' ? drawPen : tool?.kind === 'drag' ? setDragPreview : undefined}
+              onDropSurface={locked ? undefined : tool?.kind === 'pen' ? finishPen : tool?.kind === 'drag' ? finishDrag : undefined}
+              sampleDragStart={tool?.kind === 'pen'}
+              externalDrop={!locked && showHeroes ? { type: heroDragType, finish: dropHero } : undefined}
             />
-            {tool && <p className="tool-status" role="status">{t(tool.kind === 'drag'
+            {tool && <p className="tool-status" role="status">{t(tool.kind === 'pen' ? '지도에서 끌어서 그리세요. Esc로 취소합니다.' : tool.kind === 'drag'
               ? '선택한 영웅을 지도에서 끌어 이동하세요.'
               : '지도에서 지점을 선택하세요. Esc로 취소합니다.')}</p>}
             <span className="view-label" aria-hidden="true">{heroView ? t('{0} 시점', displayHero(heroView.heroId)) : t(viewNames[mode])}</span>
@@ -493,27 +477,10 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
             </>}
           </footer>
         </section>
-        <aside className="terrain-panel panel" aria-labelledby="terrain-title">
+        <aside className="terrain-panel panel" aria-labelledby="strategy-panel-title">
           <div className="panel-heading">
-            <h2 id="terrain-title" tabIndex={-1}>{t('지형 목록')}</h2>
-            <span className="count">{visibleTerrain.length}</span>
+            <h2 id="strategy-panel-title" tabIndex={-1}>{t('전략')}</h2>
           </div>
-          <ul className="terrain-list">
-            {visibleTerrain.map((terrain) => (
-              <li key={terrain.id}>
-                <Button
-                  type="button"
-                  className="terrain-button"
-                  aria-pressed={selectedTerrainIds.has(terrain.id)}
-                  onClick={(event) => { activateTool(null); selectTerrain(terrain.id, event.shiftKey || event.metaKey || event.ctrlKey); }}
-                >
-                  <span className={`terrain-swatch ${terrain.kind}`} aria-hidden="true" />
-                  <span>{t(terrain.name)}</span>
-                  <small>{formatElevation(topElevation(terrain))}</small>
-                </Button>
-              </li>
-            ))}
-          </ul>
           <StrategyDraftTools draft={draft} onRestore={restoreDraft} />
           <StrategyFileTools draft={draft} onImport={(imported) => restoreDraft(imported, true)} />
           <section className="hero-tools" aria-label={t('작업 복구')}>
@@ -535,12 +502,12 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
             }[recovery.status]}</p>}
             {recovery.saved && recovery.status === 'error' && <p role="status">{t('복구본을 지울 수 없습니다.')}</p>}
           </section>
-          {!mapEditing && <StrategyTimelineTools key={mapId} strategy={history.present} locked={locked}
+          {<StrategyTimelineTools key={mapId} strategy={history.present} locked={locked}
             onChange={(timeline) => { activateTool(null); dispatch({ type: 'set-timeline', timeline }); }}
           />}
         </aside>
         <aside className="inspector-panel panel" aria-labelledby="inspector-title">
-          {!mapEditing && <HeroTools
+          {<HeroTools
             heroes={heroes}
             locked={locked || !showHeroes}
             selectedId={selectedHeroId}
@@ -550,12 +517,8 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
               setCatalogueHeroId(id);
             }}
             pendingMessage={tool?.kind === 'place' ? t('배치할 지면을 클릭하세요.') : tool?.kind === 'drag' ? t('지도에서 누른 채 끌어 이동하세요.') : tool?.kind === 'move' ? t('이동할 지면을 클릭하세요.') : ''}
-            canUndo={!locked && history.past.length > 0}
-            canRedo={!locked && history.future.length > 0}
             onPlace={(heroId, team) => activateTool({ kind: 'place', heroId, team })}
             onSelect={(id) => { activateTool(null); selectHero(id); }}
-            onUndo={() => { activateTool(null); dispatch({ type: 'undo' }); }}
-            onRedo={() => { activateTool(null); dispatch({ type: 'redo' }); }}
             onCancel={() => activateTool(null)}
           />}
           <div className="panel-heading"><h2 id="inspector-title" tabIndex={-1}>{t('지형 정보')}</h2></div>
@@ -565,12 +528,8 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
                 <h3>{displayHero(selectedHero.heroId)}</h3>
                 <dl>
                   <div><dt>{t('팀')}</dt><dd>{t(teamNames[selectedHero.team])}</dd></div>
-                  <div><dt>{t('좌표 (X, Y, Z)')}</dt><dd>{selectedHero.position.map(formatNumber).join(', ')}</dd></div>
                   <div><dt>{t('높이')}</dt><dd>{formatElevation(selectedHero.position[1])}</dd></div>
                   <div><dt>{t('방향')}</dt><dd>{selectedHero.yaw}°</dd></div>
-                  {tool?.kind === 'drag' && dragPreview && (
-                    <div><dt>{t('이동 미리보기 (X, Y, Z)')}</dt><dd>{dragPreview.map(formatNumber).join(', ')}</dd></div>
-                  )}
                 </dl>
                 {selectedHeroProfile && <Disclosure>
                   <summary>{t('영웅 정보 ·') + ' '}{t(roleNames[selectedHeroProfile.role])}</summary>
@@ -646,11 +605,10 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
                 <dl>
                   <div><dt>{t('유형')}</dt><dd>{t(kindNames[selected.kind])}</dd></div>
                   <div><dt>{t('최고 높이')}</dt><dd>{formatElevation(topElevation(selected))}</dd></div>
-                  <div><dt>{t('기준 좌표 (X, Y, Z)')}</dt><dd>{selected.origin.map(formatNumber).join(', ')}</dd></div>
                   {selected.kind === 'stairs' && <div><dt>{t('계단 수')}</dt><dd>{selected.steps}</dd></div>}
                 </dl>
               </>
-            ) : <p className="empty-selection">{t('지도 또는 지형 목록에서 블록을 선택하세요.')}</p>}
+            ) : <p className="empty-selection">{t('지도에서 지형이나 배치한 영웅을 선택하세요.')}</p>}
           </div>
           {(measuring || first) && <section className="hero-tools" aria-label={t('측정 결과')}>
             {distance && first && second ? <dl>
@@ -668,35 +626,6 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
               : sightFirst ? t('시야 목표점을 선택하세요.') : t('시야 시작점을 선택하세요.')}</p>
             {sightFirst && <Button type="button" className="reset-button" onClick={() => setSightPoints([])}>{t('시야 지우기')}</Button>}
           </section>}
-          {mapEditing ? <>
-            <TerrainTools
-              map={map}
-              selected={selected}
-              selectedCount={selectedTerrainIds.size}
-              undoable={timeline.past.length > 0}
-              redoable={timeline.future.length > 0}
-              onSave={(terrain) => updateTerrain(map.terrain.map((item) => item.id === selectedId ? terrain : item), selectedId)}
-              onAdd={() => copyTerrain()}
-              onDuplicate={copyTerrain}
-              onTransform={(id, transform) => updateTerrain(
-                map.terrain.map((item) => item.id === id ? (transform === 'rotate' ? rotateTerrain(item) : snapTerrain(item)) : item),
-                id,
-              )}
-              onSaveLayer={saveLayer}
-              onDeleteLayer={deleteLayer}
-              onBulkRemove={() => updateTerrain(map.terrain.filter((item) => !selectedTerrainIds.has(item.id)), null)}
-              onBulkDuplicate={() => updateTerrain([
-                ...map.terrain,
-                ...map.terrain.filter((item) => selectedTerrainIds.has(item.id)).map((item) => ({
-                  ...item, id: crypto.randomUUID(), name: t('{0} 복제', item.name),
-                  origin: [item.origin[0] + 1, item.origin[1], item.origin[2] + 1],
-                })),
-              ], null)}
-              onRemove={(id) => updateTerrain(map.terrain.filter((item) => item.id !== id), null)}
-              onHistory={moveMapHistory}
-            />
-            {mapMessage && <p role="status">{t(mapMessage)}</p>}
-          </> : <>
             {(abilities.length > 0 || abilityPick) && <AbilityPlacementTools
               items={abilities}
               selectedId={selectedAbilityId}
@@ -713,6 +642,8 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
               items={annotations}
               locked={locked || !showAnnotations}
               selected={annotations.find((item) => item.id === annotationId)}
+              penActive={tool?.kind === 'pen'}
+              onPen={() => activateTool(tool?.kind === 'pen' ? null : { kind: 'pen' })}
               pending={annotationPick}
               onSelect={selectAnnotation}
               onSave={saveAnnotation}
@@ -722,7 +653,6 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
                 dispatch({ type: 'remove-annotation', id });
               }}
             />
-          </>}
           <Disclosure className="legend">
             <summary>{t('지형 범례')}</summary>
             <ul>
@@ -734,7 +664,6 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
           <Disclosure className="legend">
             <summary id="workspace-help">{t('도움말')}</summary>
             <ul>
-              <li>{t('지도나 지형 목록에서 블록을 선택하면 좌표와 높이를 확인할 수 있습니다.')}</li>
               <li>{t('영웅을 배치한 뒤 속성 패널에서 팀과 방향을 바꿀 수 있습니다.')}</li>
               <li>{t('Esc로 도구를 취소하거나 재생을 종료합니다.')}</li>
               <li>{t('Ctrl 또는 ⌘와 Z로 실행 취소하고, Shift를 함께 눌러 다시 실행합니다.')}</li>

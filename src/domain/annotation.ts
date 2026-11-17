@@ -1,7 +1,7 @@
 import { isWorldPoint } from './map';
 import type { WorldPoint } from './map';
 
-export const annotationKinds = ['route', 'line', 'circle', 'area', 'note'] as const;
+export const annotationKinds = ['route', 'line', 'circle', 'area', 'note', 'pen'] as const;
 export type AnnotationKind = (typeof annotationKinds)[number];
 
 export type Annotation = {
@@ -26,7 +26,7 @@ export const parseAnnotations = (value: unknown): Annotation[] => {
       !label.trim() || label.length > 80 || !Array.isArray(points)) throw new Error(`Invalid ${path}`);
 
     const minimum = annotationPointCount(validKind);
-    const maximum = validKind === 'route' ? 64 : minimum;
+    const maximum = (validKind === 'route' || validKind === 'pen') ? 64 : minimum;
     const coordinates = Array.from(points, (point: unknown): WorldPoint => {
       if (!isWorldPoint(point)) throw new Error(`Invalid coordinates in ${path}`);
       return [...point];

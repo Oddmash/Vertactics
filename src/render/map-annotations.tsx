@@ -41,7 +41,7 @@ const AnnotationShape = ({ item, selected }: { item: Annotation; selected: boole
         </bufferGeometry>
         <lineBasicMaterial color={color} depthTest={false} depthWrite={false} />
       </lineSegments>}
-      {item.points.map(([x, y, z], index) => (
+      {item.kind !== 'pen' && item.points.map(([x, y, z], index) => (
         <mesh key={index} position={[x, y + lift, z]} raycast={skipRaycast} renderOrder={3}>
           <sphereGeometry args={[item.kind === 'note' ? 0.36 : 0.22, 12, 8]} />
           <meshBasicMaterial color={color} depthTest={false} depthWrite={false} />

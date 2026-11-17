@@ -1,12 +1,13 @@
+import { clickWestHighGround } from './workspace-map';
 import { expect, test } from '@playwright/test';
 
 test('switches language without clearing selection and restores a save in English', async ({ page }) => {
   await page.goto('./');
-  await page.getByRole('button', { name: '서쪽 고지대 +4 u' }).click();
+  await clickWestHighGround(page);
   await page.getByRole('combobox', { name: '언어' }).selectOption('en');
   await expect(page.locator('html')).toHaveAttribute('lang', 'en');
   await expect(page.getByRole('heading', { name: 'Elevation Lab' })).toBeVisible();
-  await expect(page.getByRole('button', { name: 'West high ground +4 u' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('heading', { name: 'West high ground', exact: true })).toBeVisible();
 
   await page.getByRole('button', { name: '2D top-down' }).click();
   await expect(page.getByRole('complementary', { name: 'Terrain details' }).getByText('+4 u')).toBeVisible();

@@ -47,7 +47,8 @@ test('reports malformed recovery and a write failure without blocking named save
   const recovery = page.getByRole('region', { name: '작업 복구' });
   const local = page.getByRole('region', { name: '로컬 전략' });
   await expect(recovery.getByRole('status')).toHaveText('이전 작업 데이터를 읽을 수 없습니다.');
-  await page.getByRole('button', { name: '새 지도', exact: true }).click();
+  await page.getByRole('button', { name: '지도에서 위치 선택' }).click();
+  await page.getByTestId('viewport').locator('canvas').click();
   await expect(recovery.getByRole('status')).toContainText('작업을 자동 저장할 수 없습니다.');
   await local.getByRole('button', { name: '전략 저장', exact: true }).click();
   await expect(local.getByRole('status')).toContainText('전략을 저장했습니다.');

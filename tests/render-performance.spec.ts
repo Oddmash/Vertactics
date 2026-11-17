@@ -37,7 +37,7 @@ test('records a map-rendering baseline with a real Chromium canvas', async ({ pa
       });
     }
     document.addEventListener('click', (event) => {
-      if (event.target instanceof Element && event.target.closest('.terrain-panel .terrain-button')) {
+      if (event.target instanceof Element && event.target.closest('.mode-switch')) {
         observation.drawCalls = 0;
         observation.inputToDrawMs = null;
         observation.pendingInputAt = performance.now();
@@ -57,12 +57,10 @@ test('records a map-rendering baseline with a real Chromium canvas', async ({ pa
   });
   const results = [];
 
-  const terrain = page.getByRole('complementary', { name: '지형 목록' }).getByRole('button');
   for (const [mapId, name] of [['elevation-lab', '고저차 테스트 맵'], ['courtyard', '훈련장 안뜰'], ['kings-row-a', '왕의 길 열기']]) {
     await openMap(page, name!);
-    for (const [index, view] of ['2D 탑다운', '3D 원근'].entries()) {
+    for (const view of ['3D 원근', '2D 탑다운']) {
       await page.getByRole('button', { name: view }).click();
-      await terrain.nth(index).click();
       await expect.poll(async () => (await observation()).inputToDrawMs).not.toBeNull();
       await page.evaluate(() => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))));
       const sample = await observation();

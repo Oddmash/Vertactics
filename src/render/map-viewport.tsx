@@ -103,6 +103,7 @@ type Props = {
   onSelectHero: (id: string) => void;
   onEditSurface?: (position: WorldPoint) => void;
   onDragSurface?: (position: WorldPoint | null) => void;
+  sampleDragStart?: boolean;
   onDropSurface?: (position: WorldPoint | null) => void;
   externalDrop?: { type: string; finish: (data: string, position: WorldPoint) => void };
   locations?: MapLocation[];
@@ -111,7 +112,7 @@ type Props = {
 
 const MapViewport = ({
   map, capture, mode, reset, selectedTerrainIds, onSelect, heroes, selectedHeroId, onSelectHero, onEditSurface,
-  annotations, selectedAnnotationId, snap, layerId, onDragSurface, onDropSurface, externalDrop, abilities, abilityPreview, sightline, heroView,
+  annotations, selectedAnnotationId, snap, layerId, onDragSurface, onDropSurface, sampleDragStart, externalDrop, abilities, abilityPreview, sightline, heroView,
   locations, focusedLocation,
 }: Props) => {
   const { t } = useLocale();
@@ -149,7 +150,7 @@ const MapViewport = ({
         <MapCamera mode={mode} bounds={bounds} reset={reset} heroView={heroView} pointerEditing={Boolean(onDragSurface)}
           focusPoint={focusedLocation?.point} />
         <SurfaceCursor editing={Boolean(onEditSurface || onDragSurface)} />
-        {(onDropSurface || externalDrop) && <SurfaceDrag snap={snap} onPreview={onDragSurface} onFinish={onDropSurface} externalDrop={externalDrop} />}
+        {(onDropSurface || externalDrop) && <SurfaceDrag snap={snap} onPreview={onDragSurface} onFinish={onDropSurface} sampleStart={sampleDragStart} externalDrop={externalDrop} />}
         <gridHelper
           position={[bounds.center[0], bounds.min[1] - 0.02, bounds.center[2]]}
           args={[gridSize, gridSize, tokens.color.axis, tokens.color.grid]}

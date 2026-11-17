@@ -12,7 +12,7 @@ const HeroPortraitMarker = ({ heroId }: { heroId: string }) => {
 
   useEffect(() => {
     const url = portraits[heroId];
-    if (!url) return;
+    if (typeof url !== 'string') return;
     let active = true;
     const texture = new TextureLoader().load(url, (loaded) => {
       if (!active) { loaded.dispose(); return; }
@@ -28,7 +28,7 @@ const HeroPortraitMarker = ({ heroId }: { heroId: string }) => {
 
   if (!image) return null;
   return (
-    <sprite position={[0, 0.98, 0]} scale={[1.24, 1.24, 1]}>
+    <sprite position={[0, 0.98, 0]} scale={[1.54, 1.54, 1]}>
       <spriteMaterial map={image} transparent alphaTest={0.1} depthWrite={false} toneMapped={false} />
     </sprite>
   );
