@@ -1,7 +1,7 @@
 import { useLocale } from '../ui/locale';
 import LocalePicker from '../ui/locale-picker';
 import { useRef, useState } from 'react';
-import type { StrategyDraft } from '../storage/strategy-draft';
+import type { StrategyDraft } from '../domain/strategy-draft';
 import MapViewport from '../render/map-viewport';
 import type { ViewMode } from '../render/map-camera';
 import { sampleTimeline, timelineDuration } from '../domain/timeline-playback';

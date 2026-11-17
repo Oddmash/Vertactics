@@ -2,13 +2,13 @@ import { useLocale } from '../ui/locale';
 import LocalePicker from '../ui/locale-picker';
 import { downloadFile, fileStem } from './download-file';
 import StrategyFileTools from './strategy-file-tools';
-import useWorkspaceRecovery from './use-workspace-recovery';
+import useWorkspaceDocuments from './use-workspace-documents';
 import TimelinePlaybackControls from './timeline-playback-controls';
 import useTimelinePlayback from './use-timeline-playback';
 import { sampleTimeline, timelineDuration } from '../domain/timeline-playback';
 import StrategyTimelineTools from './strategy-timeline-tools';
 import StrategyDraftTools from './strategy-draft-tools';
-import type { StrategyDraft } from '../storage/strategy-draft';
+import type { StrategyDraft } from '../domain/strategy-draft';
 import AbilityPlacementTools from './ability-placement-tools';
 import AbilityPreviewTools from './ability-preview-tools';
 import type { AbilityPlacement, AbilityPreviewSettings } from '../domain/ability-preview';
@@ -20,13 +20,11 @@ import { traceHeroSightline, traceTerrainSightline } from '../domain/spatial-ana
 import TerrainTools from './terrain-tools';
 import AnnotationTools from './annotation-tools';
 import type { SurfacePick } from './annotation-tools';
-import { mapBounds, mapSchemaVersion, terrainKinds, parseMap, topElevation, visibleTerrainForLayer } from '../domain/map';
+import { mapBounds, terrainKinds, topElevation, visibleTerrainForLayer } from '../domain/map';
 import type { MapDefinition, MapLayer, Terrain, TerrainKind, WorldPoint } from '../domain/map';
-import { createStrategy, heroEyeHeight } from '../domain/strategy';
+import { heroEyeHeight } from '../domain/strategy';
 import type { Team } from '../domain/strategy';
-import { createStrategyHistory, reduceStrategyHistory } from '../domain/strategy-history';
-import type { StrategyAction, StrategyHistory } from '../domain/strategy-history';
-import { maps } from '../map';
+import type { StrategyAction } from '../domain/strategy-history';
 import type { ViewMode } from '../render/map-camera';
 import MapViewport from '../render/map-viewport';
 import HeroTools, { roleNames, teamNames } from './hero-tools';
@@ -62,14 +60,10 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
   const formatNumber = new Intl.NumberFormat(locale, { maximumFractionDigits: 2, useGrouping: false }).format;
   const formatElevation = (value: number) => `${value > 0 ? '+' : ''}${formatNumber(value)} u`;
   const displayHero = (id: string) => locale === 'en' ? getHero(id)?.name ?? id : heroName(id);
-  const [catalogue, setCatalogue] = useState(() => {
-    if (!initialDraft) return maps;
-    return [...maps.filter((item) => item.id !== initialDraft.map.id), initialDraft.map];
-  });
-  const [mapId, setMapId] = useState(initialDraft?.map.id ?? maps[0]!.id);
-  const map = catalogue.find((item) => item.id === mapId)!;
+  const workspace = useWorkspaceDocuments(initialDraft);
+  const { catalogue, map, history, timeline, draft, recovery, importMessage, mapMessage, editStrategy } = workspace;
+  const mapId = map.id;
   const { min, max } = useMemo(() => mapBounds(map.terrain), [map]);
-  const [importMessage, setImportMessage] = useState('');
   const captureViewport = useRef<(() => Promise<Blob>) | null>(null);
   const [imageMessage, setImageMessage] = useState('');
   const saveViewport = async () => {
@@ -97,10 +91,6 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
   const measurementOverlay: Annotation[] = first ? [{
     id: 'measurement-preview', kind: second ? 'line' : 'note', label: t('측정'), points: measurement,
   }] : [];
-  const [mapMessage, setMapMessage] = useState('');
-  const [mapHistory, setMapHistory] = useState<Record<string, { past: MapDefinition[]; future: MapDefinition[] }>>({});
-  const timeline = Object.hasOwn(mapHistory, mapId) ? mapHistory[mapId]! : { past: [], future: [] };
-  const importRequest = useRef(0);
   const [heroViewId, setHeroViewId] = useState<string>();
   const [mode, setMode] = useState<ViewMode>('3d');
   const [reset, setReset] = useState(0);
@@ -123,14 +113,6 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
   const [dragPreview, setDragPreview] = useState<WorldPoint | null>(null);
   const [selectedAbilityId, setSelectedAbilityId] = useState<string | null>(null);
   const [annotationId, setAnnotationId] = useState<string | null>(null);
-  const initialHistory = useMemo(() => createStrategyHistory(createStrategy('local-draft', mapId, '새 전략')), [mapId]);
-  const [histories, setHistories] = useState<Record<string, StrategyHistory>>(() =>
-    initialDraft ? { [initialDraft.map.id]: createStrategyHistory(initialDraft.strategy) } : {});
-  const history = Object.hasOwn(histories, mapId) ? histories[mapId]! : initialHistory;
-  const [workspaceRevision, setWorkspaceRevision] = useState(0);
-  const markWorkspaceChanged = useCallback(() => setWorkspaceRevision((value) => value + 1), []);
-  const draft: StrategyDraft = { version: 1, map, strategy: history.present };
-  const recovery = useWorkspaceRecovery(draft, workspaceRevision);
   const durationMs = timelineDuration(history.present.timeline);
   const { state: playback, start, stop, toggle, seek, changeSpeed } = useTimelinePlayback(durationMs);
   const frame = playback ? sampleTimeline(history.present, playback.timeMs) : null;
@@ -149,15 +131,10 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
   }, [changeSurfaceTool, leavePresentation]);
   const dispatch = useCallback((action: StrategyAction) => {
     stop();
-    markWorkspaceChanged();
-    setHistories((current) => ({
-      ...current,
-      [mapId]: reduceStrategyHistory(Object.hasOwn(current, mapId) ? current[mapId]! : initialHistory, action),
-    }));
-  }, [initialHistory, mapId, markWorkspaceChanged, stop]);
-  const switchMap = (id: string) => {
+    editStrategy(action);
+  }, [editStrategy, stop]);
+  const resetMapView = () => {
     activateTool(null);
-    setMapMessage('');
     setMeasurement([]);
     setSightPoints([]);
     setLayerId('');
@@ -166,75 +143,31 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
     setSightTargetId('');
     setAnnotationId(null);
     setSelectedAbilityId(null);
-    setMapId(id);
   };
-  const restoreDraft = ({ map: savedMap, strategy }: StrategyDraft) => {
-    ++importRequest.current;
-    setImportMessage('');
-    setCatalogue((current) => current.some(({ id }) => id === savedMap.id)
-      ? current.map((item) => item.id === savedMap.id ? savedMap : item)
-      : [...current, savedMap]);
-    setHistories((current) => ({ ...current, [savedMap.id]: createStrategyHistory(strategy) }));
-    setMapHistory((current) => ({ ...current, [savedMap.id]: { past: [], future: [] } }));
+  const switchMap = (id: string) => {
+    workspace.openMap(id);
+    resetMapView();
+  };
+  const restoreDraft = (saved: StrategyDraft, persist = false) => {
+    workspace.restoreDraft(saved, persist);
     setAbilityPreviews((current) => Object.fromEntries(
-      Object.entries(current).filter(([key]) => JSON.parse(key)[0] !== savedMap.id),
+      Object.entries(current).filter(([key]) => JSON.parse(key)[0] !== saved.map.id),
     ));
-    switchMap(savedMap.id);
+    resetMapView();
     setMapEditing(false);
     setReset((value) => value + 1);
   };
   const importMap = async (file: File) => {
-    const request = ++importRequest.current;
-    let imported: MapDefinition;
-    try {
-      if (file.size > 1_000_000) throw new Error();
-      imported = parseMap(JSON.parse(await file.text()));
-    } catch {
-      if (request === importRequest.current) setImportMessage('지도 JSON을 읽을 수 없습니다.');
-      return;
-    }
-    if (request !== importRequest.current) return;
-    if (catalogue.some((item) => item.id === imported.id)) {
-      setImportMessage('같은 ID의 지도가 이미 있습니다.');
-      return;
-    }
-    setCatalogue((current) => current.some((item) => item.id === imported.id) ? current : [...current, imported]);
-    switchMap(imported.id);
-    markWorkspaceChanged();
-    setImportMessage('');
+    if (await workspace.importMap(file)) resetMapView();
   };
-  const replaceMap = (next: MapDefinition) => {
-    markWorkspaceChanged();
-    setCatalogue((current) => current.map((item) => item.id === next.id ? next : item));
-  };
-  const updateTerrain = (terrain: unknown[], nextId: string | null, layers = map.layers) => {
-    try {
-      const metadata = map.metadata?.verification === 'verified' ? { ...map.metadata, verification: 'unverified' } : map.metadata;
-      const next = parseMap({ ...map, terrain, metadata, layers });
-      setMapHistory((current) => ({ ...current, [mapId]: { past: [...timeline.past, map], future: [] } }));
-      replaceMap(next);
-      setSelectedId(nextId);
-      if (layerId && !next.layers?.some((layer) => layer.id === layerId)) setLayerId('');
-      setMapMessage('');
-    } catch {
-      setMapMessage('지형 값을 확인하세요. 지도에는 블록이 한 개 이상 필요합니다.');
-    }
-  };
-  const moveMapHistory = (direction: 'undo' | 'redo') => {
-    const stack = direction === 'undo' ? timeline.past : timeline.future;
-    const next = stack.at(-1);
+  const syncTerrainView = (next: MapDefinition | undefined, nextId: string | null) => {
     if (!next) return;
-    setMapHistory((current) => ({
-      ...current,
-      [mapId]: direction === 'undo'
-        ? { past: stack.slice(0, -1), future: [...timeline.future, map] }
-        : { past: [...timeline.past, map], future: stack.slice(0, -1) },
-    }));
-    replaceMap(next);
+    setSelectedId(nextId);
     if (layerId && !next.layers?.some((layer) => layer.id === layerId)) setLayerId('');
-    setSelectedId(null);
-    setMapMessage('');
   };
+  const updateTerrain = (terrain: unknown[], nextId: string | null, layers = map.layers) =>
+    syncTerrainView(workspace.updateTerrain(terrain, layers), nextId);
+  const moveMapHistory = (direction: 'undo' | 'redo') => syncTerrainView(workspace.moveMapHistory(direction), null);
   const saveLayer = (layer: MapLayer) => {
     const layers = map.layers ?? [];
     updateTerrain(map.terrain, selectedId, layers.some((item) => item.id === layer.id)
@@ -249,14 +182,8 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
     );
   };
   const createMap = () => {
-    const id = crypto.randomUUID();
-    const created = parseMap({
-      schemaVersion: mapSchemaVersion, id, name: t('새 지도'), metadata: { verification: 'synthetic' },
-      terrain: [{ id: 'base', name: t('기본 바닥'), kind: 'floor', origin: [-8, -1, -8], size: [16, 1, 16] }],
-    });
-    setCatalogue((current) => [...current, created]);
-    switchMap(id);
-    markWorkspaceChanged();
+    workspace.createMap(t('새 지도'), t('기본 바닥'));
+    resetMapView();
     setMapEditing(true);
   };
   const copyTerrain = (terrain?: Terrain) => {
@@ -550,10 +477,7 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
             onCancel={() => activateTool(null)}
           />}
           <StrategyDraftTools draft={draft} onRestore={restoreDraft} />
-          <StrategyFileTools draft={draft} onImport={(imported) => {
-            restoreDraft(imported);
-            markWorkspaceChanged();
-          }} />
+          <StrategyFileTools draft={draft} onImport={(imported) => restoreDraft(imported, true)} />
           <section className="hero-tools" aria-label={t('작업 복구')}>
             {recovery.saved ? <>
               <p>{t('이전 작업 ·') + ' '}{t(recovery.saved.map.name)}</p>
