@@ -58,3 +58,17 @@ The source code is available under the [MIT licence](LICENSE). Vertactics uses o
 The King's Row Point A blockout uses the [StatBanana overhead survey](https://overwatch.statbanana.com/images) to cross-check the approach and plaza, the [Overwatch Wiki entry](https://overwatch.fandom.com/wiki/King%27s_Row) for the statue and Alderworth Hotel, and the [Point A breakdown](https://seesaawiki.jp/overwatchwiki/d/KING%27S%20ROW) for the choke, hotel bypass and balconies. The blockout has a separate objective surface, cover, and a selectable upper layer. An in-game screenshot corroborates the statue and hotel sharing the same plaza. [In-game screenshot](https://altertime.es/article/date-un-paseo-por-el-pasado-con-overwatch-clasico) Its dimensions, elevation and hero clearance have not been measured against the current game client.
 
 Map editing and analysis use validated JSON and procedural geometry. GLB and glTF are deferred because the current map workflow needs editable collision and walkable surfaces. If a visual asset workflow is needed, import curated self-contained GLB files through a separate render-only boundary with byte and resource limits. Keep external resource fetching disabled and retain JSON as the source for editing, placement and analysis. The [Khronos specification](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html) allows external references even in GLB containers.
+
+### Check King’s Row Point A in the game client
+
+Record the game build and compare the default map variant with the Vertactics blockout. Use **Distance measurement** in Vertactics to record both endpoints and the map-unit value. Keep game measurements in a separate column, with the in-game unit or observation method.
+
+- Approach: check the main arch and the hotel bypass from the attacking side.
+- High ground: record the relative height and access paths to the two balconies from the plaza.
+- Clearance: record whether the same hero can walk through the arch and hotel entrance and where cover cuts sightlines. Include the hero and screenshots for any mismatch.
+
+Keep the map status unverified until these comparisons are recorded.
+
+## Hero catalogue
+
+Keep hero IDs stable so older drafts can still resolve their placements. When adding a hero or reviewing a balance patch, compare roles and base ability names with the official hero page and update the source link if needed. The initial catalogue covers Tracer, Reinhardt and Ana. Perks and ability measurements are outside this catalogue. Scene markers use original geometric shapes.

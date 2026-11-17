@@ -83,7 +83,8 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 
 ## Phase 5 · Heroes and abilities
 
-- [ ] 5.01 Source hero IDs, roles, names, abilities and update criteria
+- [x] 5.01a Source IDs, roles and base abilities for the three starter heroes and document update criteria
+- [ ] 5.01b Expand and verify the hero roster
 - [ ] 5.02 Confirm icon rights and create neutral fallbacks
 - [ ] 5.03 Model ability direction, range, shape, source and verification state
 - [ ] 5.04 Render circles, spheres, cones, lines, rectangles, vectors and areas
@@ -149,3 +150,4 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 | Ramps and map schema | 37 unit tests and 12 Chromium scenarios passed. Verified ramp placement, dragging and elevation after snapping. Legacy v1 imports export as v2. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44034705436) |
 | Phase 1–4 audit | 39 unit tests and 14 Chromium scenarios passed, including Point A placement, floor switching and hero obstruction. GitHub issue and PR templates, release steps, licensing and the optional GLB loading boundary are in place. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44035786865) |
 | Terrain measurement | 40 unit tests and 15 Chromium scenarios passed. A two-point measurement reports horizontal distance, signed elevation change, and straight-line distance in map units across views. Live game comparison remains open. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44036751794) |
+| Starter hero catalogue | 42 unit tests and 16 Chromium scenarios passed. Verify grouped roles, placement, and sourced ability names in the inspector. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44037981117) |
