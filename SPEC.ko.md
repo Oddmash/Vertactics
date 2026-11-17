@@ -106,9 +106,9 @@
 - [x] 6.02b 임의 지형 지점을 양 끝으로 지정하고 벽·엄폐·고저차 시야 판정 검증
 - [x] 6.03 부분 노출 샘플링 평가와 단순화된 시야 모델의 한계 안내
 - [x] 6.04 수평 거리·3D 직선 거리·높이 차이·지점 높이·경로 길이 표시
-- [ ] 6.05 선택 영웅 시점으로 진입 및 원래 카메라 복귀
-- [ ] 6.06 차단·비차단·경계·계단 시나리오의 단위 및 통합 검증
-- [ ] 6.07 레이캐스트 비용 측정 및 데이터에 근거한 BVH 도입 판단
+- [x] 6.05 선택 영웅 시점으로 진입 및 원래 카메라 복귀
+- [x] 6.06 차단·비차단·경계·계단 시나리오의 단위 및 통합 검증
+- [x] 6.07 레이캐스트 비용 측정 및 데이터에 근거한 BVH 도입 판단
 
 ## Phase 7 · 전략 기능
 
@@ -181,3 +181,6 @@
 | 지점 간 시야선 | 단위 테스트 50개와 Chromium 시나리오 22개 통과. 벽과 낮은 엄폐물 차단, 고저차에서 개방, 보기 전환과 결과 지우기를 검증. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44045214843) · [브라우저 캡처](https://github.com/qtaghdi/Vertactics/actions/runs/44045214843/artifacts/14311187263) |
 | 영웅 부분 노출 | 세 높이 샘플, 엄폐물 뒤 부분 노출, 편집기의 고정 높이 안내 검증. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44045878353) · [캡처](https://github.com/qtaghdi/Vertactics/actions/runs/44045878353/artifacts/14312225037) |
 | 경로 길이와 지점 높이 | 단위 테스트 52개와 Chromium 시나리오 23개 통과. 경로 길이 합계와 두 지점 높이, 보기 전환, 실행 취소 검증. 경로 길이는 표시한 구간 길이의 합. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44046212660) · [캡처](https://github.com/qtaghdi/Vertactics/actions/runs/44046212660/artifacts/14310374904) |
+| 영웅 눈높이 시점 | 영웅 배치 방향, Esc 종료, 조정한 2D·3D 카메라의 화면 일치 검증. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44047235106) · [영웅 시점 캡처](https://github.com/qtaghdi/Vertactics/actions/runs/44047235106/artifacts/14312660585) |
+| 시야 경계 | 단위 테스트 55개와 Chromium 시나리오 25개 통과. 벽 경계, 출입구의 빈 공간, 계단 접점과 훈련 지도 계단의 차단·개방 구간 검증. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44047549788) |
+| 시야 계산 비용 | 눈높이 시야선 1개와 노출 시야선 3개를 한 번의 판정으로 측정. 로컬 arm64·Node.js 24.14.0에서 지도별 예열 1,000회 후 난수 시드를 고정한 지점 쌍 5,000개 사용. p95는 안뜰(4블록) 0.002ms, 고저차 테스트 맵(21블록) 0.008ms, 왕의 길 A(39블록) 0.011ms, 왕의 길 A 32개 합성 지도(1,248블록) 0.318ms. 도메인 CPU 시간 기준으로 현재 지도에는 BVH 도입을 보류하고 실시간 갱신이나 더 큰 지도를 추가하면 다시 측정. |

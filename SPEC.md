@@ -106,9 +106,9 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 - [x] 6.02b Pick arbitrary terrain endpoints and verify sightlines across walls, cover and elevation
 - [x] 6.03 Evaluate partial exposure and describe model limitations
 - [x] 6.04 Show horizontal and straight-line distances, elevations and route length
-- [ ] 6.05 Switch to a selected hero view and restore the original camera
-- [ ] 6.06 Test blocked and clear paths, boundaries and stairs
-- [ ] 6.07 Measure raycasting and decide whether to use a BVH
+- [x] 6.05 Switch to a selected hero view and restore the original camera
+- [x] 6.06 Test blocked and clear paths, boundaries and stairs
+- [x] 6.07 Measure raycasting and decide whether to use a BVH
 
 ## Phase 7 · Strategy tools
 
@@ -173,3 +173,6 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 | Terrain point sightlines | 50 unit tests and 22 Chromium scenarios passed. Verified a blocked wall, low cover, a clear elevation change, view switching and clearing the probe. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44045214843) · [Browser screenshots](https://github.com/qtaghdi/Vertactics/actions/runs/44045214843/artifacts/14311187263) |
 | Partial hero exposure | Verified the three-height sampling model, partial exposure behind cover, and the in-app explanation of fixed heights. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44045878353) · [Screenshot](https://github.com/qtaghdi/Vertactics/actions/runs/44045878353/artifacts/14312225037) |
 | Route and endpoint measurements | 52 unit tests and 23 Chromium scenarios passed. Verified both waypoint length totals and point heights, view switching and undo. Route lengths sum the drawn segments. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44046212660) · [Screenshot](https://github.com/qtaghdi/Vertactics/actions/runs/44046212660/artifacts/14310374904) |
+| Hero eye-level camera | Verified the modeled heading, Escape, and exact canvas restoration after adjusting the 2D and 3D cameras. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44047235106) · [Hero eye-level screenshot](https://github.com/qtaghdi/Vertactics/actions/runs/44047235106/artifacts/14312660585) |
+| Spatial boundaries | 55 unit tests and 25 Chromium scenarios passed. Verified wall boundaries, clear door openings, stair seams and the blocked and open sections of the training map stairs. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44047549788) |
+| Sightline CPU timing | One eye-level ray and three exposure rays per observation, 1,000 warm-ups and 5,000 seeded pairs per case. Local arm64 with Node.js 24.14.0. P95 was 0.002 ms for Courtyard (4 blocks), 0.008 ms for Elevation Lab (21), 0.011 ms for King's Row Point A (39), and 0.318 ms for a synthetic 32-copy Point A layout (1,248). The sample measures domain CPU time. Defer BVH for the current maps and remeasure if live updates or larger maps are introduced. |
