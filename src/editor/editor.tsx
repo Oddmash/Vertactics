@@ -328,10 +328,10 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
       dispatch({ type: key === 'y' || event.shiftKey ? 'redo' : 'undo' });
     }}>
       <header className="app-header">
-        <div className="brand">
-          <img className="brand-mark" src="favicon.png" alt="" width={30} height={30} />
-          Vertactics
-        </div>
+        <a className="brand workspace-brand" href="about.html">
+          <span className="workspace-brand-symbol" aria-hidden="true">V</span>
+          <span>Vertactics</span>
+        </a>
         <div className="map-catalogue" aria-label={t('지도 관리')} role="group">
           <MapCatalogue maps={catalogue} selectedId={mapId} onSelect={switchMap} />
           <Button type="button" className="reset-button mobile-panel-toggle" aria-expanded={mapActionsOpen}
@@ -559,7 +559,7 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
             onCancel={() => activateTool(null)}
           />}
           <div className="panel-heading"><h2 id="inspector-title" tabIndex={-1}>{t('지형 정보')}</h2></div>
-          <div className="inspector-body" role="status">
+          <div className={selectedHero ? 'inspector-body hero-inspector' : 'inspector-body'} role="status">
             {selectedHero ? (
               <>
                 <h3>{displayHero(selectedHero.heroId)}</h3>

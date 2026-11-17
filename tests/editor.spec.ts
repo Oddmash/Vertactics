@@ -640,6 +640,12 @@ test('renders a custom hero ability preview in both map views and hides it on re
   await inspector.getByText('능력 범위 미리보기', { exact: true }).click();
   await inspector.getByLabel('능력', { exact: true }).selectOption('blink');
   await inspector.getByLabel('미리보기 형태', { exact: true }).selectOption('cone');
+  const range = inspector.getByLabel('범위 (u)', { exact: true });
+  await expect(range.locator('..')).toHaveCSS('display', 'grid');
+  expect(await range.evaluate((input) => {
+    const label = input.closest('label');
+    return Boolean(label && input.getBoundingClientRect().width >= label.getBoundingClientRect().width - 1);
+  })).toBe(true);
   await inspector.getByLabel('범위 (u)', { exact: true }).fill('8');
   const before = await canvas.screenshot();
   await inspector.getByRole('button', { name: '범위 표시' }).click();

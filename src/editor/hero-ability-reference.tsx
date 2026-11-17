@@ -55,11 +55,13 @@ const HeroAbilityReference = ({ heroId, heroName, source, abilities }: Props) =>
               : <span aria-hidden="true">{name.slice(0, 2)}</span>}
           </Button>
         ))}
-        {detail && <div className="hero-ability-detail" id={detailsId} role="tooltip">
+      </div>
+      <div className="hero-ability-readout">
+        {detail ? <div className="hero-ability-detail" id={detailsId} role="tooltip">
           <strong>{detail.name}</strong>
           <p>{detail.description || t('스킬 설명은 공식 영웅 페이지에서 확인할 수 있습니다.')}</p>
           {patch && <dl className="hero-ability-stat"><dt>{t(patch.label)}</dt><dd>{patch.value}</dd></dl>}
-        </div>}
+        </div> : <p className="hero-ability-hint">{t('스킬을 가리키거나 선택해 설명을 확인하세요.')}</p>}
       </div>
       <div className="hero-ability-sources">
         <a href={source} target="_blank" rel="noreferrer">{t('공식 스킬 출처')}</a>

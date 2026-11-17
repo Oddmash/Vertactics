@@ -10,7 +10,7 @@ test('supports keyboard mode changes and preserves browser context menus outside
   await twoD.focus();
   await expect(twoD).toBeFocused();
   await expect(twoD).toHaveCSS('outline-style', 'solid');
-  await expect(twoD).toHaveCSS('outline-color', 'rgb(115, 233, 197)');
+  await expect(twoD).toHaveCSS('outline-color', 'rgb(129, 238, 229)');
   await twoD.press('Enter');
   await expect(twoD).toHaveAttribute('aria-pressed', 'true');
   await expect(twoD).toHaveCSS('transition-duration', '0s');
