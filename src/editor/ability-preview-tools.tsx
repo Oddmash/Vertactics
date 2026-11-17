@@ -22,7 +22,7 @@ const AbilityPreviewTools = ({ abilities, preview, placementDisabled, onPlace, o
   const [shape, setShape] = useState<AbilityShape>(preview?.shape ?? 'circle');
 
   return (
-    <Disclosure className="hero-tools">
+    <Disclosure className="hero-tools ability-preview-tools">
       <summary>{t('능력 범위 미리보기')}</summary>
       <form onSubmit={(event) => {
         event.preventDefault();

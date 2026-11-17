@@ -728,19 +728,20 @@ ul { padding: 0; list-style: none; }
 }
 .hero-ability-option img { object-fit: contain; }
 .hero-ability-option[aria-pressed="true"] { border-color: var(--color-action); }
-.hero-ability-detail {
-  position: absolute;
-  inset: 100% 0 auto;
-  z-index: 2;
+.hero-ability-readout {
   display: grid;
-  gap: var(--space-xs);
-  padding: var(--space-sm);
-  background: var(--color-raised);
-  border-inline-start: 2px solid var(--color-accent);
-  box-shadow: 0 6px 18px #0008;
+  align-content: start;
+  min-block-size: 80px;
+  padding: var(--space-md);
+  border: 1px solid var(--color-border);
+  border-inline-start: 3px solid var(--color-selection);
+  border-radius: var(--radius-control);
+  background: var(--color-app);
   font-size: 12px;
-  line-height: 1.5;
+  line-height: 1.55;
 }
+.hero-ability-detail { display: grid; gap: var(--space-xs); }
+.hero-ability-hint { color: var(--color-muted); }
 .hero-ability-detail p { color: var(--color-muted); }
 .hero-ability-sources { display: flex; flex-wrap: wrap; gap: var(--space-sm); font-size: 11px; }
 .hero-ability-sources a { color: var(--color-accent); }
@@ -793,3 +794,166 @@ ul { padding: 0; list-style: none; }
 }
 .location-picker [data-active], .location-picker [role="option"]:hover { background: var(--color-control); }
 .location-picker [aria-selected="true"] { color: var(--color-action); }
+
+.workspace-brand {
+  display: inline-flex;
+  flex: none;
+  gap: 10px;
+  color: var(--color-text);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.workspace-brand-symbol {
+  display: grid;
+  place-items: center;
+  inline-size: 34px;
+  block-size: 34px;
+  border-radius: 10px 3px;
+  background: var(--color-action);
+  color: var(--color-actionText);
+  font: 900 22px / 1 var(--font-display);
+}
+
+.editor > .app-header {
+  gap: var(--space-md) var(--space-xl);
+  background: var(--color-app);
+  border-bottom-color: var(--color-border);
+}
+
+.editor-workspace {
+  gap: var(--space-sm);
+  padding: var(--space-md);
+}
+
+.editor-workspace > .panel {
+  background: var(--color-panel);
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-controlBorder) transparent;
+}
+
+.editor-workspace > .view-panel {
+  border-color: var(--color-controlBorder);
+}
+
+.editor-workspace .panel-heading,
+.editor-workspace .viewport-toolbar {
+  background: var(--color-panel);
+  border-top: 0;
+}
+
+.editor-workspace .viewport-toolbar {
+  border-start-start-radius: var(--radius-panel);
+  border-start-end-radius: var(--radius-panel);
+}
+
+.editor-workspace .viewport-toolbar h1 {
+  font-size: clamp(20px, 2vw, 28px);
+  line-height: 1.2;
+}
+
+.editor-workspace .canvas-tools { background: var(--color-app); }
+.editor-workspace .canvas-tools .reset-button,
+.editor .workspace-links .reset-button {
+  background: transparent;
+  border-color: transparent;
+}
+
+.editor-workspace .canvas-tools .reset-button:is(:hover, :focus-visible),
+.editor .workspace-links .reset-button:is(:hover, :focus-visible) {
+  background: var(--color-control);
+  border-color: var(--color-border);
+}
+
+.editor-workspace .canvas-tools .reset-button[aria-pressed="true"] {
+  background: var(--color-action);
+  border-color: var(--color-action);
+}
+
+.editor-workspace .view-label,
+.editor-workspace .north-label {
+  border-color: var(--color-border);
+  background: var(--color-app);
+}
+
+.inspector-panel > .hero-tools { border-top: 0; }
+.editor-workspace .inspector-panel > .panel-heading { border-top: 1px solid var(--color-border); }
+
+.editor-workspace .hero-roster {
+  max-block-size: 186px;
+  padding: var(--space-sm);
+}
+.editor-workspace .hero-roster-card {
+  min-block-size: 72px;
+  background: var(--color-panel);
+}
+.editor-workspace .hero-roster-card[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--color-action) 12%, var(--color-panel));
+}
+
+.hero-inspector {
+  display: grid;
+  align-content: start;
+  gap: var(--space-md);
+}
+.hero-inspector > h3 {
+  margin: 0;
+  font: 760 20px / 1.22 var(--font-display);
+}
+.hero-inspector > dl {
+  padding: var(--space-md);
+  border-radius: var(--radius-control);
+  background: var(--color-app);
+}
+.hero-inspector > dl > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+  gap: var(--space-sm);
+}
+.hero-inspector > dl > div > dt { word-break: keep-all; }
+.hero-inspector .ability-preview-tools {
+  min-width: 0;
+  padding: var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-control);
+  background: var(--color-app);
+}
+.ability-preview-tools form {
+  margin-block: var(--space-sm);
+  gap: var(--space-md);
+}
+.editor .ability-preview-tools label {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-xs);
+  word-break: keep-all;
+}
+.editor .ability-preview-tools label :is(.ui-select, .ui-input) {
+  width: 100%;
+  min-width: 0;
+}
+.ability-preview-tools .hero-actions > span { flex-basis: 100%; }
+.ability-preview-tools > p { color: var(--color-muted); font-size: 12px; }
+.ability-preview-tools .hero-actions .reset-button {
+  flex: 1 1 auto;
+  min-height: var(--size-control);
+}
+@media (max-width: 680px) {
+  .editor > .app-header { padding: var(--space-md); }
+  .editor-workspace { padding: var(--space-sm); }
+}
+
+.editor-workspace .canvas-tools .reset-button[aria-pressed="true"]:is(:hover, :focus-visible) {
+  background: var(--color-actionHover);
+}
+
+.editor-workspace :is(.hero-tools, .spatial-probe) label:has(> .ui-select, > .ui-input:not([type="checkbox"], [type="radio"], [type="range"], [type="file"])) {
+  display: grid;
+  gap: var(--space-xs);
+  grid-template-columns: minmax(0, 1fr);
+  word-break: keep-all;
+}
+.editor-workspace :is(.hero-tools, .spatial-probe) label > :is(.ui-select, .ui-input:not([type="checkbox"], [type="radio"], [type="range"], [type="file"])) {
+  width: 100%;
+  min-width: 0;
+}

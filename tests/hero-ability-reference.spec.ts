@@ -29,6 +29,11 @@ test('selects heroes by portrait and reveals sourced skills in the right panel',
   await blink.hover();
   const details = panel.getByRole('tooltip');
   await expect(details).toContainText('현재 이동 방향으로 순간이동합니다.');
+  await expect(details).toHaveCSS('position', 'static');
+  expect(await details.evaluate((tooltip) => {
+    const sources = tooltip.closest('section')?.querySelector('.hero-ability-sources');
+    return Boolean(sources && tooltip.getBoundingClientRect().bottom <= sources.getBoundingClientRect().top);
+  })).toBe(true);
   await page.getByRole('button', { name: '2D 탑다운' }).hover();
   await expect(details).toHaveCount(0);
 
