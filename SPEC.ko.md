@@ -103,7 +103,7 @@
 
 - [ ] 6.01 지형·영웅과 Raycaster의 입력 및 차단 기준 연결
 - [x] 6.02a 두 보기에서 영웅 간 시야선과 첫 차단 지점 표시
-- [ ] 6.02b 임의 지형 지점을 양 끝으로 지정하고 벽·엄폐·고저차 시야 판정 검증
+- [x] 6.02b 임의 지형 지점을 양 끝으로 지정하고 벽·엄폐·고저차 시야 판정 검증
 - [ ] 6.03 부분 노출 샘플링 평가와 단순화된 시야 모델의 한계 안내
 - [ ] 6.04 수평 거리·3D 직선 거리·높이 차이·지점 높이·경로 길이 표시
 - [ ] 6.05 선택 영웅 시점으로 진입 및 원래 카메라 복귀
@@ -178,3 +178,4 @@
 | 능력 거리 참고값 | 단위 테스트 49개, Chromium 시나리오 20개 통과. 출처·게임 버전·실측과 추정 표시, 미터와 지도 단위 구분, 뷰 전환, 지우기와 실행 취소를 검증. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44042312699) · [캡처](https://github.com/qtaghdi/Vertactics/actions/runs/44042312699/artifacts/14310001845) |
 | 로컬 전략 초안 | 수동 저장, 새로고침, 능력과 참고값 복원 및 재편집 검증. 저장본이 없거나 손상돼도 편집 가능. 여러 전략 관리와 자동 저장은 Phase 7에 남음. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44043379399) · [복원 화면](https://github.com/qtaghdi/Vertactics/actions/runs/44043379399/artifacts/14310311989) |
 | 영웅 간 시야선 | 단위 테스트 50개와 Chromium 시나리오 21개 통과. 첫 차단면, 높은 위치의 개방 시야, 2D·3D 차단선과 대상 해제 검증. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44044442148) · [2D·3D 캡처](https://github.com/qtaghdi/Vertactics/actions/runs/44044442148/artifacts/14311166558) |
+| 지점 간 시야선 | 단위 테스트 50개와 Chromium 시나리오 22개 통과. 벽과 낮은 엄폐물 차단, 고저차에서 개방, 보기 전환과 결과 지우기를 검증. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44045214843) · [브라우저 캡처](https://github.com/qtaghdi/Vertactics/actions/runs/44045214843/artifacts/14311187263) |
