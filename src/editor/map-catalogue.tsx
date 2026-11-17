@@ -33,6 +33,9 @@ const MapCatalogue = ({ onSelect }: { onSelect: (id: string) => void }) => {
           <Button type="button" className="reset-button" onClick={() => dialog.current?.close()}>{t('닫기')}</Button>
         </div>
         <div className="map-library-body">
+          <a href="https://overwatch.statbanana.com/images" target="_blank" rel="noreferrer">
+            {t('2D 전장 참고 자료')}
+          </a>
           {Object.entries(modeNames).map(([mode, name]) => (
             <section key={mode} aria-labelledby={`map-mode-${mode}`}>
               <h3 id={`map-mode-${mode}`}>{t(name)}</h3>

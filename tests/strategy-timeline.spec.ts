@@ -5,7 +5,7 @@ test('edits and restores a phase with hero poses and an ability event', async ({
   const canvas = page.getByTestId('viewport').locator('canvas');
   await page.getByRole('button', { name: '2D 탑다운' }).click();
   await expect(canvas).toHaveAttribute('data-view-mode', '2d');
-  await page.getByRole('button', { name: '배치 시작' }).click();
+  await page.getByRole('button', { name: '지도에서 위치 선택' }).click();
   await expect(canvas).toHaveCSS('cursor', 'crosshair');
   await canvas.click();
   await page.getByText('능력 범위 미리보기', { exact: true }).click();

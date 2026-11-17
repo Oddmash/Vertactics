@@ -29,7 +29,7 @@ import type { Team } from '../domain/strategy';
 import type { StrategyAction } from '../domain/strategy-history';
 import type { ViewMode } from '../render/map-camera';
 import MapViewport from '../render/map-viewport';
-import HeroTools, { roleNames, teamNames } from './hero-tools';
+import HeroTools, { heroDragType, roleNames, teamNames } from './hero-tools';
 import { getHero, heroName, isCatalogueHero } from '../domain/hero-catalogue';
 import type { CatalogueHero } from '../domain/hero-catalogue';
 
@@ -97,7 +97,7 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
     id: 'measurement-preview', kind: second ? 'line' : 'note', label: t('측정'), points: measurement,
   }] : [];
   const [heroViewId, setHeroViewId] = useState<string>();
-  const [mode, setMode] = useState<ViewMode>('3d');
+  const [mode, setMode] = useState<ViewMode>('2d');
   const [reset, setReset] = useState(0);
   const [layerId, setLayerId] = useState('');
   const visibleTerrain = visibleTerrainForLayer(map.terrain, layerId);
@@ -266,6 +266,21 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
     changeSurfaceTool(null);
   }, [changeSurfaceTool, dispatch, locked, tool]);
 
+  const placeHero = (heroId: CatalogueHero, team: Team, position: WorldPoint) => {
+    const id = crypto.randomUUID();
+    dispatch({ type: 'place', hero: { id, heroId, team, position, yaw: 0 } });
+    setCatalogueHeroId(heroId);
+    selectHero(id);
+  };
+
+  const dropHero = (data: string, position: WorldPoint) => {
+    const [heroId, team, extra] = data.split(':');
+    if (locked || mapEditing || !showHeroes || !heroId || extra !== undefined ||
+      !isCatalogueHero(heroId) || (team !== 'attack' && team !== 'defense')) return;
+    activateTool(null);
+    placeHero(heroId, team, position);
+  };
+
   const editSurface = (position: WorldPoint) => {
     if (measuring) {
       setMeasurement((points) => points.length === 1 ? [...points, position] : [position]);
@@ -280,9 +295,7 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
     if (annotationPick) { annotationPick.apply(position); return; }
     if (!tool) return;
     if (tool.kind === 'place') {
-      const id = crypto.randomUUID();
-      dispatch({ type: 'place', hero: { id, heroId: tool.heroId, team: tool.team, position, yaw: 0 } });
-      selectHero(id);
+      placeHero(tool.heroId, tool.team, position);
     } else if (tool.kind === 'move') {
       dispatch({ type: 'update', id: tool.id, patch: { position } });
       selectHero(tool.id);
@@ -452,6 +465,7 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
               onEditSurface={measuring || sightPicking || (!locked && tool && tool.kind !== 'drag') ? editSurface : undefined}
               onDragSurface={!locked && tool?.kind === 'drag' ? setDragPreview : undefined}
               onDropSurface={!locked && tool?.kind === 'drag' ? finishDrag : undefined}
+              externalDrop={!locked && !mapEditing && showHeroes ? { type: heroDragType, finish: dropHero } : undefined}
             />
             {tool && <p className="tool-status" role="status">{t(tool.kind === 'drag'
               ? '선택한 영웅을 지도에서 끌어 이동하세요.'

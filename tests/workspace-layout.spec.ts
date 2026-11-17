@@ -21,7 +21,7 @@ test('keeps the map, controls and selected terrain accessible on a narrow touch 
   await expect(page.getByRole('button', { name: '지도 PNG 저장' })).toBeVisible();
   await displayOptions.tap();
   await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth)).toBe(390);
-  await page.screenshot({ path: testInfo.outputPath('vertactics-narrow-3d.png') });
+  await page.screenshot({ path: testInfo.outputPath('vertactics-narrow-default.png') });
 
   const twoD = page.getByRole('button', { name: '2D 탑다운' });
   await expect.poll(() => twoD.evaluate((element) => element.getBoundingClientRect().height)).toBeGreaterThanOrEqual(44);
