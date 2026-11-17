@@ -1,3 +1,4 @@
+import type { AbilityPlacement } from './ability-preview';
 import type { Annotation } from './annotation';
 import { parseStrategy } from './strategy';
 import type { HeroPlacement, StrategyDocument } from './strategy';
@@ -14,6 +15,8 @@ export type StrategyAction =
   | { type: 'remove'; id: string }
   | { type: 'set-annotation'; annotation: Annotation }
   | { type: 'remove-annotation'; id: string }
+  | { type: 'set-ability'; ability: AbilityPlacement }
+  | { type: 'remove-ability'; id: string }
   | { type: 'undo' }
   | { type: 'redo' };
 
@@ -48,6 +51,18 @@ export const reduceStrategyHistory = (
     else if (index < 0) annotations.push(action.annotation);
     else annotations[index] = action.annotation;
     return { past: [...past, present], present: parseStrategy({ ...present, annotations }), future: [] };
+  }
+
+  if (action.type === 'set-ability' || action.type === 'remove-ability') {
+    const id = action.type === 'set-ability' ? action.ability.id : action.id;
+    const existing = present.abilities.some((item) => item.id === id);
+    if (!existing && action.type === 'remove-ability') return history;
+    const abilities = action.type === 'remove-ability'
+      ? present.abilities.filter((item) => item.id !== id)
+      : existing
+        ? present.abilities.map((item) => item.id === id ? action.ability : item)
+        : [...present.abilities, action.ability];
+    return { past: [...past, present], present: parseStrategy({ ...present, abilities }), future: [] };
   }
 
   let heroes: HeroPlacement[];
