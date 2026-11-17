@@ -104,8 +104,8 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 - [ ] 6.01 Connect terrain and heroes to raycasting and blocking rules
 - [x] 6.02a Show hero-to-hero sightlines and mark the first blocking surface in both views
 - [x] 6.02b Pick arbitrary terrain endpoints and verify sightlines across walls, cover and elevation
-- [ ] 6.03 Evaluate partial exposure and describe model limitations
-- [ ] 6.04 Show horizontal and straight-line distances, elevations and route length
+- [x] 6.03 Evaluate partial exposure and describe model limitations
+- [x] 6.04 Show horizontal and straight-line distances, elevations and route length
 - [ ] 6.05 Switch to a selected hero view and restore the original camera
 - [ ] 6.06 Test blocked and clear paths, boundaries and stairs
 - [ ] 6.07 Measure raycasting and decide whether to use a BVH
@@ -171,3 +171,5 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 | Local strategy draft | Verified manual saving, reloading, restoring and editing an ability with its reference. Empty and malformed storage leave the workspace usable. Multiple drafts and autosave remain open in Phase 7. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44043379399) · [Restored editor screenshot](https://github.com/qtaghdi/Vertactics/actions/runs/44043379399/artifacts/14310311989) |
 | Hero sightlines | 50 unit tests and 21 Chromium scenarios passed. Checked the first blocking surface, an elevated clear ray, blocked overlay in both views and target reset. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44044442148) · [2D and 3D screenshots](https://github.com/qtaghdi/Vertactics/actions/runs/44044442148/artifacts/14311166558) |
 | Terrain point sightlines | 50 unit tests and 22 Chromium scenarios passed. Verified a blocked wall, low cover, a clear elevation change, view switching and clearing the probe. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44045214843) · [Browser screenshots](https://github.com/qtaghdi/Vertactics/actions/runs/44045214843/artifacts/14311187263) |
+| Partial hero exposure | Verified the three-height sampling model, partial exposure behind cover, and the in-app explanation of fixed heights. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44045878353) · [Screenshot](https://github.com/qtaghdi/Vertactics/actions/runs/44045878353/artifacts/14312225037) |
+| Route and endpoint measurements | 52 unit tests and 23 Chromium scenarios passed. Verified both waypoint length totals and point heights, view switching and undo. Route lengths sum the drawn segments. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44046212660) · [Screenshot](https://github.com/qtaghdi/Vertactics/actions/runs/44046212660/artifacts/14310374904) |
