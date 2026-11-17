@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Vertactics에서 오버워치 지형의 높낮이를 확인하고 팀 움직임을 계획하세요." />
+    <link rel="icon" type="image/png" href="%BASE_URL%favicon.png" />
+    <title>About Vertactics</title>
+    <style>
+      :root { color-scheme: dark; background: var(--color-app); color: var(--color-text); font: 1rem var(--font-ui); }
+      body { margin: 0; }
+      main { max-width: 38rem; margin: auto; padding: clamp(1.5rem, 7vw, 5rem); }
+      h1 { display: flex; align-items: center; gap: var(--space-md); }
+      h2 { font-size: 1.15rem; }
+      p { color: var(--color-muted); line-height: 1.6; }
+      a { display: inline-block; margin-block: var(--space-lg); color: var(--color-accent); text-underline-offset: 0.25em; }
+      a:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 4px; }
+      section { border-top: 1px solid var(--color-border); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1><img src="%BASE_URL%favicon.png" width="36" height="36" alt="" />Vertactics</h1>
+      <h2>같은 지도를 2D와 3D로</h2>
+      <p>오버워치 전장의 진입로, 엄폐물, 고지대를 살펴보세요. 영웅과 능력 범위를 배치하고 팀의 움직임을 타임라인에 기록할 수 있습니다.</p>
+      <a href="%BASE_URL%">지도 편집기 열기 <span lang="en">/ Open map editor</span></a>
+      <section lang="en" aria-labelledby="about-en">
+        <h2 id="about-en">Plan on the same map in 2D and 3D</h2>
+        <p>Explore approaches, cover, and high ground. Place heroes and ability previews, then record your team’s movement on a strategy timeline.</p>
+        <p>Vertactics is an independent Overwatch fan project and is unaffiliated with Blizzard Entertainment.</p>
+      </section>
+    </main>
+    <script type="module" src="/src/theme/index.ts"></script>
+  </body>
+</html>

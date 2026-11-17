@@ -4,7 +4,7 @@
 
 See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [the development guide](development.md). Check an item when its stated scope has been verified. Track implementation, browser behavior, CI and deployment separately.
 
-**Current work** Phase 8 workspace polish. Phase 4 live-game geometry and clearance verification and Phase 5 roster and asset verification remain open.
+**Current work** Public preview on GitHub Pages. Live-game geometry and clearance, third-party icon rights, and manual screen-reader verification remain open. The map and strategy catalogues, settings, and help are available inside the workspace. The product introduction is available from Help and the README.
 
 ## Phase 1 · Project setup
 
@@ -84,7 +84,7 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 ## Phase 5 · Heroes and abilities
 
 - [x] 5.01a Source IDs, roles and base abilities for the three starter heroes and document update criteria
-- [ ] 5.01b Expand and verify the hero roster
+- [x] 5.01b Expand and verify the hero roster
 - [ ] 5.02 Confirm icon rights and create neutral fallbacks
 - [x] 5.03a Model custom preview direction, range, shape and provenance
 - [x] 5.03b Store a user-measured or estimated range with its source and game version
@@ -124,34 +124,34 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 
 ## Phase 8 · Product polish
 
-- [ ] 8.01 Build product, map, strategy, settings and help screens
-- [ ] 8.02 Add onboarding, empty states, errors, recovery and input help
-- [ ] 8.03 Check panels, shortcuts, drag and drop and context menus
-- [ ] 8.04 Verify Korean and English UI, accessible names, dates and numbers
+- [x] 8.01 Build product, map, strategy, settings and help screens
+- [x] 8.02 Add onboarding, empty states, errors, recovery and input help
+- [x] 8.03 Check panels, shortcuts, drag and drop and context menus
+- [x] 8.04 Verify Korean and English UI, accessible names, dates and numbers
 - [ ] 8.05 Verify keyboard, focus, contrast, screen readers, team cues and reduced motion
-- [ ] 8.06 Check desktop workflows and touch layouts for clipping and wrapping
-- [ ] 8.07 Ship independent branding, favicon, social card and fan-project notice
-- [ ] 8.08a Capture the current workspace on desktop and narrow screens and record the layout and interaction baseline
-- [ ] 8.08b Define a canvas-first workspace with one map and strategy header, a compact tool rail, and a contextual inspector
-- [ ] 8.08c Rework typography, spacing, surfaces, focus, and semantic colors through shared JSON tokens
-- [ ] 8.08d Rebuild hero, ability, terrain, and analysis controls around active tool and selection states
-- [ ] 8.08e Adapt tool and inspector access for narrow screens and verify touch targets and canvas space
-- [ ] 8.08f Verify keyboard, responsive layouts, 2D and 3D view continuity, and save and restore in a browser, then capture the redesigned workspace
-- [ ] 8.09a After reviewing the integrated Phase 8 UI, open a separate PR to refactor workspace state and module boundaries around the verified workflows
-- [ ] 8.09b Keep map and strategy switching, restoration, and document commands under workspace ownership. Give UI panels the data and actions they need
-- [ ] 8.09c Keep world rules and document validation independent of React, rendering, and browser storage. Verify existing editor, playback, and save and restore flows after the refactor
+- [x] 8.06 Check desktop workflows and touch layouts for clipping and wrapping
+- [x] 8.07 Ship independent branding, favicon, social card and fan-project notice
+- [x] 8.08a Capture the current workspace on desktop and narrow screens and record the layout and interaction baseline
+- [x] 8.08b Define a canvas-first workspace with one map and strategy header, a compact tool rail, and a contextual inspector
+- [x] 8.08c Rework typography, spacing, surfaces, focus, and semantic colors through shared JSON tokens
+- [x] 8.08d Rebuild hero, ability, terrain, and analysis controls around active tool and selection states
+- [x] 8.08e Adapt tool and inspector access for narrow screens and verify touch targets and canvas space
+- [x] 8.08f Verify keyboard, responsive layouts, 2D and 3D view continuity, and save and restore in a browser, then capture the redesigned workspace
+- [x] 8.09a After reviewing the integrated Phase 8 UI, open a separate PR to refactor workspace state and module boundaries around the verified workflows
+- [x] 8.09b Keep map and strategy switching, restoration, and document commands under workspace ownership. Give UI panels the data and actions they need
+- [x] 8.09c Keep world rules and document validation independent of React, rendering, and browser storage. Verify existing editor, playback, and save and restore flows after the refactor
 
 ## Phase 9 · Quality and release
 
-- [ ] 9.01 Unit test coordinate, elevation, distance, visibility, abilities, serialization, history and timeline logic
-- [ ] 9.02 Integrate map, floor, hero, ability, sightline and saving flows and test end to end
-- [ ] 9.03 Verify Chromium, Firefox, WebKit and WebGL fallback
-- [ ] 9.04 Review render quality, picking, panels, occlusion and responsive layouts
-- [ ] 9.05 Record measurement environment, draw calls, memory, input latency and load performance
-- [ ] 9.06 Apply instancing, resource reuse, disposal and lazy loading where measured
-- [ ] 9.07 Add real captures to the product README and link usage, development, contribution and licence information
-- [ ] 9.08 Verify CI, production build, static paths, errors and metadata
-- [ ] 9.09 Deploy to an approved public URL and check WebGL, console and core flows
+- [x] 9.01 Unit test coordinate, elevation, distance, visibility, abilities, serialization, history and timeline logic
+- [x] 9.02 Integrate map, floor, hero, ability, sightline and saving flows and test end to end
+- [x] 9.03 Verify Chromium, Firefox, WebKit and WebGL fallback
+- [x] 9.04 Review render quality, picking, panels, occlusion and responsive layouts
+- [x] 9.05 Record measurement environment, draw calls, memory, input latency and load performance
+- [x] 9.06 Apply instancing, resource reuse, disposal and lazy loading where measured
+- [x] 9.07 Add real captures to the product README and link usage, development, contribution and licence information
+- [x] 9.08 Verify CI, production build, static paths, errors and metadata
+- [x] 9.09 Deploy to an approved public URL and check WebGL, console and core flows
 
 ## Verification record
 
@@ -188,3 +188,9 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 | Strategy file transfer and image export | 60 unit tests and 33 Chromium scenarios passed. Verified invalid import handling, saving, reload, restore, export and re-import of a map and timed plan. Decoded both PNG downloads and verified distinct nonblank views. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44054863071) |
 | Strategy share links | 62 unit tests and 35 Chromium scenarios passed. Verified read-only view, playback, JSON export, local duplication, malformed links and payload limits. Links carry a compressed snapshot. Strategies over the link limit can be transferred as JSON. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44055871444) |
 | Canvas-first workspace | Added workspace navigation, a tool strip next to the canvas, touch sizing, and narrow-screen browser coverage. Local dependency installation is blocked by npm DNS resolution and missing offline packages. Browser evidence and CI are tracked separately. |
+| Workspace baseline and narrow-screen reflow | Reviewed the 1440 × 900 and 390 × 844 Chromium captures. The design before compact controls placed the narrow canvas below y=635. The revised test requires its top above y=430, exercises touch targets, and captures both views. [Baseline](https://github.com/qtaghdi/Vertactics/actions/runs/44066432574/artifacts/14321390541) · [Revised captures](https://github.com/qtaghdi/Vertactics/actions/runs/44070388892/artifacts/14321698791) |
+| Localized workspace and document boundaries | Korean and English labels, focus, coordinates and saved dates were verified across view switching, reload and restore. A separate PR verified document ownership refactoring through the existing editing, playback, import, sharing and recovery flows. [Locale CI](https://github.com/qtaghdi/Vertactics/actions/runs/44066432574) · [Architecture CI](https://github.com/qtaghdi/Vertactics/actions/runs/44067153900) |
+| OWKR catalogue | All 54 hero IDs, Korean names and roles match OWKR Match. Its 31-map pool is browseable in both languages. King’s Row opens the existing Point A terrain under `kings-row-a`. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44072435978) |
+| Browser compatibility | Chromium runs the full suite. Firefox and WebKit verify terrain inspection and selection through both view modes and forced WebGL fallback. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44067292922) |
+| Renderer baseline and batching | Linux x64, Chromium 158.0.8127.18, ANGLE SwiftShader at 1440 × 900. Draw calls in each mode changed from 9 to 6 for Courtyard, 43 to 23 for Elevation Lab, and 79 to 41 for King’s Row. First draw was 504.5 ms on Intel Xeon 8573C and 307.1 ms on AMD EPYC 9V74. Selection-event-to-draw samples were 5.9–18.3 ms and 4.8–20.4 ms. JS heap was 11.36 and 10.88 MiB. Timing and heap samples come from different runners. [Baseline](https://github.com/qtaghdi/Vertactics/actions/runs/44066787788) · [Batched renderer](https://github.com/qtaghdi/Vertactics/actions/runs/44069847978) |
+| Public preview | The first production deployment passed favicon, metadata, WebGL, 404, shared strategy and local save/restore checks against the public repository path. [Production CI](https://github.com/qtaghdi/Vertactics/actions/runs/44071463018) · [Live editor](https://qtaghdi.github.io/Vertactics/) |

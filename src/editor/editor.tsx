@@ -703,6 +703,7 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
               <li>{t('Esc로 도구를 취소하거나 재생을 종료합니다.')}</li>
               <li>{t('Ctrl 또는 ⌘와 Z로 실행 취소하고, Shift를 함께 눌러 다시 실행합니다.')}</li>
               <li>{t('Vertactics는 Blizzard Entertainment와 제휴하지 않은 Overwatch 팬 프로젝트입니다.')}</li>
+              <li><a href="about.html" target="_blank" rel="noopener">{t('서비스 소개')}</a></li>
             </ul>
           </details>
         </aside>
