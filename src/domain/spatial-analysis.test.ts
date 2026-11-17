@@ -1,5 +1,6 @@
 import { expect, it } from 'vitest';
-import { sampleExposure, spatialBlockers, traceSightline } from './spatial-analysis';
+import { sampleExposure, spatialBlockers, traceHeroSightline, traceSightline } from './spatial-analysis';
+import type { HeroPlacement } from './strategy';
 import type { Terrain, WorldPoint } from './map';
 
 const wall: Terrain = { id: 'wall', name: 'Wall', kind: 'wall', origin: [2, 0, -1], size: [1, 3, 2] };
@@ -64,4 +65,14 @@ it('traces through a doorway opening and hits the frame above or beside it', () 
   expect(traceSightline([doorway], [2, 2, -1], [2, 2, 2]).sight).toBeUndefined();
   expect(traceSightline([doorway], [2, 3.5, -1], [2, 3.5, 2]).sight).toBe(doorway);
   expect(traceSightline([doorway], [0.2, 2, -1], [0.2, 2, 2]).sight).toBe(doorway);
+});
+
+it('uses hero position and elevation as the analysis inputs', () => {
+  const observer: HeroPlacement = { id: 'observer', heroId: 'tracer', team: 'attack', position: [0, 2, 0], yaw: 0 };
+  const target: HeroPlacement = { ...observer, id: 'target', team: 'defense', position: [6, 3, 0], yaw: 90 };
+  const result = traceHeroSightline([wall], observer, target);
+  expect(result.start).toEqual([0, 3.6, 0]);
+  expect(result.endpoint).toEqual([6, 4.6, 0]);
+  expect(result.sight).toBeUndefined();
+  expect(result.exposure.status).toBe('clear');
 });

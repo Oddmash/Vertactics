@@ -1,6 +1,8 @@
 import { terrainBlocks } from './map';
 import type { Terrain, TerrainBlock, WorldPoint } from './map';
 import { slopeFraction } from './surface-height';
+import { heroEyeHeight } from './strategy';
+import type { HeroPlacement } from './strategy';
 
 const axes = [0, 1, 2] as const;
 
@@ -42,7 +44,7 @@ const intersection = (block: TerrainBlock, start: WorldPoint, end: WorldPoint): 
   return entry;
 };
 
-export const traceSightline = (terrain: Terrain[], start: WorldPoint, end: WorldPoint) => {
+export const traceSightline = (terrain: readonly Terrain[], start: WorldPoint, end: WorldPoint) => {
   let collision: { item: Terrain; time: number } | undefined;
   let sight: { item: Terrain; time: number } | undefined;
   for (const item of terrain) {
@@ -66,7 +68,7 @@ export const traceSightline = (terrain: Terrain[], start: WorldPoint, end: World
   return { collision: collision?.item, sight: sight?.item, endpoint };
 };
 
-export const spatialBlockers = (terrain: Terrain[], start: WorldPoint, end: WorldPoint) => {
+export const spatialBlockers = (terrain: readonly Terrain[], start: WorldPoint, end: WorldPoint) => {
   const { collision, sight } = traceSightline(terrain, start, end);
   return { collision, sight };
 };
@@ -74,7 +76,7 @@ export const spatialBlockers = (terrain: Terrain[], start: WorldPoint, end: Worl
 const exposureHeights = { lower: 0.45, middle: 1.05, upper: 1.8 } as const;
 const exposureSamples = ['lower', 'middle', 'upper'] as const;
 
-export const sampleExposure = (terrain: Terrain[], observer: WorldPoint, [x, y, z]: WorldPoint) => {
+export const sampleExposure = (terrain: readonly Terrain[], observer: WorldPoint, [x, y, z]: WorldPoint) => {
   const samples = exposureSamples.map((part) => ({
     part,
     visible: !traceSightline(terrain, observer, [x, y + exposureHeights[part], z]).sight,
@@ -82,4 +84,20 @@ export const sampleExposure = (terrain: Terrain[], observer: WorldPoint, [x, y, 
   const visibleCount = samples.filter(({ visible }) => visible).length;
   const status = visibleCount === 0 ? 'blocked' : visibleCount === samples.length ? 'clear' : 'partial';
   return { samples, visibleCount, status } as const;
+};
+
+const sightOrigin = ([x, y, z]: WorldPoint): WorldPoint => [x, y + heroEyeHeight, z];
+
+export const traceTerrainSightline = (terrain: readonly Terrain[], from: WorldPoint, to: WorldPoint) => {
+  const start = sightOrigin(from);
+  return { start, ...traceSightline(terrain, start, sightOrigin(to)) };
+};
+
+export const traceHeroSightline = (
+  terrain: readonly Terrain[],
+  observer: HeroPlacement,
+  target: HeroPlacement,
+) => {
+  const sightline = traceTerrainSightline(terrain, observer.position, target.position);
+  return { ...sightline, exposure: sampleExposure(terrain, sightline.start, target.position) };
 };
