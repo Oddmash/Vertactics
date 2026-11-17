@@ -20,6 +20,8 @@ In **Tactical markers**, connect waypoints into a route or add a line, circle, a
 
 Use the editor controls to snap placements to the grid, lock edits, or hide heroes and markers while keeping them in the strategy. Press **Esc** to cancel an active placement. **Ctrl/⌘+Z** undoes an edit, and **Ctrl/⌘+Shift+Z** redoes it.
 
+In the app’s **Local strategy** panel, save the current map and strategy together. After reopening Vertactics in the same browser, review the saved draft and restore it to keep editing. The browser keeps one draft.
+
 ## Build a map
 
 Choose a map or import a validated map JSON file. In **Map edit mode**, add, edit or duplicate terrain blocks and preview changes in the shared 2D and 3D views. Export the map as JSON to keep a copy.

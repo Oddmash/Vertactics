@@ -97,7 +97,7 @@
 - [x] 5.07a 사용자 설정 범위와 지도 단위 표시
 - [x] 5.07b 사용자 실측·추정 거리와 출처, 단위 표시
 - [x] 5.08a 미리보기 도형 계산 단위 테스트와 브라우저 보기 전환 검증
-- [ ] 5.08b 저장된 능력 편집을 브라우저에서 검증
+- [x] 5.08b 저장된 능력 편집을 브라우저에서 검증
 
 ## Phase 6 · 공간 분석
 
@@ -169,3 +169,4 @@
 | 독립 능력 배치 | 단위 테스트 47개, Chromium 시나리오 18개 통과. 고지대 배치, 이동, 회전, 보기 전환, 숨기기, 삭제와 실행 취소를 검증. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44040575157) · [2D·3D 캡처](https://github.com/qtaghdi/Vertactics/actions/runs/44040575157/artifacts/14308738616) |
 | 사용자 설정 영역 지속 시간 | 지속 시간 검증, 배치, 편집, 뷰 전환, 값 지우기, 실행 취소를 확인. 전략 재생 시간 처리의 범위는 Phase 7에 포함. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44041404112) · [캡처](https://github.com/qtaghdi/Vertactics/actions/runs/44041404112/artifacts/14309283253) |
 | 능력 거리 참고값 | 단위 테스트 49개, Chromium 시나리오 20개 통과. 출처·게임 버전·실측과 추정 표시, 미터와 지도 단위 구분, 뷰 전환, 지우기와 실행 취소를 검증. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44042312699) · [캡처](https://github.com/qtaghdi/Vertactics/actions/runs/44042312699/artifacts/14310001845) |
+| 로컬 전략 초안 | 수동 저장, 새로고침, 능력과 참고값 복원 및 재편집 검증. 저장본이 없거나 손상돼도 편집 가능. 여러 전략 관리와 자동 저장은 Phase 7에 남음. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44043379399) · [복원 화면](https://github.com/qtaghdi/Vertactics/actions/runs/44043379399/artifacts/14310311989) |

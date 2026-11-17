@@ -97,7 +97,7 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 - [x] 5.07a Label custom range values and their map units
 - [x] 5.07b Label user-measured and estimated ranges with their sources and units
 - [x] 5.08a Test preview shape geometry and browser view switching
-- [ ] 5.08b Verify saved ability editing in a browser
+- [x] 5.08b Verify saved ability editing in a browser
 
 ## Phase 6 · Spatial analysis
 
@@ -161,3 +161,4 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 | Independent ability placement | 47 unit tests and 18 Chromium scenarios passed. Verified high-ground placement, moving, rotation, view switching, visibility, removal, and undo. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44040575157) · [2D and 3D screenshots](https://github.com/qtaghdi/Vertactics/actions/runs/44040575157/artifacts/14308738616) |
 | Custom area durations | Verified duration validation, placement, editing, switching views, clearing and undo. Strategy playback timing remains in Phase 7. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44041404112) · [Screenshots](https://github.com/qtaghdi/Vertactics/actions/runs/44041404112/artifacts/14309283253) |
 | Ability range references | 49 unit tests and 20 Chromium scenarios passed. Verified source, game version, measured and estimated labels, separate meters and map units, view switching, clearing and undo. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44042312699) · [Screenshots](https://github.com/qtaghdi/Vertactics/actions/runs/44042312699/artifacts/14310001845) |
+| Local strategy draft | Verified manual saving, reloading, restoring and editing an ability with its reference. Empty and malformed storage leave the workspace usable. Multiple drafts and autosave remain open in Phase 7. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44043379399) · [Restored editor screenshot](https://github.com/qtaghdi/Vertactics/actions/runs/44043379399/artifacts/14310311989) |
