@@ -56,12 +56,39 @@ def read_map(path):
     return name, instances
 
 
-def resolve_model(root, reference):
+def resolve_file(root, reference, suffix):
     root = root.resolve()
     path = (root / reference.replace(chr(92), '/')).resolve()
-    if not path.is_relative_to(root) or path.suffix.lower() != '.owmdl':
+    if not path.is_relative_to(root) or path.suffix.lower() != suffix:
         return None
     return path if path.is_file() else None
+
+
+def resolve_model(root, reference):
+    return resolve_file(root, reference, '.owmdl')
+
+
+def read_entity(root, entity):
+    stream = Binary(entity)
+    if stream.string() != 'owentity' or stream.read('HH') != (2, 1):
+        raise ValueError(f'Unsupported OWENTITY version: {entity.name}')
+    stream.string()
+    model = stream.string()
+    stream.string()
+    _, _, _, children = stream.read('IIII')
+    for _ in range(children):
+        stream.string()
+        stream.skip(24)
+        stream.string()
+    stream.string()
+    base_dir = stream.string().replace(chr(92), '/')
+    if model == 'null':
+        return None, None, children
+    folder = (entity.parent / base_dir / 'Models' / model).resolve()
+    model_file = (folder / Path(model).with_suffix('.owmdl').name).resolve()
+    if not model_file.is_relative_to(root) or not model_file.is_file():
+        return model, None, children
+    return model, model_file, children
 
 
 @lru_cache(maxsize=512)
@@ -130,8 +157,15 @@ def main():
     args = parser.parse_args()
     path = args.map.resolve()
     name, records = read_map(path)
-    references = {ref: resolve_model(path.parent, ref) for ref, _ in records}
-    instances = [(references[reference], record) for reference, record in records if references[reference]]
+    root = path.parent
+    model_refs = {ref for ref, _ in records if ref.lower().endswith('.owmdl')}
+    direct_models = {ref: resolve_model(root, ref) for ref in model_refs}
+    entity_refs = {ref for ref, _ in records if ref.lower().endswith('.owentity')}
+    entity_files = {ref: resolve_file(root, ref, '.owentity') for ref in entity_refs}
+    entities = {ref: read_entity(root, file) for ref, file in entity_files.items() if file}
+    entity_models = {ref: model for ref, (_, model, _) in entities.items()}
+    models = direct_models | entity_models
+    instances = [(models[ref], record) for ref, record in records if models.get(ref)]
     low, high = [math.inf] * 3, [-math.inf] * 3
     vertex_instances = 0
     for model, record in instances:
@@ -143,14 +177,21 @@ def main():
                 value = origin[axis] + a*r + b*s + c*t
                 low[axis] = min(low[axis], value)
                 high[axis] = max(high[axis], value)
-    missing = Counter(ref for ref, _ in records if not references[ref] and ref.lower().endswith('.owmdl'))
-    entities = sum(ref.lower().endswith('.owentity') for ref, _ in records)
+    missing = Counter(ref for ref, _ in records if ref in direct_models and not direct_models[ref])
+    rendered_entities = sum(entity_models.get(ref) is not None for ref, _ in records)
+    entity_count = sum(ref in entity_refs for ref, _ in records)
     print(json.dumps({
         'map': name, 'variant': path.name, 'instances': len(records), 'model_instances': len(instances),
-        'resolved_models': sum(path is not None for path in references.values()),
+        'resolved_models': len({model for model in models.values() if model}),
         'vertex_instances': vertex_instances, 'bounds_xyz': [low, high] if vertex_instances else None,
-        'entity_instances_not_rendered': entities,
+        'entity_instances_rendered': rendered_entities,
+        'entity_instances_without_primary_model': entity_count - rendered_entities,
+        'entity_files_with_nested_attachments': sum(children > 0 for _, _, children in entities.values()),
         'missing_model_references': dict(missing),
+        'missing_entity_files': sorted(ref for ref, file in entity_files.items() if not file),
+        'missing_entity_model_references': {
+            ref: asset for ref, (asset, file, _) in sorted(entities.items()) if asset and not file
+        },
     }, indent=2))
     if args.preview:
         if not vertex_instances:
