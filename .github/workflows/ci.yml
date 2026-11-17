@@ -28,12 +28,11 @@ jobs:
         id: scope
         env:
           EVENT_NAME: ${{ github.event_name }}
-          BASE_SHA: ${{ github.event.pull_request.base.sha }}
         run: |
           application=true
           if [[ "$EVENT_NAME" == pull_request ]]; then
-            git diff --check "$BASE_SHA" HEAD
-            if git diff --quiet "$BASE_SHA" HEAD -- . \
+            git diff --check HEAD^1 HEAD
+            if git diff --quiet HEAD^1 HEAD -- . \
               ':(top,exclude,glob)*.md' \
               ':(top,exclude,glob)docs/**/*.md' \
               ':(top,exclude,glob)skills/**/*.md' \
