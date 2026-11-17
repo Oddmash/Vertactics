@@ -3,33 +3,100 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Vertactics에서 오버워치 지형의 높낮이를 확인하고 팀 움직임을 계획하세요." />
+    <meta name="description" content="Vertactics에서 전장의 높낮이와 시야를 확인하고, 영웅의 위치와 팀 움직임을 한 장의 지도에서 계획하세요." />
+    <meta property="og:title" content="Vertactics — 오버워치 전술 플래너" />
+    <meta property="og:description" content="전장의 높낮이부터 팀의 다음 움직임까지, 한 장의 지도에서 계획하세요." />
+    <meta property="og:image" content="https://qtaghdi.github.io/Vertactics/social-card.png" />
     <link rel="icon" type="image/png" href="%BASE_URL%favicon.png" />
+    <link rel="stylesheet" href="/src/theme/landing.css" />
     <title>About Vertactics</title>
-    <style>
-      :root { color-scheme: dark; background: var(--color-app); color: var(--color-text); font: 1rem var(--font-ui); }
-      body { margin: 0; }
-      main { max-width: 38rem; margin: auto; padding: clamp(1.5rem, 7vw, 5rem); }
-      h1 { display: flex; align-items: center; gap: var(--space-md); }
-      h2 { font-size: 1.15rem; }
-      p { color: var(--color-muted); line-height: 1.6; }
-      a { display: inline-block; margin-block: var(--space-lg); color: var(--color-accent); text-underline-offset: 0.25em; }
-      a:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 4px; }
-      section { border-top: 1px solid var(--color-border); }
-    </style>
   </head>
   <body>
-    <main>
-      <h1><img src="%BASE_URL%favicon.png" width="36" height="36" alt="" />Vertactics</h1>
-      <h2>같은 지도를 2D와 3D로</h2>
-      <p>오버워치 전장의 진입로, 엄폐물, 고지대를 살펴보세요. 영웅과 능력 범위를 배치하고 팀의 움직임을 타임라인에 기록할 수 있습니다.</p>
-      <a href="%BASE_URL%">지도 편집기 열기 <span lang="en">/ Open map editor</span></a>
-      <section lang="en" aria-labelledby="about-en">
-        <h2 id="about-en">Plan on the same map in 2D and 3D</h2>
-        <p>Explore approaches, cover, and high ground. Place heroes and ability previews, then record your team’s movement on a strategy timeline.</p>
-        <p>Vertactics is an independent Overwatch fan project and is unaffiliated with Blizzard Entertainment.</p>
+    <a class="skip" href="#main">본문 바로가기</a>
+    <header class="site-header shell">
+      <a class="brand" href="%BASE_URL%about.html" aria-label="Vertactics 소개">
+        <span class="brand-mark" aria-hidden="true">V</span>
+        <span>VERTACTICS</span>
+      </a>
+      <nav aria-label="소개 페이지">
+        <a class="nav-link" href="#workflow">주요 기능</a>
+        <a class="header-action" href="%BASE_URL%">편집기 열기 <span aria-hidden="true">↗</span></a>
+      </nav>
+    </header>
+    <main id="main">
+      <section class="hero shell" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="product-category">OVERWATCH TACTICAL PLANNER</p>
+          <h1 id="hero-title">전장의 높낮이까지,<br /><em>작전 안으로.</em></h1>
+          <p class="hero-description">같은 전장을 2D와 3D로 오가며 플레이를 준비하세요. 영웅을 배치하고, 엄폐물과 시야를 확인하고, 팀의 움직임을 타임라인에 남길 수 있어요.</p>
+          <a class="primary-action" href="%BASE_URL%" aria-label="전술 편집기 열기 / Open map editor">
+            전술 편집기 열기 <span aria-hidden="true">↗</span>
+          </a>
+        </div>
+        <figure class="demo" aria-labelledby="demo-caption">
+          <div class="demo-header">
+            <figcaption id="demo-caption">전술 배치 예시</figcaption>
+            <fieldset class="perspective">
+              <legend class="visually-hidden">예시 지도 보기</legend>
+              <input class="visually-hidden" type="radio" name="perspective" id="view-flat" />
+              <label for="view-flat">2D</label>
+              <input class="visually-hidden" type="radio" name="perspective" id="view-angled" checked />
+              <label for="view-angled">3D</label>
+            </fieldset>
+          </div>
+          <div class="demo-canvas" aria-hidden="true">
+            <span class="corner corner-nw"></span><span class="corner corner-ne"></span>
+            <span class="corner corner-sw"></span><span class="corner corner-se"></span>
+            <span class="axis">↑ N</span>
+            <div class="board">
+              <div class="obstacle plateau"></div>
+              <div class="obstacle steps"></div>
+              <div class="obstacle cover"></div>
+              <div class="obstacle high-ground"></div>
+              <div class="obstacle divider"></div>
+              <div class="objective"></div>
+              <div class="route route-a"></div>
+              <div class="route route-b"></div>
+              <div class="route route-c"></div>
+              <div class="marker marker-start"></div>
+              <div class="marker marker-turn"></div>
+              <div class="marker marker-target"></div>
+            </div>
+          </div>
+          <div class="demo-footer">
+            <span><i class="legend-dot legend-route" aria-hidden="true"></i>이동 경로</span>
+            <span><i class="legend-dot legend-objective" aria-hidden="true"></i>거점</span>
+          </div>
+        </figure>
+      </section>
+      <section class="workflow shell" id="workflow" aria-labelledby="workflow-title">
+        <header class="workflow-heading">
+          <h2 id="workflow-title">팀의 다음 움직임을 준비하세요.</h2>
+          <p>전장을 살펴보는 순간부터 작전을 공유하기까지.</p>
+        </header>
+        <div class="workflow-grid">
+          <article>
+            <span class="feature-icon icon-terrain" aria-hidden="true"></span>
+            <h3>지형을 파악하세요</h3>
+            <p>탑다운으로 진입로를 짚고 3D로 고지대와 엄폐물의 높이를 확인하세요.</p>
+          </article>
+          <article>
+            <span class="feature-icon icon-sight" aria-hidden="true"></span>
+            <h3>교전 위치를 잡으세요</h3>
+            <p>영웅과 스킬 범위를 지도에 표시하고, 장애물이 시야를 가리는 지점을 확인하세요.</p>
+          </article>
+          <article>
+            <span class="feature-icon icon-timeline" aria-hidden="true"></span>
+            <h3>움직임을 공유하세요</h3>
+            <p>작전을 단계별로 기록하고, 팀원에게 읽기 전용 링크를 보내세요.</p>
+          </article>
+        </div>
       </section>
     </main>
+    <footer class="site-footer shell">
+      <p>Vertactics는 Blizzard Entertainment와 제휴하지 않은 독립 오버워치 팬 프로젝트입니다.</p>
+      <a href="https://github.com/qtaghdi/Vertactics">GitHub <span aria-hidden="true">↗</span></a>
+    </footer>
     <script type="module" src="/src/theme/index.ts"></script>
   </body>
 </html>
