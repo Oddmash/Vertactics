@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 test('shares a strategy as read-only, plays it across views and duplicates it for editing', async ({ page, context }) => {
-  await page.goto('/');
+  await page.goto('./');
   const canvas = page.getByTestId('viewport').locator('canvas');
   await page.getByRole('button', { name: '2D 탑다운' }).click();
   await expect(canvas).toHaveAttribute('data-view-mode', '2d');
@@ -42,7 +42,7 @@ test('shares a strategy as read-only, plays it across views and duplicates it fo
 });
 
 test('rejects a malformed share without loading an editor draft', async ({ page }) => {
-  await page.goto('/#strategy=invalid');
+  await page.goto('./#strategy=invalid');
   await expect(page.getByRole('heading', { name: '공유 링크를 열 수 없습니다.' })).toBeVisible();
   await expect(page.getByRole('button', { name: '편집용 복제' })).toHaveCount(0);
   await page.getByRole('button', { name: '편집기 열기' }).click();
