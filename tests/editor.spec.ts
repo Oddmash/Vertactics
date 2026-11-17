@@ -538,7 +538,7 @@ test('opens the approximate Kings Row blockout and places a hero on Point A', as
   await expect(page.getByRole('button', { name: /A 점령 구역/ })).toHaveCount(0);
 });
 
-test('shows obstruction between hero positions', async ({ page }) => {
+test('shows a blocked hero sightline in both map views', async ({ page }, testInfo) => {
   await page.goto('/');
   await page.getByRole('button', { name: '2D 탑다운' }).click();
   const canvas = page.getByTestId('viewport').locator('canvas');
@@ -554,8 +554,21 @@ test('shows obstruction between hero positions', async ({ page }) => {
   await add(-11);
   await expect(page.getByRole('list', { name: '배치한 영웅' }).getByRole('listitem')).toHaveCount(1);
   await add(-6);
-  await page.getByLabel('시야 확인 대상').selectOption({ index: 1 });
-  await expect(page.getByText('시야: 북쪽 벽 · 충돌: 북쪽 벽')).toBeVisible();
+  const target = page.getByLabel('시야 확인 대상', { exact: true });
+  const before = await canvas.screenshot();
+  await target.selectOption({ index: 1 });
+  const result = page.getByText('시야: 북쪽 벽 · 충돌: 북쪽 벽');
+  await expect(result).toBeVisible();
+  await expect.poll(async () => (await canvas.screenshot()).equals(before)).toBe(false);
+  await page.screenshot({ path: testInfo.outputPath('blocked-sightline-2d.png') });
+  await page.getByRole('button', { name: '3D 원근' }).click();
+  await expect(canvas).toHaveAttribute('data-view-mode', '3d');
+  await expect(result).toBeVisible();
+  await page.screenshot({ path: testInfo.outputPath('blocked-sightline-3d.png') });
+  const withSightline = await canvas.screenshot();
+  await target.selectOption('');
+  await expect(result).toHaveCount(0);
+  await expect.poll(async () => (await canvas.screenshot()).equals(withSightline)).toBe(false);
 });
 
 test('measures height and distance across surfaces and keeps the result through view changes', async ({ page }) => {

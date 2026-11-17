@@ -1,3 +1,5 @@
+import MapSightline from './map-sightline';
+import type { Sightline } from './map-sightline';
 import MapAbilityPreview from './map-ability-preview';
 import type { AbilityPlacement, AbilityPreviewSettings } from '../domain/ability-preview';
 import { pickTerrainSurface } from '../domain/surface-height';
@@ -52,6 +54,7 @@ type Props = {
   selectedTerrainIds: ReadonlySet<string>;
   onSelect: (id: string | null, extend?: boolean) => void;
   heroes: HeroPlacement[];
+  sightline: Sightline | null;
   abilities: AbilityPlacement[];
   abilityPreview?: { hero: HeroPlacement; settings: AbilityPreviewSettings };
   selectedHeroId: string | null;
@@ -67,7 +70,7 @@ type Props = {
 
 const MapViewport = ({
   map, mode, reset, selectedTerrainIds, onSelect, heroes, selectedHeroId, onSelectHero, onEditSurface,
-  annotations, selectedAnnotationId, snap, layerId, onDragSurface, onDropSurface, abilities, abilityPreview,
+  annotations, selectedAnnotationId, snap, layerId, onDragSurface, onDropSurface, abilities, abilityPreview, sightline,
 }: Props) => {
   const bounds = useMemo(() => mapBounds(map.terrain), [map]);
   const blocks = useMemo(() => visibleTerrainForLayer(map.terrain, layerId).map((terrain) => ({
@@ -149,6 +152,7 @@ const MapViewport = ({
         {abilityPreview && <MapAbilityPreview settings={abilityPreview.settings}
           position={abilityPreview.hero.position} heading={abilityPreview.hero.yaw}
         />}
+        {sightline && <MapSightline {...sightline} />}
         <MapAnnotations items={annotations} selectedId={selectedAnnotationId} />
         {heroes.map(({ id, position, yaw, team }) => (
           <group
