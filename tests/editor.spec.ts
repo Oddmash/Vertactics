@@ -511,7 +511,7 @@ test('places and drags heroes at continuous ramp elevations', async ({ page }) =
   await expect(inspector.getByText('1, 0.5, 0', { exact: true })).toBeVisible();
 });
 
-test('opens the approximate Kings Row blockout and places a hero on Point A', async ({ page }) => {
+test('opens the approximate Kings Row blockout and places a hero on Point A', async ({ page }, testInfo) => {
   await page.goto('/');
   await page.getByLabel('지도', { exact: true }).selectOption('kings-row-a');
   await expect(page.getByRole('heading', { name: /왕의 길 A 거점/ })).toBeVisible();
@@ -528,9 +528,11 @@ test('opens the approximate Kings Row blockout and places a hero on Point A', as
   await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2 - 11 / units);
   const inspector = page.getByRole('complementary', { name: '지형 정보' });
   await expect(inspector.getByText('0, 0.04, -8', { exact: true })).toBeVisible();
+  await page.screenshot({ path: testInfo.outputPath('kings-row-a-2d.png') });
   await page.getByRole('button', { name: '3D 원근' }).click();
   await expect(canvas).toHaveAttribute('data-view-mode', '3d');
   await expect(inspector.getByText('0, 0.04, -8', { exact: true })).toBeVisible();
+  await page.screenshot({ path: testInfo.outputPath('kings-row-a-3d.png') });
   await page.getByLabel('표시 층').selectOption('upper');
   await expect(page.getByRole('button', { name: /수비 측 고지대/ })).toBeVisible();
   await expect(page.getByRole('button', { name: /A 점령 구역/ })).toHaveCount(0);
