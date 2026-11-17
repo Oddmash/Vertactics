@@ -88,10 +88,17 @@ test('renders and manipulates the same elevated terrain in both views', async ({
   await expect.poll(async () => (await canvas.screenshot()).equals(initial2d)).toBe(true);
 
   const worldUnitsPerPixel = Math.max(36 / box.width, 24 / box.height) * 1.22;
-  await page.mouse.click(
-    box.x + box.width / 2 + 10.5 / worldUnitsPerPixel,
-    box.y + box.height / 2 + 6 / worldUnitsPerPixel,
+  const clickWorld = (x: number, z: number) => page.mouse.click(
+    box.x + box.width / 2 + x / worldUnitsPerPixel,
+    box.y + box.height / 2 + z / worldUnitsPerPixel,
   );
+  await clickWorld(0, 0);
+  await expect(inspector.getByText('중앙 바닥')).toBeVisible();
+  await clickWorld(6, -8.6);
+  await expect(inspector.getByText('북쪽 벽')).toBeVisible();
+  await clickWorld(-9.5, 2.5);
+  await expect(inspector.getByText('서쪽 계단')).toBeVisible();
+  await clickWorld(10.5, 6);
   await expect(inspector.getByText('동쪽 고지대')).toBeVisible();
   await expect(inspector.getByText('+2 u')).toBeVisible();
 
