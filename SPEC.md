@@ -89,7 +89,7 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 - [x] 5.03a Model custom preview direction, range, shape and provenance
 - [ ] 5.03b Model sources and verification states for measured ability values
 - [x] 5.04a Render circle, sphere, cone, line, rectangle, vector and ground area outlines
-- [ ] 5.04b Represent persistent areas and their durations
+- [x] 5.04b Represent persistent areas and their durations
 - [x] 5.05a Select, rotate, show and hide a hero-anchored preview
 - [x] 5.05b Place, move, rotate and remove independent ability objects
 - [x] 5.06a Share preview position, direction and elevation across 2D and 3D
@@ -159,3 +159,4 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 | Starter hero catalogue | 42 unit tests and 16 Chromium scenarios passed. Verify grouped roles, placement, and sourced ability names in the inspector. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44037981117) |
 | Hero ability previews | 45 unit tests and 17 Chromium scenarios passed. Verified custom ranges and view switching using a hero-anchored cone. Type checks, lint and the production build passed. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44039103823) · [2D and 3D screenshots](https://github.com/qtaghdi/Vertactics/actions/runs/44039103823/artifacts/14309061041) |
 | Independent ability placement | 47 unit tests and 18 Chromium scenarios passed. Verified high-ground placement, moving, rotation, view switching, visibility, removal, and undo. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44040575157) · [2D and 3D screenshots](https://github.com/qtaghdi/Vertactics/actions/runs/44040575157/artifacts/14308738616) |
+| Custom area durations | Verified duration validation, placement, editing, switching views, clearing and undo. Strategy playback timing remains in Phase 7. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44041404112) · [Screenshots](https://github.com/qtaghdi/Vertactics/actions/runs/44041404112/artifacts/14309283253) |
