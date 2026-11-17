@@ -8,3 +8,7 @@ it('rounds horizontal coordinates while preserving the picked elevation', () => 
 it('stays inside the tread and keeps the hit coordinate when it has no grid intersection', () => {
   expect(snapSurfacePoint([0.6, 0.5, 1.8], [0.9, 0.25, 1.7], [0.8, 0.5, 0.4])).toEqual([1, 0.5, 1.8]);
 });
+
+it('normalizes negative zero on the grid origin', () => {
+  expect(snapSurfacePoint([-0.1, 0, -0.1], [0, -0.25, 0], [2, 0.5, 2])).toEqual([0, 0, 0]);
+});
