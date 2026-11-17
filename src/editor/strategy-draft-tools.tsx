@@ -1,6 +1,8 @@
+import { useLocale } from '../ui/locale';
 import { useState } from 'react';
 import { deleteStrategyDraft, listStrategyDrafts, saveStrategyDraft } from '../storage/strategy-draft';
-import type { SavedStrategyDraft, StrategyDraft } from '../storage/strategy-draft';
+import type { SavedStrategyDraft } from '../storage/strategy-draft';
+import type { StrategyDraft } from '../domain/strategy-draft';
 
 type Props = {
   draft: StrategyDraft;
@@ -8,6 +10,8 @@ type Props = {
 };
 
 const StrategyDraftTools = ({ draft, onRestore }: Props) => {
+  const { locale, t } = useLocale();
+  const formatDate = new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short' });
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [drafts, setDrafts] = useState<SavedStrategyDraft[]>();
@@ -51,7 +55,7 @@ const StrategyDraftTools = ({ draft, onRestore }: Props) => {
 
   return (
     <section className="hero-tools" aria-labelledby="strategy-draft-title">
-      <h2 id="strategy-draft-title" tabIndex={-1}>로컬 전략</h2>
+      <h2 id="strategy-draft-title" tabIndex={-1}>{t('로컬 전략')}</h2>
       <form key={JSON.stringify([draft.map.id, draft.strategy.id, existingId, active?.title])} onSubmit={(event) => {
         event.preventDefault();
         const title = String(new FormData(event.currentTarget).get('title')).trim();
@@ -59,27 +63,34 @@ const StrategyDraftTools = ({ draft, onRestore }: Props) => {
         const submitter = (event.nativeEvent as SubmitEvent).submitter;
         void save(title, submitter?.getAttribute('value') === 'new' ? undefined : existingId);
       }}>
-        <label className="strategy-name">전략 이름 <input name="title" maxLength={80} required
-          defaultValue={existingId ? active?.title : draft.strategy.title} />
+        <label className="strategy-name">{t('전략 이름') + ' '}<input name="title" maxLength={80} required
+          defaultValue={existingId ? active?.title : draft.strategy.id === 'local-draft' ? t(draft.strategy.title) : draft.strategy.title} />
         </label>
         <div className="hero-actions">
-          <button type="submit" className="reset-button" disabled={busy}>전략 저장</button>
-          {existingId && <button type="submit" className="reset-button" value="new" disabled={busy}>새 이름으로 저장</button>}
-          <button type="button" className="reset-button" disabled={busy} onClick={() => void load()}>저장본 확인</button>
+          <button type="submit" className="reset-button" disabled={busy}>{t('전략 저장')}</button>
+          {existingId && <button type="submit" className="reset-button" value="new" disabled={busy}>{t('새 이름으로 저장')}</button>}
+          <button type="button" className="reset-button" disabled={busy} onClick={() => void load()}>{t('저장본 확인')}</button>
         </div>
       </form>
-      {message && <p role="status">{message}</p>}
-      {drafts && drafts.length > 0 && <ul className="terrain-list" aria-label="저장된 전략">
-        {drafts.map(({ id, draft: item }) => <li key={id}>
+      {message && <p role="status">{t(message)}</p>}
+      {drafts && drafts.length > 0 && <ul className="terrain-list" aria-label={t('저장된 전략')}>
+        {drafts.map(({ id, draft: item, updatedAt }) => {
+          const updated = new Date(updatedAt);
+          return <li key={id}>
           <button type="button" className="terrain-button saved-strategy" disabled={busy} aria-pressed={selectedId === id}
             onClick={() => { setSelectedId(id); setDeleting(false); }}>
-            <span>{item.strategy.title}</span><small>{item.map.name}</small>
+            <span>{item.strategy.title}</span>
+            <small>{t(item.map.name)}</small>
+            {updatedAt > 0 && Number.isFinite(updated.getTime()) && (
+              <small><time dateTime={updated.toISOString()}>{formatDate.format(updated)}</time></small>
+            )}
           </button>
-        </li>)}
+        </li>;
+        })}
       </ul>}
       {selected && <div className="pending-edit">
-        <p>{selected.draft.map.name} · {selected.draft.strategy.title}</p>
-        <p>복원하면 같은 지도의 현재 편집 내용을 저장본으로 바꿉니다.</p>
+        <p>{t(selected.draft.map.name)} · {selected.draft.strategy.title}</p>
+        <p>{t('복원하면 같은 지도의 현재 편집 내용을 저장본으로 바꿉니다.')}</p>
         <div className="hero-actions">
           <button type="button" className="reset-button" disabled={busy} onClick={() => {
             onRestore(selected.draft);
@@ -87,17 +98,17 @@ const StrategyDraftTools = ({ draft, onRestore }: Props) => {
               title: selected.draft.strategy.title });
             setSelectedId(undefined);
             setMessage('저장된 전략을 복원했습니다.');
-          }}>전략 복원</button>
+          }}>{t('전략 복원')}</button>
           <button type="button" className="reset-button" disabled={busy} onClick={() => void run(async () => {
-            const duplicate = await saveStrategyDraft(selected.draft, `${selected.draft.strategy.title} 복제`);
+            const duplicate = await saveStrategyDraft(selected.draft, t('{0} 복제', selected.draft.strategy.title));
             setDrafts((current) => [duplicate, ...(current ?? [])]);
             setSelectedId(duplicate.id);
             setDeleting(false);
             setMessage('전략을 복제했습니다.');
-          }, '전략을 복제할 수 없습니다.')}>전략 복제</button>
-          <button type="button" className="reset-button" disabled={busy} onClick={() => setDeleting(true)}>전략 삭제</button>
+          }, t('전략을 복제할 수 없습니다.'))}>{t('전략 복제')}</button>
+          <button type="button" className="reset-button" disabled={busy} onClick={() => setDeleting(true)}>{t('전략 삭제')}</button>
           <button type="button" className="reset-button" disabled={busy}
-            onClick={() => { setSelectedId(undefined); setDeleting(false); }}>복원 취소</button>
+            onClick={() => { setSelectedId(undefined); setDeleting(false); }}>{t('복원 취소')}</button>
         </div>
         {deleting && <div className="hero-actions">
           <button type="button" className="reset-button" disabled={busy} onClick={() => void run(async () => {
@@ -107,8 +118,8 @@ const StrategyDraftTools = ({ draft, onRestore }: Props) => {
             setSelectedId(undefined);
             setDeleting(false);
             setMessage('저장된 전략을 삭제했습니다.');
-          }, '전략을 삭제할 수 없습니다.')}>삭제 확인</button>
-          <button type="button" className="reset-button" disabled={busy} onClick={() => setDeleting(false)}>삭제 취소</button>
+          }, t('전략을 삭제할 수 없습니다.'))}>{t('삭제 확인')}</button>
+          <button type="button" className="reset-button" disabled={busy} onClick={() => setDeleting(false)}>{t('삭제 취소')}</button>
         </div>}
       </div>}
     </section>

@@ -1,7 +1,8 @@
+import { useLocale } from '../ui/locale';
 import { useRef, useState } from 'react';
 import { encodeStrategyShare, sharePrefix } from '../storage/strategy-share';
-import { parseStrategyDraft } from '../storage/strategy-draft';
-import type { StrategyDraft } from '../storage/strategy-draft';
+import { parseStrategyDraft } from '../domain/strategy-draft';
+import type { StrategyDraft } from '../domain/strategy-draft';
 import { downloadFile, fileStem } from './download-file';
 
 type Props = {
@@ -12,6 +13,7 @@ type Props = {
 const maxBytes = 5 * 1024 * 1024;
 
 const StrategyFileTools = ({ draft, onImport }: Props) => {
+  const { t } = useLocale();
   const [pending, setPending] = useState<StrategyDraft>();
   const [message, setMessage] = useState('');
   const [shareLink, setShareLink] = useState('');
@@ -51,9 +53,9 @@ const StrategyFileTools = ({ draft, onImport }: Props) => {
   };
 
   return (
-    <section className="hero-tools" aria-label="전략 파일">
-      <h2>전략 파일</h2>
-      <label className="strategy-name">전략 JSON 가져오기 <input type="file" accept=".json,application/json" onChange={(event) => {
+    <section className="hero-tools" aria-label={t('전략 파일')}>
+      <h2>{t('전략 파일')}</h2>
+      <label className="strategy-name">{t('전략 JSON 가져오기') + ' '}<input type="file" accept=".json,application/json" onChange={(event) => {
         const file = event.target.files?.[0];
         event.target.value = '';
         if (file) void read(file);
@@ -66,10 +68,10 @@ const StrategyFileTools = ({ draft, onImport }: Props) => {
           return;
         }
         downloadFile(blob, `${fileStem(draft.map.id)}-strategy.json`);
-      }}>전략 JSON 내보내기</button>
-      <button type="button" className="reset-button" disabled={sharing} onClick={() => void share()}>공유 링크 만들기</button>
+      }}>{t('전략 JSON 내보내기')}</button>
+      <button type="button" className="reset-button" disabled={sharing} onClick={() => void share()}>{t('공유 링크 만들기')}</button>
       {shareLink && <div className="pending-edit">
-        <label className="strategy-name">읽기 전용 공유 링크 <input value={shareLink} readOnly
+        <label className="strategy-name">{t('읽기 전용 공유 링크') + ' '}<input value={shareLink} readOnly
           onFocus={(event) => event.currentTarget.select()} /></label>
         <button type="button" className="reset-button" onClick={() => {
           if (!navigator.clipboard) {
@@ -80,22 +82,22 @@ const StrategyFileTools = ({ draft, onImport }: Props) => {
             () => setMessage('공유 링크를 복사했습니다.'),
             () => setMessage('링크를 선택해 복사하세요.'),
           );
-        }}>링크 복사</button>
-        <p>링크를 받은 사람은 전략과 지도를 볼 수 있습니다.</p>
+        }}>{t('링크 복사')}</button>
+        <p>{t('링크를 받은 사람은 전략과 지도를 볼 수 있습니다.')}</p>
       </div>}
       {pending && <div className="pending-edit">
         <p>{pending.map.name} · {pending.strategy.title}</p>
-        <p>같은 지도의 현재 편집 내용이 파일의 내용으로 바뀝니다.</p>
+        <p>{t('같은 지도의 현재 편집 내용이 파일의 내용으로 바뀝니다.')}</p>
         <div className="hero-actions">
           <button type="button" className="reset-button" onClick={() => {
             onImport({ ...pending, strategy: { ...pending.strategy, id: crypto.randomUUID() } });
             setPending(undefined);
             setMessage('전략 파일을 열었습니다.');
-          }}>전략 파일 열기</button>
-          <button type="button" className="reset-button" onClick={() => setPending(undefined)}>가져오기 취소</button>
+          }}>{t('전략 파일 열기')}</button>
+          <button type="button" className="reset-button" onClick={() => setPending(undefined)}>{t('가져오기 취소')}</button>
         </div>
       </div>}
-      {message && <p role="status">{message}</p>}
+      {message && <p role="status">{t(message)}</p>}
     </section>
   );
 };

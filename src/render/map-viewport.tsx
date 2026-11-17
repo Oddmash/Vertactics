@@ -1,3 +1,4 @@
+import { useLocale } from '../ui/locale';
 import ViewportCapture from './viewport-capture';
 import type { ViewportCaptureRef } from './viewport-capture';
 import MapSightline from './map-sightline';
@@ -24,9 +25,12 @@ const unitBox = new BoxGeometry();
 const ramps = { '+x': rampGeometry('+x'), '-x': rampGeometry('-x'), '+z': rampGeometry('+z'), '-z': rampGeometry('-z') };
 const skipRaycast = () => undefined;
 
-const Fallback = () => (
-  <p className="viewport-fallback" role="status">WebGL 2를 사용할 수 없어 지도를 표시할 수 없습니다.</p>
-);
+const Fallback = () => {
+  const { t } = useLocale();
+  return (
+    <p className="viewport-fallback" role="status">{t('WebGL 2를 사용할 수 없어 지도를 표시할 수 없습니다.')}</p>
+  );
+};
 
 class ViewportBoundary extends Component<{ children: ReactNode }, { failed: boolean }> {
   state = { failed: false };
@@ -76,6 +80,7 @@ const MapViewport = ({
   map, capture, mode, reset, selectedTerrainIds, onSelect, heroes, selectedHeroId, onSelectHero, onEditSurface,
   annotations, selectedAnnotationId, snap, layerId, onDragSurface, onDropSurface, abilities, abilityPreview, sightline, heroView,
 }: Props) => {
+  const { t } = useLocale();
   const bounds = useMemo(() => mapBounds(map.terrain), [map]);
   const blocks = useMemo(() => visibleTerrainForLayer(map.terrain, layerId).map((terrain) => ({
     terrain,
@@ -91,7 +96,7 @@ const MapViewport = ({
       <Canvas
         className="map-canvas"
         style={{ position: 'absolute', inset: 0 }}
-        aria-label="지형 지도"
+        aria-label={t('지형 지도')}
         dpr={[1, 1.5]}
         frameloop="demand"
         flat

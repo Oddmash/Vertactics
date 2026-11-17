@@ -1,5 +1,5 @@
-import { parseStrategyDraft } from './strategy-draft';
-import type { StrategyDraft } from './strategy-draft';
+import { parseStrategyDraft } from '../domain/strategy-draft';
+import type { StrategyDraft } from '../domain/strategy-draft';
 
 export const sharePrefix = '#strategy=';
 export const maxShareCharacters = 12_000;

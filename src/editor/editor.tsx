@@ -1,12 +1,14 @@
+import { useLocale } from '../ui/locale';
+import LocalePicker from '../ui/locale-picker';
 import { downloadFile, fileStem } from './download-file';
 import StrategyFileTools from './strategy-file-tools';
-import useWorkspaceRecovery from './use-workspace-recovery';
+import useWorkspaceDocuments from './use-workspace-documents';
 import TimelinePlaybackControls from './timeline-playback-controls';
 import useTimelinePlayback from './use-timeline-playback';
 import { sampleTimeline, timelineDuration } from '../domain/timeline-playback';
 import StrategyTimelineTools from './strategy-timeline-tools';
 import StrategyDraftTools from './strategy-draft-tools';
-import type { StrategyDraft } from '../storage/strategy-draft';
+import type { StrategyDraft } from '../domain/strategy-draft';
 import AbilityPlacementTools from './ability-placement-tools';
 import AbilityPreviewTools from './ability-preview-tools';
 import type { AbilityPlacement, AbilityPreviewSettings } from '../domain/ability-preview';
@@ -18,13 +20,11 @@ import { traceHeroSightline, traceTerrainSightline } from '../domain/spatial-ana
 import TerrainTools from './terrain-tools';
 import AnnotationTools from './annotation-tools';
 import type { SurfacePick } from './annotation-tools';
-import { mapBounds, mapSchemaVersion, terrainKinds, parseMap, topElevation, visibleTerrainForLayer } from '../domain/map';
+import { mapBounds, terrainKinds, topElevation, visibleTerrainForLayer } from '../domain/map';
 import type { MapDefinition, MapLayer, Terrain, TerrainKind, WorldPoint } from '../domain/map';
-import { createStrategy, heroEyeHeight } from '../domain/strategy';
+import { heroEyeHeight } from '../domain/strategy';
 import type { Team } from '../domain/strategy';
-import { createStrategyHistory, reduceStrategyHistory } from '../domain/strategy-history';
-import type { StrategyAction, StrategyHistory } from '../domain/strategy-history';
-import { maps } from '../map';
+import type { StrategyAction } from '../domain/strategy-history';
 import type { ViewMode } from '../render/map-camera';
 import MapViewport from '../render/map-viewport';
 import HeroTools, { roleNames, teamNames } from './hero-tools';
@@ -52,23 +52,18 @@ const kindNames: Record<TerrainKind, string> = {
 const viewNames: Record<ViewMode, string> = { '2d': '2D 탑다운', '3d': '3D 원근' };
 const viewportModes = ['2d', '3d'] as const;
 
-const formatNumber = (value: number) => new Intl.NumberFormat('ko-KR', {
-  maximumFractionDigits: 2,
-}).format(value);
-const formatElevation = (value: number) => `${value > 0 ? '+' : ''}${formatNumber(value)} u`;
-
 const exposureLabels = { blocked: '완전 차단', partial: '부분 노출', clear: '개방' };
 const sampleLabels = { lower: '하단', middle: '중단', upper: '상단' };
 
 const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
-  const [catalogue, setCatalogue] = useState(() => {
-    if (!initialDraft) return maps;
-    return [...maps.filter((item) => item.id !== initialDraft.map.id), initialDraft.map];
-  });
-  const [mapId, setMapId] = useState(initialDraft?.map.id ?? maps[0]!.id);
-  const map = catalogue.find((item) => item.id === mapId)!;
+  const { locale, t } = useLocale();
+  const formatNumber = new Intl.NumberFormat(locale, { maximumFractionDigits: 2, useGrouping: false }).format;
+  const formatElevation = (value: number) => `${value > 0 ? '+' : ''}${formatNumber(value)} u`;
+  const displayHero = (id: string) => locale === 'en' ? getHero(id)?.name ?? id : heroName(id);
+  const workspace = useWorkspaceDocuments(initialDraft);
+  const { catalogue, map, history, timeline, draft, recovery, importMessage, mapMessage, editStrategy } = workspace;
+  const mapId = map.id;
   const { min, max } = useMemo(() => mapBounds(map.terrain), [map]);
-  const [importMessage, setImportMessage] = useState('');
   const captureViewport = useRef<(() => Promise<Blob>) | null>(null);
   const [imageMessage, setImageMessage] = useState('');
   const saveViewport = async () => {
@@ -94,12 +89,8 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
   const second = measurement[1];
   const distance = first && second ? measureSegment(first, second) : null;
   const measurementOverlay: Annotation[] = first ? [{
-    id: 'measurement-preview', kind: second ? 'line' : 'note', label: '측정', points: measurement,
+    id: 'measurement-preview', kind: second ? 'line' : 'note', label: t('측정'), points: measurement,
   }] : [];
-  const [mapMessage, setMapMessage] = useState('');
-  const [mapHistory, setMapHistory] = useState<Record<string, { past: MapDefinition[]; future: MapDefinition[] }>>({});
-  const timeline = Object.hasOwn(mapHistory, mapId) ? mapHistory[mapId]! : { past: [], future: [] };
-  const importRequest = useRef(0);
   const [heroViewId, setHeroViewId] = useState<string>();
   const [mode, setMode] = useState<ViewMode>('3d');
   const [reset, setReset] = useState(0);
@@ -122,14 +113,6 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
   const [dragPreview, setDragPreview] = useState<WorldPoint | null>(null);
   const [selectedAbilityId, setSelectedAbilityId] = useState<string | null>(null);
   const [annotationId, setAnnotationId] = useState<string | null>(null);
-  const initialHistory = useMemo(() => createStrategyHistory(createStrategy('local-draft', mapId, '새 전략')), [mapId]);
-  const [histories, setHistories] = useState<Record<string, StrategyHistory>>(() =>
-    initialDraft ? { [initialDraft.map.id]: createStrategyHistory(initialDraft.strategy) } : {});
-  const history = Object.hasOwn(histories, mapId) ? histories[mapId]! : initialHistory;
-  const [workspaceRevision, setWorkspaceRevision] = useState(0);
-  const markWorkspaceChanged = useCallback(() => setWorkspaceRevision((value) => value + 1), []);
-  const draft: StrategyDraft = { version: 1, map, strategy: history.present };
-  const recovery = useWorkspaceRecovery(draft, workspaceRevision);
   const durationMs = timelineDuration(history.present.timeline);
   const { state: playback, start, stop, toggle, seek, changeSpeed } = useTimelinePlayback(durationMs);
   const frame = playback ? sampleTimeline(history.present, playback.timeMs) : null;
@@ -148,15 +131,10 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
   }, [changeSurfaceTool, leavePresentation]);
   const dispatch = useCallback((action: StrategyAction) => {
     stop();
-    markWorkspaceChanged();
-    setHistories((current) => ({
-      ...current,
-      [mapId]: reduceStrategyHistory(Object.hasOwn(current, mapId) ? current[mapId]! : initialHistory, action),
-    }));
-  }, [initialHistory, mapId, markWorkspaceChanged, stop]);
-  const switchMap = (id: string) => {
+    editStrategy(action);
+  }, [editStrategy, stop]);
+  const resetMapView = () => {
     activateTool(null);
-    setMapMessage('');
     setMeasurement([]);
     setSightPoints([]);
     setLayerId('');
@@ -165,75 +143,31 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
     setSightTargetId('');
     setAnnotationId(null);
     setSelectedAbilityId(null);
-    setMapId(id);
   };
-  const restoreDraft = ({ map: savedMap, strategy }: StrategyDraft) => {
-    ++importRequest.current;
-    setImportMessage('');
-    setCatalogue((current) => current.some(({ id }) => id === savedMap.id)
-      ? current.map((item) => item.id === savedMap.id ? savedMap : item)
-      : [...current, savedMap]);
-    setHistories((current) => ({ ...current, [savedMap.id]: createStrategyHistory(strategy) }));
-    setMapHistory((current) => ({ ...current, [savedMap.id]: { past: [], future: [] } }));
+  const switchMap = (id: string) => {
+    workspace.openMap(id);
+    resetMapView();
+  };
+  const restoreDraft = (saved: StrategyDraft, persist = false) => {
+    workspace.restoreDraft(saved, persist);
     setAbilityPreviews((current) => Object.fromEntries(
-      Object.entries(current).filter(([key]) => JSON.parse(key)[0] !== savedMap.id),
+      Object.entries(current).filter(([key]) => JSON.parse(key)[0] !== saved.map.id),
     ));
-    switchMap(savedMap.id);
+    resetMapView();
     setMapEditing(false);
     setReset((value) => value + 1);
   };
   const importMap = async (file: File) => {
-    const request = ++importRequest.current;
-    let imported: MapDefinition;
-    try {
-      if (file.size > 1_000_000) throw new Error();
-      imported = parseMap(JSON.parse(await file.text()));
-    } catch {
-      if (request === importRequest.current) setImportMessage('지도 JSON을 읽을 수 없습니다.');
-      return;
-    }
-    if (request !== importRequest.current) return;
-    if (catalogue.some((item) => item.id === imported.id)) {
-      setImportMessage('같은 ID의 지도가 이미 있습니다.');
-      return;
-    }
-    setCatalogue((current) => current.some((item) => item.id === imported.id) ? current : [...current, imported]);
-    switchMap(imported.id);
-    markWorkspaceChanged();
-    setImportMessage('');
+    if (await workspace.importMap(file)) resetMapView();
   };
-  const replaceMap = (next: MapDefinition) => {
-    markWorkspaceChanged();
-    setCatalogue((current) => current.map((item) => item.id === next.id ? next : item));
-  };
-  const updateTerrain = (terrain: unknown[], nextId: string | null, layers = map.layers) => {
-    try {
-      const metadata = map.metadata?.verification === 'verified' ? { ...map.metadata, verification: 'unverified' } : map.metadata;
-      const next = parseMap({ ...map, terrain, metadata, layers });
-      setMapHistory((current) => ({ ...current, [mapId]: { past: [...timeline.past, map], future: [] } }));
-      replaceMap(next);
-      setSelectedId(nextId);
-      if (layerId && !next.layers?.some((layer) => layer.id === layerId)) setLayerId('');
-      setMapMessage('');
-    } catch {
-      setMapMessage('지형 값을 확인하세요. 지도에는 블록이 한 개 이상 필요합니다.');
-    }
-  };
-  const moveMapHistory = (direction: 'undo' | 'redo') => {
-    const stack = direction === 'undo' ? timeline.past : timeline.future;
-    const next = stack.at(-1);
+  const syncTerrainView = (next: MapDefinition | undefined, nextId: string | null) => {
     if (!next) return;
-    setMapHistory((current) => ({
-      ...current,
-      [mapId]: direction === 'undo'
-        ? { past: stack.slice(0, -1), future: [...timeline.future, map] }
-        : { past: [...timeline.past, map], future: stack.slice(0, -1) },
-    }));
-    replaceMap(next);
+    setSelectedId(nextId);
     if (layerId && !next.layers?.some((layer) => layer.id === layerId)) setLayerId('');
-    setSelectedId(null);
-    setMapMessage('');
   };
+  const updateTerrain = (terrain: unknown[], nextId: string | null, layers = map.layers) =>
+    syncTerrainView(workspace.updateTerrain(terrain, layers), nextId);
+  const moveMapHistory = (direction: 'undo' | 'redo') => syncTerrainView(workspace.moveMapHistory(direction), null);
   const saveLayer = (layer: MapLayer) => {
     const layers = map.layers ?? [];
     updateTerrain(map.terrain, selectedId, layers.some((item) => item.id === layer.id)
@@ -248,21 +182,15 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
     );
   };
   const createMap = () => {
-    const id = crypto.randomUUID();
-    const created = parseMap({
-      schemaVersion: mapSchemaVersion, id, name: '새 지도', metadata: { verification: 'synthetic' },
-      terrain: [{ id: 'base', name: '기본 바닥', kind: 'floor', origin: [-8, -1, -8], size: [16, 1, 16] }],
-    });
-    setCatalogue((current) => [...current, created]);
-    switchMap(id);
-    markWorkspaceChanged();
+    workspace.createMap(t('새 지도'), t('기본 바닥'));
+    resetMapView();
     setMapEditing(true);
   };
   const copyTerrain = (terrain?: Terrain) => {
     const id = crypto.randomUUID();
     const item = terrain
-      ? { ...terrain, id, name: `${terrain.name} 복제`, origin: [terrain.origin[0] + 1, terrain.origin[1], terrain.origin[2] + 1] }
-      : { id, name: '새 블록', kind: 'platform', origin: [-1, 0, -1], size: [2, 1, 2], layerId: layerId || undefined };
+      ? { ...terrain, id, name: t('{0} 복제', terrain.name), origin: [terrain.origin[0] + 1, terrain.origin[1], terrain.origin[2] + 1] }
+      : { id, name: t('새 블록'), kind: 'platform', origin: [-1, 0, -1], size: [2, 1, 2], layerId: layerId || undefined };
     updateTerrain([...map.terrain, item], id);
   };
   const { heroes, annotations, abilities } = history.present;
@@ -279,7 +207,7 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
   const terrainSight = sightFirst && sightSecond ? traceTerrainSightline(map.terrain, sightFirst, sightSecond) : null;
   const activeSight = sightPicking || sightFirst ? terrainSight : spatialProbe;
   const sightOverlay: Annotation[] = sightFirst && !sightSecond ? [{
-    id: 'sight-start', kind: 'note', label: '시야 시작점', points: [sightFirst],
+    id: 'sight-start', kind: 'note', label: t('시야 시작점'), points: [sightFirst],
   }] : [];
   const selectTerrain = (id: string | null, extend = false) => {
     if (mapEditing && extend && id && selectedId) {
@@ -368,50 +296,51 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
     }}>
       <header className="app-header">
         <div className="brand">
-          <span className="brand-mark" aria-hidden="true">V</span>
+          <img className="brand-mark" src="favicon.png" alt="" width={30} height={30} />
           Vertactics
         </div>
-        <div className="map-catalogue" aria-label="지도 관리" role="group">
-          <label>지도 <select aria-label="지도" value={mapId} onChange={(event) => switchMap(event.target.value)}>
-            {catalogue.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
+        <div className="map-catalogue" aria-label={t('지도 관리')} role="group">
+          <label>{t('지도') + ' '}<select aria-label={t('지도')} value={mapId} onChange={(event) => switchMap(event.target.value)}>
+            {catalogue.map((item) => <option key={item.id} value={item.id}>{t(item.name)}</option>)}
           </select></label>
-          <button type="button" className="reset-button" onClick={createMap}>새 지도</button>
+          <button type="button" className="reset-button" onClick={createMap}>{t('새 지도')}</button>
           <button type="button" className="reset-button" aria-pressed={mapEditing} onClick={() => {
             activateTool(null);
             selectTerrain(null);
             setMapEditing((current) => !current);
-          }}>지도 편집 모드</button>
-          <label>지도 JSON 가져오기 <input type="file" accept=".json,application/json" onChange={(event) => {
+          }}>{t('지도 편집 모드')}</button>
+          <label>{t('지도 JSON 가져오기') + ' '}<input type="file" accept=".json,application/json" onChange={(event) => {
             const file = event.target.files?.[0];
             event.target.value = '';
             if (file) void importMap(file);
           }} /></label>
           <a className="reset-button" download={`${map.id}.json`}
-            href={`data:application/json;charset=utf-8,${encodeURIComponent(JSON.stringify(map, null, 2))}`}>지도 JSON 저장</a>
-          {importMessage && <span role="status">{importMessage}</span>}
+            href={`data:application/json;charset=utf-8,${encodeURIComponent(JSON.stringify(map, null, 2))}`}>{t('지도 JSON 저장')}</a>
+          {importMessage && <span role="status">{t(importMessage)}</span>}
         </div>
-        <nav className="workspace-links" aria-label="작업 공간">
-          <a className="reset-button" href="#view-title">지도 보기</a>
-          <a className="reset-button" href="#strategy-draft-title">{draft.strategy.title}</a>
-          <a className="reset-button" href="#inspector-title">속성</a>
-          <a className="reset-button" href="#workspace-help">도움말</a>
+        <nav className="workspace-links" aria-label={t('작업 공간')}>
+          <a className="reset-button" href="#view-title">{t('지도 보기')}</a>
+          <a className="reset-button" href="#strategy-draft-title">{draft.strategy.id === 'local-draft' ? t(draft.strategy.title) : draft.strategy.title}</a>
+          <a className="reset-button" href="#inspector-title">{t('속성')}</a>
+          <a className="reset-button" href="#workspace-help">{t('도움말')}</a>
+          <LocalePicker />
         </nav>
       </header>
       <main className="workspace editor-workspace">
         <section className="view-panel panel" aria-labelledby="view-title">
           <div className="viewport-toolbar">
             <div>
-              <h1 id="view-title" tabIndex={-1}>{map.name}</h1>
+              <h1 id="view-title" tabIndex={-1}>{t(map.name)}</h1>
               <p className="world-size">
-                {map.metadata?.verification === 'verified' ? '검증됨' : map.metadata?.verification === 'synthetic' ? '가상 지도' : '미검증'} · {max[0] - min[0]} × {max[2] - min[2]} u</p>
+                {map.metadata?.verification === 'verified' ? t('검증됨') : map.metadata?.verification === 'synthetic' ? t('가상 지도') : t('미검증')} · {max[0] - min[0]} × {max[2] - min[2]} u</p>
             </div>
             <div className="viewport-actions">
-              <div className="mode-switch" role="group" aria-label="지도 보기">
+              <div className="mode-switch" role="group" aria-label={t('지도 보기')}>
                 {viewportModes.map((view) => (
                   <button
                     key={view}
                     type="button"
-                    aria-label={viewNames[view]}
+                    aria-label={t(viewNames[view])}
                     aria-pressed={!heroView && mode === view}
                     onClick={() => { setHeroViewId(undefined); setMode(view); }}
                   >
@@ -420,56 +349,56 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
                 ))}
               </div>
               {heroView
-                ? <button className="reset-button" type="button" onClick={() => setHeroViewId(undefined)}>이전 시점으로</button>
+                ? <button className="reset-button" type="button" onClick={() => setHeroViewId(undefined)}>{t('이전 시점으로')}</button>
                 : <button className="reset-button" type="button" onClick={() => setReset((value) => value + 1)}>
-                  시점 초기화
+                  {t('시점 초기화')}
                 </button>}
-              <button className="reset-button" type="button" onClick={() => void saveViewport()}>지도 PNG 저장</button>
+              <button className="reset-button" type="button" onClick={() => void saveViewport()}>{t('지도 PNG 저장')}</button>
             </div>
           </div>
-          {imageMessage && <p role="status">{imageMessage}</p>}
-          <div className="view-options" role="group" aria-label="편집 및 표시 설정">
-            {map.layers && <label>표시 층 <select value={layerId} onChange={(event) => {
+          {imageMessage && <p role="status">{t(imageMessage)}</p>}
+          <div className="view-options" role="group" aria-label={t('편집 및 표시 설정')}>
+            {map.layers && <label>{t('표시 층') + ' '}<select value={layerId} onChange={(event) => {
               setLayerId(event.target.value);
               setSelectedId(null);
             }}>
-              <option value="">모든 층</option>
-              {map.layers.map(({ id, name }) => <option key={id} value={id}>{name}</option>)}
+              <option value="">{t('모든 층')}</option>
+              {map.layers.map(({ id, name }) => <option key={id} value={id}>{t(name)}</option>)}
             </select></label>}
-            <label><input type="checkbox" checked={snap} onChange={(event) => setSnap(event.target.checked)} /> 격자 스냅</label>
+            <label><input type="checkbox" checked={snap} onChange={(event) => setSnap(event.target.checked)} />{' ' + t('격자 스냅')}</label>
             <label><input type="checkbox" checked={locked} onChange={(event) => {
               activateTool(null);
               setLocked(event.target.checked);
-            }} /> 편집 잠금</label>
+            }} />{' ' + t('편집 잠금')}</label>
             <label><input type="checkbox" checked={showHeroes} onChange={(event) => {
               activateTool(null);
               setShowHeroes(event.target.checked);
-            }} /> 영웅 표시</label>
+            }} />{' ' + t('영웅 표시')}</label>
             <label><input type="checkbox" checked={showAnnotations} onChange={(event) => {
               activateTool(null);
               setShowAnnotations(event.target.checked);
-            }} /> 마커 표시</label>
+            }} />{' ' + t('마커 표시')}</label>
           </div>
           {!mapEditing && durationMs > 0 && (!playback
             ? <div className="view-options"><button type="button" className="reset-button" onClick={() => {
               activateTool(null);
               start();
-            }}>전략 재생</button></div>
+            }}>{t('전략 재생')}</button></div>
             : <TimelinePlaybackControls durationMs={durationMs} phaseLabel={frame?.phaseLabel ?? ''}
               timeMs={playback.timeMs} playing={playback.playing} speed={playback.speed}
               onToggle={toggle} onSeek={seek} onSpeed={changeSpeed} onExit={stop}
             />)}
-          <nav className="canvas-tools" aria-label="지도 도구">
-            <a className="reset-button" href="#terrain-title">지형 목록</a>
-            {!mapEditing && <a className="reset-button" href="#hero-tools-title">영웅</a>}
+          <nav className="canvas-tools" aria-label={t('지도 도구')}>
+            <a className="reset-button" href="#terrain-title">{t('지형 목록')}</a>
+            {!mapEditing && <a className="reset-button" href="#hero-tools-title">{t('영웅')}</a>}
             <button type="button" className="reset-button" aria-pressed={measuring} onClick={() => {
               activateTool(measuring ? null : { kind: 'distance' });
               if (!measuring) setMeasurement([]);
-            }}>거리 측정</button>
+            }}>{t('거리 측정')}</button>
             <button type="button" className="reset-button" aria-pressed={sightPicking} onClick={() => {
               activateTool(sightPicking ? null : { kind: 'sight' });
               if (!sightPicking || !sightSecond) setSightPoints([]);
-            }}>지점 간 시야</button>
+            }}>{t('지점 간 시야')}</button>
           </nav>
           <div className="viewport" data-testid="viewport"
             onPointerCancel={() => { if (tool?.kind === 'drag') changeSurfaceTool(null); }}
@@ -503,19 +432,19 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
               onDragSurface={!locked && tool?.kind === 'drag' ? setDragPreview : undefined}
               onDropSurface={!locked && tool?.kind === 'drag' ? finishDrag : undefined}
             />
-            <span className="view-label" aria-hidden="true">{heroView ? `${heroName(heroView.heroId)} 시점` : viewNames[mode]}</span>
-            {!heroView && mode === '2d' && <span className="north-label" aria-label="위쪽은 북쪽">↑ N</span>}
+            <span className="view-label" aria-hidden="true">{heroView ? t('{0} 시점', displayHero(heroView.heroId)) : t(viewNames[mode])}</span>
+            {!heroView && mode === '2d' && <span className="north-label" aria-label={t('위쪽은 북쪽')}>↑ N</span>}
           </div>
           <footer className="viewport-footer">
-            {heroView ? <span>영웅의 눈높이와 배치 방향 · Esc로 종료</span> : <>
-              <span>{mode === '2d' ? '드래그로 이동' : '드래그로 회전 · 우클릭 드래그로 이동'}</span>
-              <span>휠 또는 핀치로 확대·축소</span>
+            {heroView ? <span>{t('영웅의 눈높이와 배치 방향 · Esc로 종료')}</span> : <>
+              <span>{mode === '2d' ? t('드래그로 이동') : t('드래그로 회전 · 우클릭 드래그로 이동')}</span>
+              <span>{t('휠 또는 핀치로 확대·축소')}</span>
             </>}
           </footer>
         </section>
         <aside className="terrain-panel panel" aria-labelledby="terrain-title">
           <div className="panel-heading">
-            <h2 id="terrain-title" tabIndex={-1}>지형 목록</h2>
+            <h2 id="terrain-title" tabIndex={-1}>{t('지형 목록')}</h2>
             <span className="count">{visibleTerrain.length}</span>
           </div>
           <ul className="terrain-list">
@@ -528,7 +457,7 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
                   onClick={(event) => { activateTool(null); selectTerrain(terrain.id, event.shiftKey || event.metaKey || event.ctrlKey); }}
                 >
                   <span className={`terrain-swatch ${terrain.kind}`} aria-hidden="true" />
-                  <span>{terrain.name}</span>
+                  <span>{t(terrain.name)}</span>
                   <small>{formatElevation(topElevation(terrain))}</small>
                 </button>
               </li>
@@ -538,7 +467,7 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
             heroes={heroes}
             locked={locked || !showHeroes}
             selectedId={selectedHeroId}
-            pendingMessage={tool?.kind === 'place' ? '배치할 지면을 클릭하세요.' : tool?.kind === 'drag' ? '지도에서 누른 채 끌어 이동하세요.' : tool?.kind === 'move' ? '이동할 지면을 클릭하세요.' : ''}
+            pendingMessage={tool?.kind === 'place' ? t('배치할 지면을 클릭하세요.') : tool?.kind === 'drag' ? t('지도에서 누른 채 끌어 이동하세요.') : tool?.kind === 'move' ? t('이동할 지면을 클릭하세요.') : ''}
             canUndo={!locked && history.past.length > 0}
             canRedo={!locked && history.future.length > 0}
             onPlace={(heroId, team) => activateTool({ kind: 'place', heroId, team })}
@@ -548,54 +477,51 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
             onCancel={() => activateTool(null)}
           />}
           <StrategyDraftTools draft={draft} onRestore={restoreDraft} />
-          <StrategyFileTools draft={draft} onImport={(imported) => {
-            restoreDraft(imported);
-            markWorkspaceChanged();
-          }} />
-          <section className="hero-tools" aria-label="작업 복구">
+          <StrategyFileTools draft={draft} onImport={(imported) => restoreDraft(imported, true)} />
+          <section className="hero-tools" aria-label={t('작업 복구')}>
             {recovery.saved ? <>
-              <p>이전 작업 · {recovery.saved.map.name}</p>
-              <p>복구하면 해당 지도의 편집 내용이 복구본으로 바뀝니다.</p>
+              <p>{t('이전 작업 ·') + ' '}{t(recovery.saved.map.name)}</p>
+              <p>{t('복구하면 해당 지도의 편집 내용이 복구본으로 바뀝니다.')}</p>
               <div className="hero-actions">
                 <button type="button" className="reset-button" onClick={() => {
                   const saved = recovery.restore();
                   if (saved) restoreDraft(saved);
-                }}>이전 작업 복구</button>
-                <button type="button" className="reset-button" onClick={recovery.discard}>복구본 지우기</button>
+                }}>{t('이전 작업 복구')}</button>
+                <button type="button" className="reset-button" onClick={recovery.discard}>{t('복구본 지우기')}</button>
               </div>
             </> : <p role="status">{{
-              idle: recovery.unreadable ? '이전 작업 데이터를 읽을 수 없습니다.' : '편집 내용은 이 브라우저에 자동 저장됩니다.',
-              pending: '작업 자동 저장 중',
-              saved: '작업을 자동 저장했습니다.',
-              error: '작업을 자동 저장할 수 없습니다. 전략 저장을 사용할 수 있습니다.',
+              idle: recovery.unreadable ? t('이전 작업 데이터를 읽을 수 없습니다.') : t('편집 내용은 이 브라우저에 자동 저장됩니다.'),
+              pending: t('작업 자동 저장 중'),
+              saved: t('작업을 자동 저장했습니다.'),
+              error: t('작업을 자동 저장할 수 없습니다. 전략 저장을 사용할 수 있습니다.'),
             }[recovery.status]}</p>}
-            {recovery.saved && recovery.status === 'error' && <p role="status">복구본을 지울 수 없습니다.</p>}
+            {recovery.saved && recovery.status === 'error' && <p role="status">{t('복구본을 지울 수 없습니다.')}</p>}
           </section>
           {!mapEditing && <StrategyTimelineTools key={mapId} strategy={history.present} locked={locked}
             onChange={(timeline) => { activateTool(null); dispatch({ type: 'set-timeline', timeline }); }}
           />}
         </aside>
         <aside className="inspector-panel panel" aria-labelledby="inspector-title">
-          <div className="panel-heading"><h2 id="inspector-title" tabIndex={-1}>지형 정보</h2></div>
+          <div className="panel-heading"><h2 id="inspector-title" tabIndex={-1}>{t('지형 정보')}</h2></div>
           <div className="inspector-body" role="status">
             {selectedHero ? (
               <>
-                <h3>{heroName(selectedHero.heroId)}</h3>
+                <h3>{displayHero(selectedHero.heroId)}</h3>
                 <dl>
-                  <div><dt>팀</dt><dd>{teamNames[selectedHero.team]}</dd></div>
-                  <div><dt>좌표 (X, Y, Z)</dt><dd>{selectedHero.position.map(formatNumber).join(', ')}</dd></div>
-                  <div><dt>높이</dt><dd>{formatElevation(selectedHero.position[1])}</dd></div>
-                  <div><dt>방향</dt><dd>{selectedHero.yaw}°</dd></div>
+                  <div><dt>{t('팀')}</dt><dd>{t(teamNames[selectedHero.team])}</dd></div>
+                  <div><dt>{t('좌표 (X, Y, Z)')}</dt><dd>{selectedHero.position.map(formatNumber).join(', ')}</dd></div>
+                  <div><dt>{t('높이')}</dt><dd>{formatElevation(selectedHero.position[1])}</dd></div>
+                  <div><dt>{t('방향')}</dt><dd>{selectedHero.yaw}°</dd></div>
                   {tool?.kind === 'drag' && dragPreview && (
-                    <div><dt>이동 미리보기 (X, Y, Z)</dt><dd>{dragPreview.map(formatNumber).join(', ')}</dd></div>
+                    <div><dt>{t('이동 미리보기 (X, Y, Z)')}</dt><dd>{dragPreview.map(formatNumber).join(', ')}</dd></div>
                   )}
                 </dl>
                 {selectedHeroProfile && <details>
-                  <summary>영웅 정보 · {roleNames[selectedHeroProfile.role]}</summary>
+                  <summary>{t('영웅 정보 ·') + ' '}{t(roleNames[selectedHeroProfile.role])}</summary>
                   <ul>
                     {selectedHeroProfile.abilities.map(({ id, name }) => <li key={id}>{name}</li>)}
                   </ul>
-                  <a href={selectedHeroProfile.source} target="_blank" rel="noreferrer">Blizzard 영웅 정보</a>
+                  <a href={selectedHeroProfile.source} target="_blank" rel="noreferrer">{t('Blizzard 영웅 정보')}</a>
                 </details>}
                 {selectedHeroProfile && <AbilityPreviewTools
                   key={previewKey}
@@ -614,77 +540,77 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
                   })}
                 />}
                 {heroes.length > 1 && <div className="spatial-probe">
-                  <label>시야 확인 대상 <select aria-label="시야 확인 대상" value={sightTarget?.id ?? ''} onChange={(event) => {
+                  <label>{t('시야 확인 대상') + ' '}<select aria-label={t('시야 확인 대상')} value={sightTarget?.id ?? ''} onChange={(event) => {
                     activateTool(null);
                     setSightPoints([]);
                     setSightTargetId(event.target.value);
                   }}>
-                    <option value="">대상 선택</option>
+                    <option value="">{t('대상 선택')}</option>
                     {heroes.filter((hero) => hero.id !== selectedHeroId).map((hero, index) => (
-                      <option key={hero.id} value={hero.id}>{heroName(hero.heroId)} · {index + 1}</option>
+                      <option key={hero.id} value={hero.id}>{displayHero(hero.heroId)} · {index + 1}</option>
                     ))}
                   </select></label>
                   {spatialProbe && <>
-                    <p>시야: {spatialProbe.sight?.name ?? '개방'} · 충돌: {spatialProbe.collision?.name ?? '없음'}</p>
-                    <p>노출: {exposureLabels[spatialProbe.exposure.status]} ({spatialProbe.exposure.visibleCount}/{spatialProbe.exposure.samples.length})</p>
-                    <ul aria-label="높이별 노출">
+                    <p>{t('시야:') + ' '}{spatialProbe.sight ? t(spatialProbe.sight.name) : t('개방')}{' ' + t('· 충돌:') + ' '}{spatialProbe.collision ? t(spatialProbe.collision.name) : t('없음')}</p>
+                    <p>{t('노출:') + ' '}{t(exposureLabels[spatialProbe.exposure.status])} ({spatialProbe.exposure.visibleCount}/{spatialProbe.exposure.samples.length})</p>
+                    <ul aria-label={t('높이별 노출')}>
                       {spatialProbe.exposure.samples.map(({ part, visible }) => (
-                        <li key={part}>{sampleLabels[part]}: {visible ? '보임' : '가려짐'}</li>
+                        <li key={part}>{t(sampleLabels[part])}: {visible ? t('보임') : t('가려짐')}</li>
                       ))}
                     </ul>
                     <details>
-                      <summary>노출 판정 기준</summary>
-                      <p>지도 단위 기준 0.45, 1.05, 1.8 높이의 세 점을 검사합니다. 실제 영웅의 자세와 히트박스는 반영하지 않습니다.</p>
-                      <p>모든 층의 지형이 포함되며 시야 차단과 충돌은 각각 판정합니다. 영웅은 판정의 시작점과 목표점을 제공합니다.</p>
+                      <summary>{t('노출 판정 기준')}</summary>
+                      <p>{t('지도 단위 기준 0.45, 1.05, 1.8 높이의 세 점을 검사합니다. 실제 영웅의 자세와 히트박스는 반영하지 않습니다.')}</p>
+                      <p>{t('모든 층의 지형이 포함되며 시야 차단과 충돌은 각각 판정합니다. 영웅은 판정의 시작점과 목표점을 제공합니다.')}</p>
                     </details>
                   </>}
                 </div>}
                 {showHeroes && <button className="reset-button" type="button" aria-pressed={Boolean(heroView)} onClick={() => {
                   activateTool(null);
                   if (!heroView) setHeroViewId(selectedHero.id);
-                }}>영웅 시점</button>}
+                }}>{t('영웅 시점')}</button>}
                 <fieldset className="hero-actions edit-controls" disabled={locked || !showHeroes}>
-                  <button className="reset-button" type="button" onClick={() => activateTool({ kind: 'move', id: selectedHero.id })}>이동</button>
-                  <button className="reset-button" type="button" onClick={() => activateTool({ kind: 'drag', id: selectedHero.id })}>드래그 이동</button>
+                  <button className="reset-button" type="button" onClick={() => activateTool({ kind: 'move', id: selectedHero.id })}>{t('이동')}</button>
+                  <button className="reset-button" type="button" onClick={() => activateTool({ kind: 'drag', id: selectedHero.id })}>{t('드래그 이동')}</button>
                   <button className="reset-button" type="button" onClick={() => dispatch({
                     type: 'update', id: selectedHero.id, patch: { yaw: (selectedHero.yaw + 45) % 360 },
-                  })}>45° 회전</button>
+                  })}>{t('45° 회전')}</button>
                   <button className="reset-button" type="button" onClick={() => dispatch({
                     type: 'update', id: selectedHero.id, patch: { team: selectedHero.team === 'attack' ? 'defense' : 'attack' },
-                  })}>팀 전환</button>
+                  })}>{t('팀 전환')}</button>
                   <button className="reset-button" type="button" onClick={() => {
                     activateTool(null);
                     dispatch({ type: 'remove', id: selectedHero.id });
-                  }}>삭제</button>
+                  }}>{t('삭제')}</button>
                 </fieldset>
               </>
             ) : selected ? (
               <>
-                <h3>{selected.name}</h3>
+                <h3>{t(selected.name)}</h3>
                 <dl>
-                  <div><dt>유형</dt><dd>{kindNames[selected.kind]}</dd></div>
-                  <div><dt>최고 높이</dt><dd>{formatElevation(topElevation(selected))}</dd></div>
-                  <div><dt>기준 좌표 (X, Y, Z)</dt><dd>{selected.origin.map(formatNumber).join(', ')}</dd></div>
-                  {selected.kind === 'stairs' && <div><dt>계단 수</dt><dd>{selected.steps}</dd></div>}
+                  <div><dt>{t('유형')}</dt><dd>{t(kindNames[selected.kind])}</dd></div>
+                  <div><dt>{t('최고 높이')}</dt><dd>{formatElevation(topElevation(selected))}</dd></div>
+                  <div><dt>{t('기준 좌표 (X, Y, Z)')}</dt><dd>{selected.origin.map(formatNumber).join(', ')}</dd></div>
+                  {selected.kind === 'stairs' && <div><dt>{t('계단 수')}</dt><dd>{selected.steps}</dd></div>}
                 </dl>
               </>
-            ) : <p className="empty-selection">지도 또는 지형 목록에서 블록을 선택하세요.</p>}
+            ) : <p className="empty-selection">{t('지도 또는 지형 목록에서 블록을 선택하세요.')}</p>}
           </div>
-          {(measuring || first) && <section className="hero-tools" aria-label="측정 결과">
+          {(measuring || first) && <section className="hero-tools" aria-label={t('측정 결과')}>
             {distance && first && second ? <dl>
-              <div><dt>지점 높이</dt><dd>시작 {formatElevation(first[1])} · 끝 {formatElevation(second[1])}</dd></div>
-              <div><dt>수평 거리</dt><dd>{formatNumber(distance.horizontal)} u</dd></div>
-              <div><dt>높이 차</dt><dd>{formatElevation(distance.rise)}</dd></div>
-              <div><dt>직선 거리</dt><dd>{formatNumber(distance.distance)} u</dd></div>
-            </dl> : <p>{first ? '두 번째 지점을 선택하세요.' : '첫 번째 지점을 선택하세요.'}</p>}
-            {first && <button type="button" className="reset-button" onClick={() => setMeasurement([])}>측정 지우기</button>}
+              <div><dt>{t('지점 높이')}</dt><dd>{t('시작') + ' '}{formatElevation(first[1])}{' ' + t('· 끝') + ' '}{formatElevation(second[1])}</dd></div>
+              <div><dt>{t('수평 거리')}</dt><dd>{formatNumber(distance.horizontal)} u</dd></div>
+              <div><dt>{t('높이 차')}</dt><dd>{formatElevation(distance.rise)}</dd></div>
+              <div><dt>{t('직선 거리')}</dt><dd>{formatNumber(distance.distance)} u</dd></div>
+            </dl> : <p>{first ? t('두 번째 지점을 선택하세요.') : t('첫 번째 지점을 선택하세요.')}</p>}
+            {first && <button type="button" className="reset-button" onClick={() => setMeasurement([])}>{t('측정 지우기')}</button>}
           </section>}
-          {(sightPicking || sightFirst) && <section className="hero-tools" aria-label="지점 간 시야 결과">
-            <p>두 지면에서 {heroEyeHeight} u 위를 연결합니다.</p>
+          {(sightPicking || sightFirst) && <section className="hero-tools" aria-label={t('지점 간 시야 결과')}>
+            <p>{t('두 지면에서') + ' '}{heroEyeHeight}{' ' + t('u 위를 연결합니다.')}</p>
             <p role="status">{terrainSight
-              ? terrainSight.sight ? `시야 차단: ${terrainSight.sight.name}` : '시야 개방'
-              : sightFirst ? '시야 목표점을 선택하세요.' : '시야 시작점을 선택하세요.'}</p>
-            {sightFirst && <button type="button" className="reset-button" onClick={() => setSightPoints([])}>시야 지우기</button>}
+              ? terrainSight.sight ? t('시야 차단: {0}', t(terrainSight.sight.name)) : t('시야 개방')
+              : sightFirst ? t('시야 목표점을 선택하세요.') : t('시야 시작점을 선택하세요.')}</p>
+            {sightFirst && <button type="button" className="reset-button" onClick={() => setSightPoints([])}>{t('시야 지우기')}</button>}
           </section>}
           {mapEditing ? <>
             <TerrainTools
@@ -706,14 +632,14 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
               onBulkDuplicate={() => updateTerrain([
                 ...map.terrain,
                 ...map.terrain.filter((item) => selectedTerrainIds.has(item.id)).map((item) => ({
-                  ...item, id: crypto.randomUUID(), name: `${item.name} 복제`,
+                  ...item, id: crypto.randomUUID(), name: t('{0} 복제', item.name),
                   origin: [item.origin[0] + 1, item.origin[1], item.origin[2] + 1],
                 })),
               ], null)}
               onRemove={(id) => updateTerrain(map.terrain.filter((item) => item.id !== id), null)}
               onHistory={moveMapHistory}
             />
-            {mapMessage && <p role="status">{mapMessage}</p>}
+            {mapMessage && <p role="status">{t(mapMessage)}</p>}
           </> : <>
             {(abilities.length > 0 || abilityPick) && <AbilityPlacementTools
               items={abilities}
@@ -742,21 +668,21 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
             />
           </>}
           <details className="legend">
-            <summary>지형 범례</summary>
+            <summary>{t('지형 범례')}</summary>
             <ul>
               {terrainKinds.map((kind) => (
-                <li key={kind}><span className={`terrain-swatch ${kind}`} aria-hidden="true" />{kindNames[kind]}</li>
+                <li key={kind}><span className={`terrain-swatch ${kind}`} aria-hidden="true" />{t(kindNames[kind])}</li>
               ))}
             </ul>
           </details>
           <details className="legend">
-            <summary id="workspace-help">도움말</summary>
+            <summary id="workspace-help">{t('도움말')}</summary>
             <ul>
-              <li>지도나 지형 목록에서 블록을 선택하면 좌표와 높이를 확인할 수 있습니다.</li>
-              <li>영웅을 배치한 뒤 속성 패널에서 팀과 방향을 바꿀 수 있습니다.</li>
-              <li>Esc로 도구를 취소하거나 재생을 종료합니다.</li>
-              <li>Ctrl 또는 ⌘와 Z로 실행 취소하고, Shift를 함께 눌러 다시 실행합니다.</li>
-              <li>Vertactics는 Blizzard Entertainment와 제휴하지 않은 Overwatch 팬 프로젝트입니다.</li>
+              <li>{t('지도나 지형 목록에서 블록을 선택하면 좌표와 높이를 확인할 수 있습니다.')}</li>
+              <li>{t('영웅을 배치한 뒤 속성 패널에서 팀과 방향을 바꿀 수 있습니다.')}</li>
+              <li>{t('Esc로 도구를 취소하거나 재생을 종료합니다.')}</li>
+              <li>{t('Ctrl 또는 ⌘와 Z로 실행 취소하고, Shift를 함께 눌러 다시 실행합니다.')}</li>
+              <li>{t('Vertactics는 Blizzard Entertainment와 제휴하지 않은 Overwatch 팬 프로젝트입니다.')}</li>
             </ul>
           </details>
         </aside>
