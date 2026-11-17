@@ -165,11 +165,12 @@ test('places and moves a hero across views, then undoes and redoes elevation cha
   expect(pageErrors).toEqual([]);
 });
 
-test('edits route waypoints and carries the annotation across views and history', async ({ page }) => {
+test('edits route waypoints and carries the annotation across views and history', async ({ page }, testInfo) => {
   await page.goto('/');
   const canvas = page.getByTestId('viewport').locator('canvas');
   await page.getByRole('button', { name: '2D 탑다운' }).click();
   await expect(canvas).toHaveAttribute('data-view-mode', '2d');
+  await page.getByRole('checkbox', { name: '격자 스냅' }).check();
   const tools = page.getByRole('region', { name: '전술 마커' });
   const box = await canvas.boundingBox();
   if (!box) throw new Error('Canvas has no bounds');
@@ -184,17 +185,24 @@ test('edits route waypoints and carries the annotation across views and history'
   await click(0, 1);
   const points = tools.getByRole('list', { name: '마커 지점' }).getByRole('listitem');
   await expect(points).toHaveCount(2);
+  const pathLength = tools.getByRole('definition').filter({ hasText: /^6 u$/ }).last();
+  await expect(pathLength).toBeVisible();
   await tools.getByRole('button', { name: '지점 추가' }).click();
   await expect(canvas).toHaveCSS('cursor', 'crosshair');
   await click(7, 5);
   await expect(points).toHaveCount(3);
+  await expect(tools.getByText('14.06 u', { exact: true })).toBeVisible();
+  await expect(tools.getByText('14.31 u', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: '3D 원근' }).click();
   await expect(canvas).toHaveAttribute('data-view-mode', '3d');
   await expect(points).toHaveCount(3);
+  await expect(tools.getByText('14.31 u', { exact: true })).toBeVisible();
   await tools.getByRole('button', { name: '지점 3 삭제' }).click();
   await expect(points).toHaveCount(2);
   await page.getByRole('button', { name: '실행 취소', exact: true }).click();
   await expect(points).toHaveCount(3);
+  await expect(tools.getByText('14.31 u', { exact: true })).toBeVisible();
+  await page.screenshot({ path: testInfo.outputPath('route-measurement-3d.png') });
 });
 
 
@@ -591,6 +599,7 @@ test('measures height and distance across surfaces and keeps the result through 
   await click(7, 5);
   await expect(result.getByText('7 u', { exact: true })).toBeVisible();
   await expect(result.getByText('+2 u', { exact: true })).toBeVisible();
+  await expect(result.getByText('시작 0 u · 끝 +2 u', { exact: true })).toBeVisible();
   await expect(result.getByText('7.28 u', { exact: true })).toBeVisible();
   await page.getByRole('button', { name: '3D 원근' }).click();
   await expect(canvas).toHaveAttribute('data-view-mode', '3d');

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { measureRoute } from '../domain/measurement';
 import { annotationKinds, annotationPointCount } from '../domain/annotation';
 import type { Annotation, AnnotationKind } from '../domain/annotation';
 import type { WorldPoint } from '../domain/map';
@@ -21,6 +22,7 @@ type Props = {
 };
 
 const AnnotationTools = ({ items, locked, selected, pending, onSelect, onPick, onSave, onRemove }: Props) => {
+  const routeLength = selected?.kind === 'route' ? measureRoute(selected.points) : undefined;
   const [kind, setKind] = useState<AnnotationKind>('route');
   const start = () => onPick({
     hint: '첫 지점을 클릭하세요.',
@@ -67,6 +69,10 @@ const AnnotationTools = ({ items, locked, selected, pending, onSelect, onPick, o
           <label>이름 <input name="label" maxLength={80} defaultValue={selected.label} required /></label>
           <button type="submit" className="reset-button">이름 저장</button>
         </form>
+        {routeLength && <dl aria-label="경로 거리">
+          <div><dt>수평 경로 길이</dt><dd>{Number(routeLength.horizontal.toFixed(2))} u</dd></div>
+          <div><dt>3D 경로 길이</dt><dd>{Number(routeLength.distance.toFixed(2))} u</dd></div>
+        </dl>}
         <ol aria-label="마커 지점">
           {selected.points.map(([x, y, z], index) => (
             <li key={index}>
