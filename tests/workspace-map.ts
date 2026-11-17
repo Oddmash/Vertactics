@@ -16,4 +16,3 @@ export const savedHeroPosition = (page: Page) => page.evaluate(() => {
   const point: number[] | undefined = raw ? JSON.parse(raw).strategy.heroes.at(-1)?.position : undefined;
   return point?.map((coordinate) => Number(coordinate.toFixed(2))).join(', ');
 });
-
