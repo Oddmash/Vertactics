@@ -371,5 +371,14 @@
   "지형 준비 중": "Terrain pending",
   "{0} 열기": "Open {0}",
   "열기": "Open",
-  "서비스 소개": "About Vertactics"
+  "서비스 소개": "About Vertactics",
+  "영웅 역할": "Hero role",
+  "영웅 선택": "Choose a hero",
+  "{0}의 스킬": "{0} abilities",
+  "스킬 상세": "Ability details",
+  "스킬 설명은 공식 영웅 페이지에서 확인할 수 있습니다.": "See the official hero page for ability details.",
+  "공식 스킬 출처": "Official ability source",
+  "영웅 이미지 © Blizzard Entertainment": "Hero portraits © Blizzard Entertainment",
+  "폭발 피해": "Explosion damage",
+  "{0} 패치 노트": "{0} patch notes"
 }

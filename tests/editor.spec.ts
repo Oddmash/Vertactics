@@ -613,7 +613,8 @@ test('shows the selected hero role, official source and abilities', async ({ pag
   await page.getByRole('button', { name: '2D 탑다운' }).click();
   const canvas = page.getByTestId('viewport').locator('canvas');
   await expect(canvas).toHaveAttribute('data-view-mode', '2d');
-  await page.getByLabel('영웅', { exact: true }).selectOption('ana');
+  await page.getByRole('group', { name: '영웅 역할' }).getByRole('button', { name: '지원' }).click();
+  await page.getByRole('group', { name: '영웅 선택' }).getByRole('button', { name: '아나', exact: true }).click();
   await page.getByRole('button', { name: '배치 시작' }).click();
   await expect(canvas).toHaveCSS('cursor', 'crosshair');
   await canvas.click();

@@ -15,7 +15,8 @@ test('recovers unsaved work after reload and keeps the named snapshot intact', a
   await local.getByRole('button', { name: '전략 저장', exact: true }).click();
   await expect(local.getByRole('status')).toContainText('전략을 저장했습니다.');
 
-  await page.getByLabel('영웅', { exact: true }).selectOption('ana');
+  await page.getByRole('group', { name: '영웅 역할' }).getByRole('button', { name: '지원' }).click();
+  await page.getByRole('group', { name: '영웅 선택' }).getByRole('button', { name: '아나', exact: true }).click();
   await page.getByRole('button', { name: '배치 시작' }).click();
   await expect(canvas).toHaveCSS('cursor', 'crosshair');
   const box = await canvas.boundingBox();
