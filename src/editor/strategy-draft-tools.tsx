@@ -1,7 +1,8 @@
 import { useLocale } from '../ui/locale';
 import { useState } from 'react';
 import { deleteStrategyDraft, listStrategyDrafts, saveStrategyDraft } from '../storage/strategy-draft';
-import type { SavedStrategyDraft, StrategyDraft } from '../storage/strategy-draft';
+import type { SavedStrategyDraft } from '../storage/strategy-draft';
+import type { StrategyDraft } from '../domain/strategy-draft';
 
 type Props = {
   draft: StrategyDraft;

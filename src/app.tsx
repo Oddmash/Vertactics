@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import Editor from './editor/editor';
 import SharedStrategyView from './editor/shared-strategy-view';
 import { decodeStrategyShare, sharePrefix } from './storage/strategy-share';
-import type { StrategyDraft } from './storage/strategy-draft';
+import type { StrategyDraft } from './domain/strategy-draft';
 
 const App = () => {
   const { t } = useLocale();

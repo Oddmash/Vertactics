@@ -1,8 +1,8 @@
 import { useLocale } from '../ui/locale';
 import { useRef, useState } from 'react';
 import { encodeStrategyShare, sharePrefix } from '../storage/strategy-share';
-import { parseStrategyDraft } from '../storage/strategy-draft';
-import type { StrategyDraft } from '../storage/strategy-draft';
+import { parseStrategyDraft } from '../domain/strategy-draft';
+import type { StrategyDraft } from '../domain/strategy-draft';
 import { downloadFile, fileStem } from './download-file';
 
 type Props = {

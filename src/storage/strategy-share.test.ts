@@ -3,7 +3,7 @@ import { gzipSync } from 'node:zlib';
 import { parseMap } from '../domain/map';
 import { createStrategy } from '../domain/strategy';
 import { decodeStrategyShare, encodeStrategyShare, maxShareCharacters } from './strategy-share';
-import type { StrategyDraft } from './strategy-draft';
+import type { StrategyDraft } from '../domain/strategy-draft';
 
 const map = parseMap({
   schemaVersion: 2, id: 'map', name: '지도',

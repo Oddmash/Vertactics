@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { clearWorkspaceRecovery, readWorkspaceRecovery, saveWorkspaceRecovery } from '../storage/workspace-recovery';
-import type { StrategyDraft } from '../storage/strategy-draft';
+import type { StrategyDraft } from '../domain/strategy-draft';
 
 const readRecovery = () => {
   try {
