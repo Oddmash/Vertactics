@@ -129,6 +129,12 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 - [ ] 8.05 Verify keyboard, focus, contrast, screen readers, team cues and reduced motion
 - [ ] 8.06 Check desktop workflows and touch layouts for clipping and wrapping
 - [ ] 8.07 Ship independent branding, favicon, social card and fan-project notice
+- [ ] 8.08a Capture the current workspace on desktop and narrow screens and record the layout and interaction baseline
+- [ ] 8.08b Define a canvas-first workspace with one map and strategy header, a compact tool rail, and a contextual inspector
+- [ ] 8.08c Rework typography, spacing, surfaces, focus, and semantic colors through shared JSON tokens
+- [ ] 8.08d Rebuild hero, ability, terrain, and analysis controls around active tool and selection states
+- [ ] 8.08e Adapt tool and inspector access for narrow screens and verify touch targets and canvas space
+- [ ] 8.08f Verify keyboard, responsive layouts, 2D and 3D view continuity, and save and restore in a browser, then capture the redesigned workspace
 
 ## Phase 9 · Quality and release
 
