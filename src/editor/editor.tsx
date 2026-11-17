@@ -1,3 +1,4 @@
+import StrategyTimelineTools from './strategy-timeline-tools';
 import StrategyDraftTools from './strategy-draft-tools';
 import type { StrategyDraft } from '../storage/strategy-draft';
 import AbilityPlacementTools from './ability-placement-tools';
@@ -384,6 +385,9 @@ const Editor = () => {
             onCancel={() => setTool(null)}
           />}
           <StrategyDraftTools draft={{ version: 1, map, strategy: history.present }} onRestore={restoreDraft} />
+          {!mapEditing && <StrategyTimelineTools key={mapId} strategy={history.present} locked={locked}
+            onChange={(timeline) => { setTool(null); dispatch({ type: 'set-timeline', timeline }); }}
+          />}
         </aside>
         <section className="view-panel panel" aria-labelledby="view-title">
           <div className="viewport-toolbar">
