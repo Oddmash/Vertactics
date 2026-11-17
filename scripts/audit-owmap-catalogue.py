@@ -24,17 +24,19 @@ def inspect_candidate(path):
     model_refs = sorted(ref for ref in references if ref.lower().endswith('.owmdl'))
     entity_refs = sorted(ref for ref in references if ref.lower().endswith('.owentity'))
     missing_models = [ref for ref in model_refs if not INSPECTOR['resolve_model'](path.parent, ref)]
-    missing_entities = [
-        ref for ref in entity_refs
-        if not (path.parent / ref.replace(chr(92), '/')).resolve().is_relative_to(path.parent)
-        or not (path.parent / ref.replace(chr(92), '/')).is_file()
-    ]
+    entity_files = {ref: INSPECTOR['resolve_file'](path.parent, ref, '.owentity') for ref in entity_refs}
+    entities = {ref: INSPECTOR['read_entity'](path.parent, file) for ref, file in entity_files.items() if file}
     return {
         'internalName': map_name,
         'directModels': len(model_refs),
         'missingDirectModels': missing_models,
         'entityReferences': len(entity_refs),
-        'missingEntityFiles': missing_entities,
+        'missingEntityFiles': [ref for ref, file in entity_files.items() if not file],
+        'entityPrimaryModels': sum(file is not None for _, file, _ in entities.values()),
+        'missingEntityPrimaryModels': {
+            ref: asset for ref, (asset, file, _) in entities.items() if asset and not file
+        },
+        'entityFilesWithNestedAttachments': sum(children > 0 for _, _, children in entities.values()),
     }
 
 
