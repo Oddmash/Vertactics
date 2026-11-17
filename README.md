@@ -18,6 +18,8 @@ Choose a hero and team, then click a walkable surface to place the hero. You can
 
 In **Tactical markers**, connect waypoints into a route or add a line, circle, area, or note. Use the marker panel to edit points and labels. Routes and markers appear in both views.
 
+Use the editor controls to snap placements to the grid, lock edits, or hide heroes and markers while keeping them in the strategy. Press **Esc** to cancel an active placement. **Ctrl/⌘+Z** undoes an edit, and **Ctrl/⌘+Shift+Z** redoes it.
+
 [Map, hero placement, and marker screenshots](https://github.com/qtaghdi/Vertactics/actions/runs/44030502710/artifacts/14304991790) · [Development and contribution](development.md)
 
 Vertactics is an unofficial fan project and is unaffiliated with Blizzard Entertainment.
