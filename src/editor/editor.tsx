@@ -1,3 +1,6 @@
+import TimelinePlaybackControls from './timeline-playback-controls';
+import useTimelinePlayback from './use-timeline-playback';
+import { sampleTimeline, timelineDuration } from '../domain/timeline-playback';
 import StrategyTimelineTools from './strategy-timeline-tools';
 import StrategyDraftTools from './strategy-draft-tools';
 import type { StrategyDraft } from '../storage/strategy-draft';
@@ -98,22 +101,29 @@ const Editor = () => {
   const [selectedAbilityId, setSelectedAbilityId] = useState<string | null>(null);
   const [annotationPick, setAnnotationPick] = useState<SurfacePick | null>(null);
   const [annotationId, setAnnotationId] = useState<string | null>(null);
+  const initialHistory = useMemo(() => createStrategyHistory(createStrategy('local-draft', mapId, '새 전략')), [mapId]);
+  const [histories, setHistories] = useState<Record<string, StrategyHistory>>({});
+  const history = Object.hasOwn(histories, mapId) ? histories[mapId]! : initialHistory;
+  const durationMs = timelineDuration(history.present.timeline);
+  const [playback, setPlayback] = useTimelinePlayback(durationMs);
+  const frame = playback ? sampleTimeline(history.present, playback.timeMs) : null;
   const setTool = useCallback((next: EditTool | null) => {
     setAnnotationPick(null);
     setAbilityPick(null);
     setDragPreview(null);
     setHeroTool(next);
+    setPlayback(null);
     setProbeTool(null);
     setHeroViewId(undefined);
     setSightPoints((points) => points.length === 2 ? points : []);
-  }, []);
-  const initialHistory = useMemo(() => createStrategyHistory(createStrategy('local-draft', mapId, '새 전략')), [mapId]);
-  const [histories, setHistories] = useState<Record<string, StrategyHistory>>({});
-  const history = Object.hasOwn(histories, mapId) ? histories[mapId]! : initialHistory;
-  const dispatch = useCallback((action: StrategyAction) => setHistories((current) => ({
-    ...current,
-    [mapId]: reduceStrategyHistory(Object.hasOwn(current, mapId) ? current[mapId]! : initialHistory, action),
-  })), [initialHistory, mapId]);
+  }, [setPlayback]);
+  const dispatch = useCallback((action: StrategyAction) => {
+    setPlayback(null);
+    setHistories((current) => ({
+      ...current,
+      [mapId]: reduceStrategyHistory(Object.hasOwn(current, mapId) ? current[mapId]! : initialHistory, action),
+    }));
+  }, [initialHistory, mapId, setPlayback]);
   const switchMap = (id: string) => {
     setTool(null);
     setMapMessage('');
@@ -310,7 +320,7 @@ const Editor = () => {
 
   return (
     <div className="editor" onKeyDown={(event) => {
-      if (event.key === 'Escape' && (heroView || tool || annotationPick || abilityPick || probeTool)) {
+      if (event.key === 'Escape' && (frame || heroView || tool || annotationPick || abilityPick || probeTool)) {
         event.preventDefault();
         setTool(null);
         return;
@@ -449,6 +459,22 @@ const Editor = () => {
               setShowAnnotations(event.target.checked);
             }} /> 마커 표시</label>
           </div>
+          {!mapEditing && durationMs > 0 && (!playback
+            ? <div className="view-options"><button type="button" className="reset-button" onClick={() => {
+              setTool(null);
+              setPlayback({ timeMs: 0, playing: true, speed: 1 });
+            }}>전략 재생</button></div>
+            : <TimelinePlaybackControls durationMs={durationMs} phaseLabel={frame?.phaseLabel ?? ''}
+              timeMs={playback.timeMs} playing={playback.playing} speed={playback.speed}
+              onToggle={() => setPlayback({
+                ...playback,
+                timeMs: playback.timeMs >= durationMs ? 0 : playback.timeMs,
+                playing: !playback.playing,
+              })}
+              onSeek={(timeMs) => setPlayback({ ...playback, timeMs, playing: false })}
+              onSpeed={(speed) => setPlayback((state) => state && { ...state, speed })}
+              onExit={() => setPlayback(null)}
+            />)}
           <div className="viewport" data-testid="viewport"
             onPointerCancel={() => { if (tool?.kind === 'drag') setTool(null); }}
             onPointerLeave={(event) => { if (tool?.kind === 'drag' && event.buttons === 1) setTool(null); }}
@@ -461,19 +487,19 @@ const Editor = () => {
               heroView={heroView}
               reset={reset}
               selectedTerrainIds={selectedTerrainIds}
-              heroes={!mapEditing && showHeroes ? heroes.map((hero) =>
+              heroes={!mapEditing && showHeroes ? (frame?.heroes ?? heroes).map((hero) =>
                 tool?.kind === 'drag' && hero.id === tool.id && dragPreview ? { ...hero, position: dragPreview } : hero
               ) : []}
               snap={snap}
               selectedHeroId={selectedHeroId}
-              sightline={activeSight && {
+              sightline={!frame && activeSight ? {
                 start: activeSight.start, end: activeSight.endpoint, blocked: Boolean(activeSight.sight),
-              }}
-              abilities={mapEditing ? [] : abilities}
-              abilityPreview={!mapEditing && showHeroes && selectedHero && activeAbility
+              } : null}
+              abilities={mapEditing ? [] : frame?.abilities ?? abilities}
+              abilityPreview={!frame && !mapEditing && showHeroes && selectedHero && activeAbility
                 ? { hero: selectedHero, settings: activeAbility } : undefined}
-              onSelect={selectTerrain}
-              onSelectHero={selectHero}
+              onSelect={(id, extend) => { if (!frame) selectTerrain(id, extend); }}
+              onSelectHero={(id) => { if (!frame) selectHero(id); }}
               annotations={[...(!mapEditing && showAnnotations ? annotations : []), ...measurementOverlay, ...sightOverlay]}
               selectedAnnotationId={annotationId}
               onEditSurface={probeTool || (!locked && ((tool && tool.kind !== 'drag') || annotationPick || abilityPick)) ? editSurface : undefined}
