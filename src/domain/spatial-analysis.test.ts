@@ -43,3 +43,25 @@ it('distinguishes partial exposure, an open target and full cover', () => {
   expect(sampleExposure([wall], observer, target).status).toBe('blocked');
   expect(sampleExposure([{ ...wall, blocksSight: false }], observer, target).status).toBe('clear');
 });
+
+it('counts contact with an obstacle boundary and misses rays just outside it', () => {
+  expect(traceSightline([wall], [0, 3, -1], [6, 3, -1]).endpoint).toEqual([2, 3, -1]);
+  expect(traceSightline([wall], [0, 3.001, -1], [6, 3.001, -1]).sight).toBeUndefined();
+  expect(traceSightline([wall], [0, 3, -1], [1.99, 3, -1]).sight).toBeUndefined();
+});
+
+it('uses individual stair heights and treats the taller side of a shared edge as solid', () => {
+  const stairs: Terrain = {
+    id: 'stairs', name: 'Stairs', kind: 'stairs', origin: [0, 0, 0], size: [4, 4, 2], steps: 4, risesToward: '+x',
+  };
+  expect(traceSightline([stairs], [0.5, 1.5, -1], [0.5, 1.5, 3]).sight).toBeUndefined();
+  expect(traceSightline([stairs], [1.99, 2.5, -1], [1.99, 2.5, 3]).sight).toBeUndefined();
+  expect(traceSightline([stairs], [2, 2.5, -1], [2, 2.5, 3]).sight).toBe(stairs);
+});
+
+it('traces through a doorway opening and hits the frame above or beside it', () => {
+  const doorway: Terrain = { id: 'door', name: 'Doorway', kind: 'doorway', origin: [0, 0, 0], size: [4, 4, 1] };
+  expect(traceSightline([doorway], [2, 2, -1], [2, 2, 2]).sight).toBeUndefined();
+  expect(traceSightline([doorway], [2, 3.5, -1], [2, 3.5, 2]).sight).toBe(doorway);
+  expect(traceSightline([doorway], [0.2, 2, -1], [0.2, 2, 2]).sight).toBe(doorway);
+});
