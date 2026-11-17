@@ -19,6 +19,7 @@ import type { MapDefinition, WorldPoint } from '../domain/map';
 import type { HeroPlacement } from '../domain/strategy';
 import tokens from '../theme/tokens.json';
 import MapCamera from './map-camera';
+import HeroPortraitMarker from './hero-portrait-marker';
 import type { ViewMode } from './map-camera';
 import type { MapLocation } from '../map/competitive-overviews';
 
@@ -206,7 +207,7 @@ const MapViewport = ({
           </mesh>
         ))}
         <MapAnnotations items={annotations} selectedId={selectedAnnotationId} />
-        {heroes.filter(({ id }) => id !== heroView?.id).map(({ id, position, yaw, team }) => (
+        {heroes.filter(({ id }) => id !== heroView?.id).map(({ id, heroId, position, yaw, team }) => (
           <group
             key={id}
             position={position}
@@ -225,6 +226,7 @@ const MapViewport = ({
                 emissiveIntensity={id === selectedHeroId ? 0.6 : 0}
               />
             </mesh>
+            <HeroPortraitMarker key={heroId} heroId={heroId} />
             <mesh position={[0, 0.46, -0.75]} rotation={[-Math.PI / 2, 0, 0]}>
               <coneGeometry args={[0.3, 0.7, 3]} />
               <meshBasicMaterial color={tokens.team[team]} />
