@@ -156,3 +156,4 @@
 | 지형 유형 확장 | 단위 테스트 31개, Chromium 시나리오 11개 통과. 열린 출입구의 형상과 지도 JSON 지형 속성 검증. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44034026109) |
 | 경사로와 지도 스키마 | 단위 테스트 37개, Chromium 시나리오 12개 통과. 경사로 배치·드래그·스냅 높이와 기존 v1 지도의 v2 내보내기 검증. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44034705436) |
 | Phase 1~4 점검 | 단위 테스트 39개와 Chromium 시나리오 14개 통과. A 거점 배치, 층 전환과 영웅 간 차단 검증. 이슈·PR 템플릿, 릴리스 절차, 라이선스와 선택적 GLB 로딩 경계 정리. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44035786865) |
+| 지형 측정 | 단위 테스트 40개, Chromium 시나리오 15개 통과. 두 지점의 수평 거리·높이 차·직선 거리를 지도 단위로 표시하고 보기 전환 후에도 유지. 실게임 대조는 미완료. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44036751794) |
