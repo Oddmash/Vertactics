@@ -147,6 +147,7 @@ test('places and moves a hero across views, then undoes and redoes elevation cha
   await expect(inspector.getByText('+4 u')).toBeVisible();
 
   const placedHeroes = inspector.getByRole('list', { name: '배치한 영웅' });
+  await expect.poll(() => savedHeroPosition(page)).toMatch(/, 4, /);
   const worldPosition = await savedHeroPosition(page);
   await threeD.click();
   await expect(canvas).toHaveAttribute('data-view-mode', '3d');
