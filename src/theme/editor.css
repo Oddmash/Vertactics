@@ -727,3 +727,14 @@ ul { padding: 0; list-style: none; }
 .hero-ability-sources a { color: var(--color-accent); }
 .hero-ability-stat { display: flex; gap: var(--space-sm); }
 .hero-ability-stat dd { color: var(--color-action); }
+
+.location-picker {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+  min-width: 0;
+}
+
+.location-picker .ui-select {
+  max-width: min(15rem, 60vw);
+}

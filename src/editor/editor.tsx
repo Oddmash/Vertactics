@@ -32,6 +32,7 @@ import MapViewport from '../render/map-viewport';
 import HeroTools, { heroDragType, roleNames, teamNames } from './hero-tools';
 import { getHero, heroName, isCatalogueHero } from '../domain/hero-catalogue';
 import type { CatalogueHero } from '../domain/hero-catalogue';
+import { competitiveOverview } from '../map/competitive-overviews';
 
 type SurfaceTool =
   | { kind: 'place'; heroId: CatalogueHero; team: Team }
@@ -65,6 +66,9 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
   const workspace = useWorkspaceDocuments(initialDraft);
   const { catalogue, map, history, timeline, draft, recovery, importMessage, mapMessage, editStrategy } = workspace;
   const mapId = map.id;
+  const overview = useMemo(() => competitiveOverview(map), [map]);
+  const [locationId, setLocationId] = useState('');
+  const focusedLocation = overview?.locations.find(({ id }) => id === locationId);
   const { min, max } = useMemo(() => mapBounds(map.terrain), [map]);
   const [mapActionsOpen, setMapActionsOpen] = useState(false);
   const [displayOptionsOpen, setDisplayOptionsOpen] = useState(false);
@@ -97,7 +101,8 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
     id: 'measurement-preview', kind: second ? 'line' : 'note', label: t('측정'), points: measurement,
   }] : [];
   const [heroViewId, setHeroViewId] = useState<string>();
-  const [mode, setMode] = useState<ViewMode>('2d');
+  const [viewMode, setMode] = useState<ViewMode>('2d');
+  const mode = overview ? '2d' : viewMode;
   const [reset, setReset] = useState(0);
   const [layerId, setLayerId] = useState('');
   const visibleTerrain = visibleTerrainForLayer(map.terrain, layerId);
@@ -144,6 +149,7 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
     editStrategy(action);
   }, [editStrategy, stop]);
   const resetMapView = () => {
+    setLocationId('');
     activateTool(null);
     setMeasurement([]);
     setSightPoints([]);
@@ -207,7 +213,7 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
   const selected = visibleTerrain.find(({ id }) => id === selectedId);
   const selectedHero = heroes.find(({ id }) => id === selectedHeroId);
 
-  const heroView = !mapEditing && showHeroes && selectedHero?.id === heroViewId ? selectedHero : undefined;
+  const heroView = !overview && !mapEditing && showHeroes && selectedHero?.id === heroViewId ? selectedHero : undefined;
   const selectedHeroProfile = selectedHero && getHero(selectedHero.heroId);
   const previewKey = selectedHero ? JSON.stringify([mapId, selectedHero.id]) : '';
   const activeAbility = abilityPreviews[previewKey];
@@ -362,10 +368,20 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
             <div>
               <h1 id="view-title" tabIndex={-1}>{t(map.name)}</h1>
               <p className="world-size">
-                {map.metadata?.verification === 'verified' ? t('검증됨') : map.metadata?.verification === 'synthetic' ? t('가상 지도') : t('미검증')} · {max[0] - min[0]} × {max[2] - min[2]} u</p>
+                {overview ? t('2D 전술 도식 · 위치와 축척은 참고용') :
+                  (map.metadata?.verification === 'verified' ? t('검증됨') : map.metadata?.verification === 'synthetic' ? t('가상 지도') : t('미검증')) +
+                  ` · ${max[0] - min[0]} × ${max[2] - min[2]} u`}</p>
             </div>
             <div className="viewport-actions">
-              <div className="mode-switch" role="group" aria-label={t('지도 보기')}>
+              {overview ? <label className="location-picker">
+                {t('주요 위치')}
+                <Select value={locationId} onChange={(event) => setLocationId(event.target.value)}>
+                  <option value="">{t('전장 전체')}</option>
+                  {overview.locations.map(({ id, name }) => (
+                    <option key={id} value={id}>{name[locale === 'ko' ? 0 : 1]}</option>
+                  ))}
+                </Select>
+              </label> : <div className="mode-switch" role="group" aria-label={t('지도 보기')}>
                 {viewportModes.map((view) => (
                   <Button
                     key={view}
@@ -377,10 +393,13 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
                     {view.toUpperCase()}
                   </Button>
                 ))}
-              </div>
+              </div>}
               {heroView
                 ? <Button className="reset-button" type="button" onClick={() => setHeroViewId(undefined)}>{t('이전 시점으로')}</Button>
-                : <Button className="reset-button" type="button" onClick={() => setReset((value) => value + 1)}>
+                : <Button className="reset-button" type="button" onClick={() => {
+                  setLocationId('');
+                  setReset((value) => value + 1);
+                }}>
                   {t('시점 초기화')}
                 </Button>}
               <Button type="button" className="reset-button mobile-panel-toggle" aria-expanded={displayOptionsOpen}
@@ -444,6 +463,8 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
               capture={captureViewport}
               layerId={layerId}
               mode={mode}
+              locations={overview?.locations}
+              focusedLocation={focusedLocation}
               heroView={heroView}
               reset={reset}
               selectedTerrainIds={selectedTerrainIds}
@@ -608,7 +629,7 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
                     </Disclosure>
                   </>}
                 </div>}
-                {showHeroes && <Button className="reset-button" type="button" aria-pressed={Boolean(heroView)} onClick={() => {
+                {showHeroes && !overview && <Button className="reset-button" type="button" aria-pressed={Boolean(heroView)} onClick={() => {
                   activateTool(null);
                   if (!heroView) setHeroViewId(selectedHero.id);
                 }}>{t('영웅 시점')}</Button>}

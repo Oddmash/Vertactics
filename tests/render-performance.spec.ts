@@ -58,7 +58,7 @@ test('records a map-rendering baseline with a real Chromium canvas', async ({ pa
 
   const map = page.getByRole('combobox', { name: '지도', exact: true });
   const terrain = page.getByRole('complementary', { name: '지형 목록' }).getByRole('button');
-  for (const mapId of await map.locator('option').evaluateAll((options) => options.map((option) => (option as HTMLOptionElement).value))) {
+  for (const mapId of ['elevation-lab', 'courtyard', 'kings-row-a']) {
     await map.selectOption(mapId);
     for (const [index, view] of ['2D 탑다운', '3D 원근'].entries()) {
       await page.getByRole('button', { name: view }).click();
