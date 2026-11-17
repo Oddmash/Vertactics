@@ -83,3 +83,7 @@ Playwright는 `dist`의 프로덕션 빌드를 프리뷰 서버로 실행합니�
 ## 영웅 데이터
 
 이전 전략의 배치를 찾을 수 있도록 영웅 ID는 유지합니다. 영웅을 추가하거나 밸런스 패치를 검토할 때 공식 영웅 페이지에서 역할과 기본 능력 이름을 확인하고 필요하면 출처 링크를 갱신합니다. 2026년 11월 17일 Blizzard 공식 목록의 영웅 54명을 제공합니다. 각 항목은 공식 역할과 출처 페이지의 기술 섹션에 표시된 능력을 기록합니다. 특전, 스타디움 파워, 능력 수치는 제외합니다. 편집기는 텍스트와 자체 제작한 팀 도형을 사용합니다. 타사 초상화와 능력 아이콘을 배포하려면 사용 허가를 확인해야 합니다. [공식 영웅 목록](https://overwatch.blizzard.com/ko-kr/heroes/) · [11월 라이브 패치 노트](https://overwatch.blizzard.com/en-us/news/patch-notes/live/2026/11/)
+
+## OWKR 카탈로그
+
+영웅 ID, 한국어 이름, 역할과 기본 내전 전장 목록은 OWKR Match의 `owkr-custom-2026-10-20` 카탈로그를 바탕으로 관리합니다. 능력 이름은 Blizzard 공식 영웅 페이지를 참조합니다. 전장 목록에 내전 지도 31개를 표시하며 왕의 길 A 거점 근사 지도는 기존 저장 ID인 `kings-row-a`로 엽니다. 나머지 항목에는 지형 데이터가 준비 중이라고 표시합니다. [OWKR 카탈로그 출처](https://github.com/Overwatch-KR/owkr-balance/blob/91d786313399dad137b16efba21ad91c7388e05a/domains/draft/shared/default-catalog.ts)

@@ -1,8 +1,10 @@
 import { expect, it } from 'vitest';
+import owkrCatalogue from './owkr-catalogue.json';
 import { getHero, heroCatalogue, heroName, heroRoles, isCatalogueHero } from './hero-catalogue';
 
 it('provides all 54 listed heroes with sourced, unique ability IDs', () => {
   expect(Object.keys(heroCatalogue)).toHaveLength(54);
+  expect(Object.keys(heroCatalogue).sort()).toEqual(Object.keys(owkrCatalogue.heroes).sort());
   expect(new Set(Object.values(heroCatalogue).map((hero) => hero.role))).toEqual(new Set(heroRoles));
   for (const [id, hero] of Object.entries(heroCatalogue)) {
     expect(isCatalogueHero(id)).toBe(true);

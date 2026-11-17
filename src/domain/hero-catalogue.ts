@@ -1,3 +1,5 @@
+import owkrCatalogue from './owkr-catalogue.json';
+
 export const heroRoles = ['damage', 'tank', 'support'] as const;
 export type HeroRole = (typeof heroRoles)[number];
 
@@ -9,11 +11,9 @@ type HeroDefinition = {
   abilities: { id: string; name: string }[];
 };
 
-export const heroCatalogue = {
+const heroDetails = {
   tracer: {
     name: 'Tracer',
-    localizedName: '트레이서',
-    role: 'damage',
     source: 'https://overwatch.blizzard.com/en-us/heroes/tracer/',
     abilities: [
       { id: 'pulse-pistols', name: 'Pulse Pistols' },
@@ -24,8 +24,6 @@ export const heroCatalogue = {
   },
   reinhardt: {
     name: 'Reinhardt',
-    localizedName: '라인하르트',
-    role: 'tank',
     source: 'https://overwatch.blizzard.com/en-us/heroes/reinhardt/',
     abilities: [
       { id: 'rocket-hammer', name: 'Rocket Hammer' },
@@ -37,8 +35,6 @@ export const heroCatalogue = {
   },
   ana: {
     name: 'Ana',
-    localizedName: '아나',
-    role: 'support',
     source: 'https://overwatch.blizzard.com/en-us/heroes/ana/',
     abilities: [
       { id: 'biotic-rifle', name: 'Biotic Rifle' },
@@ -49,8 +45,6 @@ export const heroCatalogue = {
   },
   anran: {
     name: 'Anran',
-    localizedName: '안란',
-    role: 'damage',
     source: 'https://overwatch.blizzard.com/heroes/anran',
     abilities: [
       { id: 'zhuque-fans', name: 'Zhuque Fans' },
@@ -64,8 +58,6 @@ export const heroCatalogue = {
   },
   ashe: {
     name: 'Ashe',
-    localizedName: '애쉬',
-    role: 'damage',
     source: 'https://overwatch.blizzard.com/en-us/heroes/ashe/',
     abilities: [
       { id: 'the-viper', name: 'The Viper' },
@@ -76,8 +68,6 @@ export const heroCatalogue = {
   },
   baptiste: {
     name: 'Baptiste',
-    localizedName: '바티스트',
-    role: 'support',
     source: 'https://overwatch.blizzard.com/en-us/heroes/baptiste/',
     abilities: [
       { id: 'biotic-launcher', name: 'Biotic Launcher' },
@@ -89,8 +79,6 @@ export const heroCatalogue = {
   },
   bastion: {
     name: 'Bastion',
-    localizedName: '바스티온',
-    role: 'damage',
     source: 'https://overwatch.blizzard.com/en-us/heroes/bastion/',
     abilities: [
       { id: 'configuration-assault', name: 'Configuration: Assault' },
@@ -102,8 +90,6 @@ export const heroCatalogue = {
   },
   brigitte: {
     name: 'Brigitte',
-    localizedName: '브리기테',
-    role: 'support',
     source: 'https://overwatch.blizzard.com/en-us/heroes/brigitte/',
     abilities: [
       { id: 'rocket-flail', name: 'Rocket Flail' },
@@ -117,8 +103,6 @@ export const heroCatalogue = {
   },
   cassidy: {
     name: 'Cassidy',
-    localizedName: '캐서디',
-    role: 'damage',
     source: 'https://overwatch.blizzard.com/en-us/heroes/cassidy/',
     abilities: [
       { id: 'peacekeeper', name: 'Peacekeeper' },
@@ -128,8 +112,6 @@ export const heroCatalogue = {
   },
   dmon: {
     name: 'D.Mon',
-    localizedName: 'D.Mon',
-    role: 'tank',
     source: 'https://overwatch.blizzard.com/en-us/heroes/dmon/',
     abilities: [
       { id: 'plasma-saber', name: 'Plasma Saber' },
@@ -145,8 +127,6 @@ export const heroCatalogue = {
   },
   doctrine: {
     name: 'Doctrine',
-    localizedName: '독트린',
-    role: 'support',
     source: 'https://overwatch.blizzard.com/en-us/heroes/doctrine/',
     abilities: [
       { id: 'eternal-scepter', name: 'Eternal Scepter' },
@@ -158,8 +138,6 @@ export const heroCatalogue = {
   },
   domina: {
     name: 'Domina',
-    localizedName: '도미나',
-    role: 'tank',
     source: 'https://overwatch.blizzard.com/heroes/domina',
     abilities: [
       { id: 'photon-magnum', name: 'Photon Magnum' },
@@ -171,8 +149,6 @@ export const heroCatalogue = {
   },
   doomfist: {
     name: 'Doomfist',
-    localizedName: '둠피스트',
-    role: 'tank',
     source: 'https://overwatch.blizzard.com/en-us/heroes/doomfist/',
     abilities: [
       { id: 'hand-cannon', name: 'Hand Cannon' },
@@ -184,8 +160,6 @@ export const heroCatalogue = {
   },
   dva: {
     name: 'D.Va',
-    localizedName: 'D.Va',
-    role: 'tank',
     source: 'https://overwatch.blizzard.com/en-us/heroes/dva/',
     abilities: [
       { id: 'fusion-cannons', name: 'Fusion Cannons' },
@@ -200,8 +174,6 @@ export const heroCatalogue = {
   },
   echo: {
     name: 'Echo',
-    localizedName: '에코',
-    role: 'damage',
     source: 'https://overwatch.blizzard.com/en-us/heroes/echo/',
     abilities: [
       { id: 'tri-shot', name: 'Tri-Shot' },
@@ -214,8 +186,6 @@ export const heroCatalogue = {
   },
   emre: {
     name: 'Emre',
-    localizedName: '엠레',
-    role: 'damage',
     source: 'https://overwatch.blizzard.com/en-us/heroes/emre/',
     abilities: [
       { id: 'synthetic-burst-rifle', name: 'Synthetic Burst Rifle' },
@@ -226,8 +196,6 @@ export const heroCatalogue = {
   },
   freja: {
     name: 'Freja',
-    localizedName: '프레야',
-    role: 'damage',
     source: 'https://overwatch.blizzard.com/en-us/heroes/freja/',
     abilities: [
       { id: 'bola-shot', name: 'Bola Shot' },
@@ -238,8 +206,6 @@ export const heroCatalogue = {
   },
   genji: {
     name: 'Genji',
-    localizedName: '겐지',
-    role: 'damage',
     source: 'https://overwatch.blizzard.com/en-us/heroes/genji/',
     abilities: [
       { id: 'shuriken', name: 'Shuriken' },
@@ -251,8 +217,6 @@ export const heroCatalogue = {
   },
   hanzo: {
     name: 'Hanzo',
-    localizedName: '한조',
-    role: 'damage',
     source: 'https://overwatch.blizzard.com/en-us/heroes/hanzo/',
     abilities: [
       { id: 'storm-bow', name: 'Storm Bow' },
@@ -265,8 +229,6 @@ export const heroCatalogue = {
   },
   hazard: {
     name: 'Hazard',
-    localizedName: '해저드',
-    role: 'tank',
     source: 'https://overwatch.blizzard.com/en-us/heroes/hazard/',
     abilities: [
       { id: 'bonespur', name: 'Bonespur' },
@@ -279,8 +241,6 @@ export const heroCatalogue = {
   },
   illari: {
     name: 'Illari',
-    localizedName: '일리아리',
-    role: 'support',
     source: 'https://overwatch.blizzard.com/en-us/heroes/illari/',
     abilities: [
       { id: 'solar-rifle', name: 'Solar Rifle' },
@@ -291,8 +251,6 @@ export const heroCatalogue = {
   },
   'jetpack-cat': {
     name: 'Jetpack Cat',
-    localizedName: '제트팩 캣',
-    role: 'support',
     source: 'https://overwatch.blizzard.com/en-us/heroes/jetpack-cat/',
     abilities: [
       { id: 'biotic-pawjectiles', name: 'Biotic Pawjectiles' },
@@ -304,8 +262,6 @@ export const heroCatalogue = {
   },
   'junker-queen': {
     name: 'Junker Queen',
-    localizedName: '정커퀸',
-    role: 'tank',
     source: 'https://overwatch.blizzard.com/en-us/heroes/junker-queen/',
     abilities: [
       { id: 'scattergun', name: 'Scattergun' },
@@ -317,8 +273,6 @@ export const heroCatalogue = {
   },
   junkrat: {
     name: 'Junkrat',
-    localizedName: '정크랫',
-    role: 'damage',
     source: 'https://overwatch.blizzard.com/en-us/heroes/junkrat/',
     abilities: [
       { id: 'frag-launcher', name: 'Frag Launcher' },
@@ -330,8 +284,6 @@ export const heroCatalogue = {
   },
   juno: {
     name: 'Juno',
-    localizedName: '주노',
-    role: 'support',
     source: 'https://overwatch.blizzard.com/en-us/heroes/juno/',
     abilities: [
       { id: 'mediblaster', name: 'Mediblaster' },
@@ -344,8 +296,6 @@ export const heroCatalogue = {
   },
   kiriko: {
     name: 'Kiriko',
-    localizedName: '키리코',
-    role: 'support',
     source: 'https://overwatch.blizzard.com/en-us/heroes/kiriko/',
     abilities: [
       { id: 'healing-ofuda', name: 'Healing Ofuda' },
@@ -357,8 +307,6 @@ export const heroCatalogue = {
   },
   lifeweaver: {
     name: 'Lifeweaver',
-    localizedName: '라이프위버',
-    role: 'support',
     source: 'https://overwatch.blizzard.com/en-us/heroes/lifeweaver/',
     abilities: [
       { id: 'healing-blossom', name: 'Healing Blossom' },
@@ -371,8 +319,6 @@ export const heroCatalogue = {
   },
   lucio: {
     name: 'Lúcio',
-    localizedName: '루시우',
-    role: 'support',
     source: 'https://overwatch.blizzard.com/en-us/heroes/lucio/',
     abilities: [
       { id: 'sonic-amplifier', name: 'Sonic Amplifier' },
@@ -385,8 +331,6 @@ export const heroCatalogue = {
   },
   mauga: {
     name: 'Mauga',
-    localizedName: '마우가',
-    role: 'tank',
     source: 'https://overwatch.blizzard.com/en-us/heroes/mauga/',
     abilities: [
       { id: 'overrun', name: 'Overrun' },
@@ -397,8 +341,6 @@ export const heroCatalogue = {
   },
   mei: {
     name: 'Mei',
-    localizedName: '메이',
-    role: 'damage',
     source: 'https://overwatch.blizzard.com/en-us/heroes/mei/',
     abilities: [
       { id: 'endothermic-blaster', name: 'Endothermic Blaster' },
@@ -409,8 +351,6 @@ export const heroCatalogue = {
   },
   mercy: {
     name: 'Mercy',
-    localizedName: '메르시',
-    role: 'support',
     source: 'https://overwatch.blizzard.com/en-us/heroes/mercy/',
     abilities: [
       { id: 'caduceus-staff', name: 'Caduceus Staff' },
@@ -423,8 +363,6 @@ export const heroCatalogue = {
   },
   mizuki: {
     name: 'Mizuki',
-    localizedName: '미즈키',
-    role: 'support',
     source: 'https://overwatch.blizzard.com/en-us/heroes/mizuki/',
     abilities: [
       { id: 'spirit-glaive', name: 'Spirit Glaive' },
@@ -437,8 +375,6 @@ export const heroCatalogue = {
   },
   moira: {
     name: 'Moira',
-    localizedName: '모이라',
-    role: 'support',
     source: 'https://overwatch.blizzard.com/en-us/heroes/moira/',
     abilities: [
       { id: 'biotic-grasp', name: 'Biotic Grasp' },
@@ -449,8 +385,6 @@ export const heroCatalogue = {
   },
   orisa: {
     name: 'Orisa',
-    localizedName: '오리사',
-    role: 'tank',
     source: 'https://overwatch.blizzard.com/en-us/heroes/orisa/',
     abilities: [
       { id: 'augmented-fusion-driver', name: 'Augmented Fusion Driver' },
@@ -462,8 +396,6 @@ export const heroCatalogue = {
   },
   pharah: {
     name: 'Pharah',
-    localizedName: '파라',
-    role: 'damage',
     source: 'https://overwatch.blizzard.com/en-us/heroes/pharah/',
     abilities: [
       { id: 'rocket-launcher', name: 'Rocket Launcher' },
@@ -476,8 +408,6 @@ export const heroCatalogue = {
   },
   ramattra: {
     name: 'Ramattra',
-    localizedName: '라마트라',
-    role: 'tank',
     source: 'https://overwatch.blizzard.com/en-us/heroes/ramattra/',
     abilities: [
       { id: 'void-accelerator-omnic-form', name: 'Void Accelerator (Omnic Form)' },
@@ -489,8 +419,6 @@ export const heroCatalogue = {
   },
   reaper: {
     name: 'Reaper',
-    localizedName: '리퍼',
-    role: 'damage',
     source: 'https://overwatch.blizzard.com/en-us/heroes/reaper/',
     abilities: [
       { id: 'hellfire-shotguns', name: 'Hellfire Shotguns' },
@@ -502,8 +430,6 @@ export const heroCatalogue = {
   },
   roadhog: {
     name: 'Roadhog',
-    localizedName: '로드호그',
-    role: 'tank',
     source: 'https://overwatch.blizzard.com/en-us/heroes/roadhog/',
     abilities: [
       { id: 'scrap-gun', name: 'Scrap Gun' },
@@ -515,8 +441,6 @@ export const heroCatalogue = {
   },
   shion: {
     name: 'Shion',
-    localizedName: '시온',
-    role: 'damage',
     source: 'https://overwatch.blizzard.com/en-us/heroes/shion/',
     abilities: [
       { id: 'kira-pistols', name: 'Kira Pistols' },
@@ -528,8 +452,6 @@ export const heroCatalogue = {
   },
   sierra: {
     name: 'Sierra',
-    localizedName: '시에라',
-    role: 'damage',
     source: 'https://overwatch.blizzard.com/en-us/heroes/sierra/',
     abilities: [
       { id: 'helix-rifle', name: 'Helix Rifle' },
@@ -541,8 +463,6 @@ export const heroCatalogue = {
   },
   sigma: {
     name: 'Sigma',
-    localizedName: '시그마',
-    role: 'tank',
     source: 'https://overwatch.blizzard.com/en-us/heroes/sigma/',
     abilities: [
       { id: 'hyperspheres', name: 'Hyperspheres' },
@@ -554,8 +474,6 @@ export const heroCatalogue = {
   },
   sojourn: {
     name: 'Sojourn',
-    localizedName: '소전',
-    role: 'damage',
     source: 'https://overwatch.blizzard.com/en-us/heroes/sojourn/',
     abilities: [
       { id: 'railgun', name: 'Railgun' },
@@ -566,8 +484,6 @@ export const heroCatalogue = {
   },
   'soldier-76': {
     name: 'Soldier: 76',
-    localizedName: '솔저: 76',
-    role: 'damage',
     source: 'https://overwatch.blizzard.com/en-gb/heroes/soldier-76/',
     abilities: [
       { id: 'heavy-pulse-rifle', name: 'Heavy Pulse Rifle' },
@@ -579,8 +495,6 @@ export const heroCatalogue = {
   },
   sombra: {
     name: 'Sombra',
-    localizedName: '솜브라',
-    role: 'support',
     source: 'https://overwatch.blizzard.com/en-us/heroes/sombra/',
     abilities: [
       { id: 'machine-pistol', name: 'Machine Pistol' },
@@ -592,8 +506,6 @@ export const heroCatalogue = {
   },
   symmetra: {
     name: 'Symmetra',
-    localizedName: '시메트라',
-    role: 'damage',
     source: 'https://overwatch.blizzard.com/en-us/heroes/symmetra/',
     abilities: [
       { id: 'photon-projector', name: 'Photon Projector' },
@@ -604,8 +516,6 @@ export const heroCatalogue = {
   },
   torbjorn: {
     name: 'Torbjörn',
-    localizedName: '토르비욘',
-    role: 'damage',
     source: 'https://overwatch.blizzard.com/en-us/heroes/torbjorn/',
     abilities: [
       { id: 'rivet-gun', name: 'Rivet Gun' },
@@ -617,8 +527,6 @@ export const heroCatalogue = {
   },
   vendetta: {
     name: 'Vendetta',
-    localizedName: '벤데타',
-    role: 'damage',
     source: 'https://overwatch.blizzard.com/heroes/vendetta',
     abilities: [
       { id: 'palatine-fang', name: 'Palatine Fang' },
@@ -631,8 +539,6 @@ export const heroCatalogue = {
   },
   venture: {
     name: 'Venture',
-    localizedName: '벤처',
-    role: 'damage',
     source: 'https://overwatch.blizzard.com/en-us/heroes/venture/',
     abilities: [
       { id: 'smart-excavator', name: 'SMART Excavator' },
@@ -643,8 +549,6 @@ export const heroCatalogue = {
   },
   widowmaker: {
     name: 'Widowmaker',
-    localizedName: '위도우메이커',
-    role: 'damage',
     source: 'https://overwatch.blizzard.com/en-us/heroes/widowmaker/',
     abilities: [
       { id: 'widows-kiss', name: "Widow's Kiss" },
@@ -655,8 +559,6 @@ export const heroCatalogue = {
   },
   winston: {
     name: 'Winston',
-    localizedName: '윈스턴',
-    role: 'tank',
     source: 'https://overwatch.blizzard.com/en-us/heroes/winston/',
     abilities: [
       { id: 'tesla-cannon', name: 'Tesla Cannon' },
@@ -667,8 +569,6 @@ export const heroCatalogue = {
   },
   'wrecking-ball': {
     name: 'Wrecking Ball',
-    localizedName: '레킹볼',
-    role: 'tank',
     source: 'https://overwatch.blizzard.com/en-us/heroes/wrecking-ball/',
     abilities: [
       { id: 'quad-cannons', name: 'Quad Cannons' },
@@ -681,8 +581,6 @@ export const heroCatalogue = {
   },
   wuyang: {
     name: 'Wuyang',
-    localizedName: '우양',
-    role: 'support',
     source: 'https://overwatch.blizzard.com/en-us/heroes/wuyang/',
     abilities: [
       { id: 'xuanwu-staff', name: 'Xuanwu Staff' },
@@ -694,8 +592,6 @@ export const heroCatalogue = {
   },
   zarya: {
     name: 'Zarya',
-    localizedName: '자리야',
-    role: 'tank',
     source: 'https://overwatch.blizzard.com/en-us/heroes/zarya/',
     abilities: [
       { id: 'particle-cannon', name: 'Particle Cannon' },
@@ -707,8 +603,6 @@ export const heroCatalogue = {
   },
   zenyatta: {
     name: 'Zenyatta',
-    localizedName: '젠야타',
-    role: 'support',
     source: 'https://overwatch.blizzard.com/en-us/heroes/zenyatta/',
     abilities: [
       { id: 'orb-of-destruction', name: 'Orb of Destruction' },
@@ -718,9 +612,17 @@ export const heroCatalogue = {
       { id: 'snap-kick', name: 'Snap Kick' },
     ],
   },
-} satisfies Record<string, HeroDefinition>;
+} satisfies Record<string, Omit<HeroDefinition, 'localizedName' | 'role'>>;
 
-export type CatalogueHero = keyof typeof heroCatalogue;
+export type CatalogueHero = keyof typeof heroDetails;
+
+const heroIds = Object.keys(heroDetails) as CatalogueHero[];
+export const heroCatalogue = Object.fromEntries(heroIds.map((id) => {
+  const { nameKo, role } = owkrCatalogue.heroes[id];
+  const catalogueRole = heroRoles.find((candidate) => candidate === role);
+  if (!catalogueRole) throw new Error(`Invalid role for hero ${id}`);
+  return [id, { ...heroDetails[id], localizedName: nameKo, role: catalogueRole }];
+})) as Record<CatalogueHero, HeroDefinition>;
 export const isCatalogueHero = (id: string): id is CatalogueHero => Object.hasOwn(heroCatalogue, id);
 export const getHero = (id: string): HeroDefinition | undefined => isCatalogueHero(id) ? heroCatalogue[id] : undefined;
 export const heroName = (id: string) => getHero(id)?.localizedName ?? id;

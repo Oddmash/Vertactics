@@ -81,3 +81,7 @@ Keep the map status unverified until these comparisons are recorded.
 ## Hero catalogue
 
 Keep hero IDs stable so older drafts can still resolve their placements. When adding a hero or reviewing a balance patch, compare roles and base ability names with the official hero page and update the source link if needed. The catalogue covers the 54 heroes listed by Blizzard on November 17, 2026. Each entry records the official role and the abilities listed under Abilities on its source page. Perks, Stadium powers and ability measurements are outside the catalogue. The editor uses text labels and original geometric team markers. Third-party portraits and ability icons require permission before bundling. [Official hero roster](https://overwatch.blizzard.com/en-us/heroes/) · [November live patch notes](https://overwatch.blizzard.com/en-us/news/patch-notes/live/2026/11/)
+
+## OWKR catalogue
+
+The hero IDs, Korean names, roles, and standard scrim map pool come from the OWKR Match catalogue snapshot, version `owkr-custom-2026-10-20`. Vertactics pairs that snapshot with official hero ability profiles. The map library lists 31 OWKR maps and opens the existing King's Row Point A schematic under the saved document ID `kings-row-a`. The other entries await a terrain document. [OWKR catalogue source](https://github.com/Overwatch-KR/owkr-balance/blob/91d786313399dad137b16efba21ad91c7388e05a/domains/draft/shared/default-catalog.ts)

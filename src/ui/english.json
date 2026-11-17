@@ -359,5 +359,16 @@
   "거점 뒤 엄폐": "Rear point cover",
   "표시 설정": "Display options",
   "선택한 영웅을 지도에서 끌어 이동하세요.": "Drag the selected hero on the map.",
-  "지도에서 지점을 선택하세요. Esc로 취소합니다.": "Select a point on the map. Press Esc to cancel."
+  "지도에서 지점을 선택하세요. Esc로 취소합니다.": "Select a point on the map. Press Esc to cancel.",
+  "전장 목록": "Map catalogue",
+  "닫기": "Close",
+  "쟁탈": "Control",
+  "호위": "Escort",
+  "혼합": "Hybrid",
+  "밀기": "Push",
+  "플래시포인트": "Flashpoint",
+  "A 거점 근사 지도": "Point A schematic",
+  "지형 준비 중": "Terrain pending",
+  "{0} 열기": "Open {0}",
+  "열기": "Open"
 }
