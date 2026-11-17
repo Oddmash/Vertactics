@@ -12,6 +12,10 @@ Vertactics는 진입로, 엄폐물, 고지대를 살펴보고 전술을 구상�
 
 마우스 휠이나 핀치로 확대·축소할 수 있습니다. 시작 화면으로 돌아가려면 **시점 초기화**를 누르세요.
 
-[실제 2D·3D 화면 캡처](https://github.com/qtaghdi/Vertactics/actions/runs/44027542773) · [개발 및 기여](development.md)
+## 영웅 배치하기
+
+**영웅 배치**에서 영웅과 팀을 고르고, 지도에서 바닥이나 고지대를 클릭해 배치합니다. 배치한 영웅의 위치와 방향을 바꾸거나 팀을 전환할 수 있습니다. 2D에서 놓은 영웅을 3D에서도 같은 위치와 높이에서 볼 수 있으며, 실행 취소와 다시 실행으로 배치를 비교할 수 있습니다.
+
+[2D·3D 지도와 영웅 배치 화면](https://github.com/qtaghdi/Vertactics/actions/runs/44028807455/artifacts/14304237794) · [개발 및 기여](development.md)
 
 Vertactics는 Blizzard Entertainment와 제휴하지 않은 팬 프로젝트입니다.
