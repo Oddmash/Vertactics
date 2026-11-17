@@ -30,3 +30,4 @@
 | Phase delivery and SPEC updates | [phase-delivery](skills/phase-delivery/SKILL.md) |
 | Coordinate systems, terrain, cameras and assets | [map-rendering](skills/map-rendering/SKILL.md) |
 | Browser verification, screenshots and CI | [browser-verification](skills/browser-verification/SKILL.md) |
+| Editor layout, controls, design tokens and accessibility | [editor-design](skills/editor-design/SKILL.md) |
