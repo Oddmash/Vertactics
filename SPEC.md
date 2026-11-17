@@ -118,9 +118,9 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 - [x] 7.03 Verify interpolation, playback boundaries and restoration at an intermediate point
 - [x] 7.04 Create, list, reopen, clone and delete strategies in IndexedDB
 - [x] 7.05 Handle autosave, errors, close recovery, migration and corrupt documents
-- [ ] 7.06 Support validated JSON import and export and PNG export
+- [x] 7.06 Support validated JSON import and export and PNG export
 - [ ] 7.07 Support share links, size limits, read-only views, duplication and validation
-- [ ] 7.08 Verify save, reload, restore, export and re-import end to end
+- [x] 7.08 Verify save, reload, restore, export and re-import end to end
 
 ## Phase 8 · Product polish
 
@@ -182,3 +182,4 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 | Strategy playback | 60 unit tests and 27 Chromium scenarios passed. Verified position and heading interpolation, phase and event boundaries, viewing a sought point in both cameras, and returning to the editable strategy. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44051109069) |
 | Local strategy library | 60 unit tests and 29 Chromium scenarios passed. Verified named saves, recent order, update, duplication, confirmed deletion, restoration and in-place upgrade of a legacy workspace draft. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44052203062) |
 | Workspace autosave and recovery | 60 unit tests and 31 Chromium scenarios passed. Verified autosave, page-hide flush, reload and explicit restoration, malformed recovery and write failure, and preservation of named saves. Legacy named-draft migration is covered by the local strategy library checkpoint. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44053504783) |
+| Strategy file transfer and image export | 60 unit tests and 33 Chromium scenarios passed. Verified invalid import handling, saving, reload, restore, export and re-import of a map and timed plan. Decoded both PNG downloads and verified distinct nonblank views. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44054863071) |

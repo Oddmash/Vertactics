@@ -24,6 +24,8 @@ In **Local strategy**, save the current map and plan under a name. Use the saved
 
 Your most recently edited workspace is also saved automatically in this browser. Use **Recover previous work** to reopen it. Named strategies remain available independently.
 
+Use **Strategy files** to transfer the map and strategy together as JSON. **Save map PNG** captures the active map camera.
+
 ## Build a map
 
 Choose a map or import a validated map JSON file. In **Map edit mode**, add, edit or duplicate terrain blocks and preview changes in the shared 2D and 3D views. Export the map as JSON to keep a copy.
