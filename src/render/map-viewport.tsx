@@ -10,6 +10,7 @@ import MapCamera from './map-camera';
 import type { ViewMode } from './map-camera';
 
 const unitBox = new BoxGeometry();
+const skipRaycast = () => undefined;
 
 const Fallback = () => (
   <p className="viewport-fallback" role="status">WebGL 2를 사용할 수 없어 지도를 표시할 수 없습니다.</p>
@@ -101,7 +102,7 @@ const MapViewport = ({
                   emissive={tokens.color.accent}
                   emissiveIntensity={selectedId === terrain.id ? 0.26 : 0}
                 />
-                <lineSegments>
+                <lineSegments raycast={skipRaycast}>
                   <edgesGeometry args={[unitBox]} />
                   <lineBasicMaterial color={tokens.color.app} transparent opacity={0.48} />
                 </lineSegments>

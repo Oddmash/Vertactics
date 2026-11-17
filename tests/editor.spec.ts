@@ -109,7 +109,8 @@ test('renders and manipulates the same elevated terrain in both views', async ({
 });
 
 test('places and moves a hero across views, then undoes and redoes elevation changes', async ({ page }) => {
-  page.on('pageerror', (error) => console.error(error.message));
+  const pageErrors: string[] = [];
+  page.on('pageerror', (error) => pageErrors.push(error.message));
   await page.goto('/');
   const twoD = page.getByRole('button', { name: '2D 탑다운' });
   const threeD = page.getByRole('button', { name: '3D 원근' });
@@ -150,4 +151,5 @@ test('places and moves a hero across views, then undoes and redoes elevation cha
   await expect(inspector.getByText('수비팀')).toBeVisible();
   await inspector.getByRole('button', { name: '삭제' }).click();
   await expect(page.getByRole('list', { name: '배치한 영웅' })).toHaveCount(0);
+  expect(pageErrors).toEqual([]);
 });
