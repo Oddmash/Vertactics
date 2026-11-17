@@ -2,6 +2,7 @@ import { Button, Disclosure, Input, Select } from '../ui/controls';
 import { useLocale } from '../ui/locale';
 import LocalePicker from '../ui/locale-picker';
 import MapCatalogue from './map-catalogue';
+import MapLocationPicker from './map-location-picker';
 import { downloadFile, fileStem } from './download-file';
 import StrategyFileTools from './strategy-file-tools';
 import useWorkspaceDocuments from './use-workspace-documents';
@@ -373,15 +374,7 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
                   ` · ${max[0] - min[0]} × ${max[2] - min[2]} u`}</p>
             </div>
             <div className="viewport-actions">
-              {overview ? <label className="location-picker">
-                {t('주요 위치')}
-                <Select value={locationId} onChange={(event) => setLocationId(event.target.value)}>
-                  <option value="">{t('전장 전체')}</option>
-                  {overview.locations.map(({ id, name }) => (
-                    <option key={id} value={id}>{name[locale === 'ko' ? 0 : 1]}</option>
-                  ))}
-                </Select>
-              </label> : <div className="mode-switch" role="group" aria-label={t('지도 보기')}>
+              {overview ? <MapLocationPicker locations={overview.locations} value={locationId} onChange={setLocationId} /> : <div className="mode-switch" role="group" aria-label={t('지도 보기')}>
                 {viewportModes.map((view) => (
                   <Button
                     key={view}
