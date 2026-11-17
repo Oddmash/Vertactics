@@ -10,7 +10,7 @@ test('keeps terrain inspection available across map views', async ({ page, brows
   const viewport = page.getByTestId('viewport');
   if (webgl2 || browserName === 'chromium') {
     await expect(viewport.locator('canvas')).toBeVisible();
-    await expect(viewport.getByText(/WebGL 2를 사용할 수 없어/)).toHaveCount(0);
+    await expect(viewport.getByText(/WebGL 2를 사용할 수 없어/)).toBeHidden();
   } else {
     await expect(viewport.getByText(/WebGL 2를 사용할 수 없어/)).toBeVisible();
   }
