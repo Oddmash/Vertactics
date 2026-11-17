@@ -1,31 +1,14 @@
-import { parseMap } from '../domain/map';
-import type { MapDefinition } from '../domain/map';
-import { parseStrategy } from '../domain/strategy';
-import type { StrategyDocument } from '../domain/strategy';
+import { parseStrategyDraft } from '../domain/strategy-draft';
+import type { StrategyDraft } from '../domain/strategy-draft';
 
-export type StrategyDraft = {
-  version: 1;
-  map: MapDefinition;
-  strategy: StrategyDocument;
-};
+export { parseStrategyDraft } from '../domain/strategy-draft';
+export type { StrategyDraft } from '../domain/strategy-draft';
 
 const storeName = 'drafts';
 export type SavedStrategyDraft = {
   id: string;
   updatedAt: number;
   draft: StrategyDraft;
-};
-
-export const parseStrategyDraft = (value: unknown): StrategyDraft => {
-  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
-    throw new Error('Invalid strategy draft');
-  }
-  const { version, map, strategy } = value as Record<string, unknown>;
-  if (version !== 1) throw new Error('Unsupported strategy draft version');
-  const parsedMap = parseMap(map);
-  const parsedStrategy = parseStrategy(strategy);
-  if (parsedMap.id !== parsedStrategy.mapId) throw new Error('Strategy draft map mismatch');
-  return { version, map: parsedMap, strategy: parsedStrategy };
 };
 
 const openDatabase = () => new Promise<IDBDatabase>((resolve, reject) => {
