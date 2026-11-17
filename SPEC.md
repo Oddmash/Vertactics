@@ -137,6 +137,9 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 - [ ] 8.08d Rebuild hero, ability, terrain, and analysis controls around active tool and selection states
 - [ ] 8.08e Adapt tool and inspector access for narrow screens and verify touch targets and canvas space
 - [ ] 8.08f Verify keyboard, responsive layouts, 2D and 3D view continuity, and save and restore in a browser, then capture the redesigned workspace
+- [ ] 8.09a After reviewing the integrated Phase 8 UI, open a separate PR to refactor workspace state and module boundaries around the verified workflows
+- [ ] 8.09b Keep map and strategy switching, restoration, and document commands under workspace ownership. Give UI panels the data and actions they need
+- [ ] 8.09c Keep world rules and document validation independent of React, rendering, and browser storage. Verify existing editor, playback, and save and restore flows after the refactor
 
 ## Phase 9 · Quality and release
 
