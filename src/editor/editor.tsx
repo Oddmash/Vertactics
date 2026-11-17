@@ -7,7 +7,7 @@ import { measureSegment } from '../domain/measurement';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import type { Annotation } from '../domain/annotation';
 import { rotateTerrain, snapTerrain } from '../domain/terrain-edit';
-import { sampleExposure, traceSightline } from '../domain/spatial-analysis';
+import { traceHeroSightline, traceTerrainSightline } from '../domain/spatial-analysis';
 import TerrainTools from './terrain-tools';
 import AnnotationTools from './annotation-tools';
 import type { SurfacePick } from './annotation-tools';
@@ -48,7 +48,6 @@ const formatElevation = (value: number) => `${value > 0 ? '+' : ''}${formatNumbe
 
 const exposureLabels = { blocked: '완전 차단', partial: '부분 노출', clear: '개방' };
 const sampleLabels = { lower: '하단', middle: '중단', upper: '상단' };
-const sightOrigin = ([x, y, z]: WorldPoint): WorldPoint => [x, y + heroEyeHeight, z];
 
 const Editor = () => {
   const [catalogue, setCatalogue] = useState(maps);
@@ -231,18 +230,9 @@ const Editor = () => {
   const previewKey = selectedHero ? JSON.stringify([mapId, selectedHero.id]) : '';
   const activeAbility = abilityPreviews[previewKey];
   const sightTarget = heroes.find((hero) => hero.id === sightTargetId && hero.id !== selectedHeroId);
-  const spatialProbe = !mapEditing && showHeroes && selectedHero && sightTarget ? (() => {
-    const start = sightOrigin(selectedHero.position);
-    return {
-      start,
-      ...traceSightline(map.terrain, start, sightOrigin(sightTarget.position)),
-      exposure: sampleExposure(map.terrain, start, sightTarget.position),
-    };
-  })() : null;
-  const terrainSight = sightFirst && sightSecond ? (() => {
-    const start = sightOrigin(sightFirst);
-    return { start, ...traceSightline(map.terrain, start, sightOrigin(sightSecond)) };
-  })() : null;
+  const spatialProbe = !mapEditing && showHeroes && selectedHero && sightTarget
+    ? traceHeroSightline(map.terrain, selectedHero, sightTarget) : null;
+  const terrainSight = sightFirst && sightSecond ? traceTerrainSightline(map.terrain, sightFirst, sightSecond) : null;
   const activeSight = sightPicking || sightFirst ? terrainSight : spatialProbe;
   const sightOverlay: Annotation[] = sightFirst && !sightSecond ? [{
     id: 'sight-start', kind: 'note', label: '시야 시작점', points: [sightFirst],
@@ -426,7 +416,7 @@ const Editor = () => {
           <div className="view-options" role="group" aria-label="편집 및 표시 설정">
             {map.layers && <label>표시 층 <select value={layerId} onChange={(event) => {
               setLayerId(event.target.value);
-              selectTerrain(null);
+              setSelectedId(null);
             }}>
               <option value="">모든 층</option>
               {map.layers.map(({ id, name }) => <option key={id} value={id}>{name}</option>)}
@@ -556,6 +546,7 @@ const Editor = () => {
                     <details>
                       <summary>노출 판정 기준</summary>
                       <p>지도 단위 기준 0.45, 1.05, 1.8 높이의 세 점을 검사합니다. 실제 영웅의 자세와 히트박스는 반영하지 않습니다.</p>
+                      <p>모든 층의 지형이 포함되며 시야 차단과 충돌은 각각 판정합니다. 영웅은 판정의 시작점과 목표점을 제공합니다.</p>
                     </details>
                   </>}
                 </div>}
