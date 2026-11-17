@@ -85,8 +85,9 @@ const MapViewport = ({
                   if (event.delta > 4) return;
                   event.stopPropagation();
                   if (onEditSurface) {
-                    if (terrain.kind !== 'wall' && event.face && event.face.normal.y > 0.5) {
-                      onEditSurface([event.point.x, center[1] + size[1] / 2, event.point.z]);
+                    const top = center[1] + size[1] / 2;
+                    if (terrain.kind !== 'wall' && Math.abs(event.point.y - top) < 0.0001) {
+                      onEditSurface([event.point.x, top, event.point.z]);
                     }
                     return;
                   }

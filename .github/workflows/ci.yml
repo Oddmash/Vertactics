@@ -24,6 +24,9 @@ jobs:
       - run: pnpm build
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm test:e2e
+      - name: Print failed browser assertions context
+        if: failure()
+        run: find test-results -name error-context.md -exec cat {} + 2>/dev/null || true
       - uses: actions/upload-artifact@v6
         if: always()
         with:
