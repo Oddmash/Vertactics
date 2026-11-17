@@ -939,7 +939,7 @@ ul { padding: 0; list-style: none; }
   min-height: var(--size-control);
 }
 @media (max-width: 680px) {
-  .editor > .app-header { padding: var(--space-md); }
+  .editor > .app-header { padding: var(--space-sm) var(--space-md); }
   .editor-workspace { padding: var(--space-sm); }
 }
 
