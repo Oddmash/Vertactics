@@ -5,7 +5,7 @@ import { Canvas, useThree } from '@react-three/fiber';
 import { Component, useLayoutEffect, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { BoxGeometry } from 'three';
-import { mapBounds, terrainBlocks } from '../domain/map';
+import { mapBounds, terrainBlocks, visibleTerrainForLayer } from '../domain/map';
 import type { MapDefinition, WorldPoint } from '../domain/map';
 import type { HeroPlacement } from '../domain/strategy';
 import tokens from '../theme/tokens.json';
@@ -51,19 +51,20 @@ type Props = {
   annotations: Annotation[];
   selectedAnnotationId: string | null;
   snap: boolean;
+  layerId: string;
   onSelectHero: (id: string) => void;
   onEditSurface?: (position: WorldPoint) => void;
 };
 
 const MapViewport = ({
   map, mode, reset, selectedId, onSelect, heroes, selectedHeroId, onSelectHero, onEditSurface,
-  annotations, selectedAnnotationId, snap,
+  annotations, selectedAnnotationId, snap, layerId,
 }: Props) => {
   const bounds = useMemo(() => mapBounds(map.terrain), [map]);
-  const blocks = useMemo(() => map.terrain.map((terrain) => ({
+  const blocks = useMemo(() => visibleTerrainForLayer(map.terrain, layerId).map((terrain) => ({
     terrain,
     blocks: terrainBlocks(terrain),
-  })), [map]);
+  })), [map, layerId]);
   const gridSize = Math.ceil(Math.max(
     bounds.max[0] - bounds.min[0],
     bounds.max[2] - bounds.min[2],

@@ -6,6 +6,7 @@ export type WorldPoint = [x: number, y: number, z: number];
 type TerrainBase = {
   id: string;
   name: string;
+  layerId?: string;
   origin: WorldPoint;
 };
 
@@ -23,11 +24,14 @@ type Stairs = TerrainBase & {
 
 export type Terrain = Box | Stairs;
 
+export type MapLayer = { id: string; name: string };
+
 export type MapDefinition = {
   schemaVersion: 1;
   id: string;
   name: string;
   terrain: Terrain[];
+  layers?: MapLayer[];
 };
 
 export type TerrainBlock = { center: WorldPoint; size: WorldPoint };
@@ -46,20 +50,21 @@ const parseTerrain = (value: unknown, index: number): Terrain => {
   const path = `terrain[${index}]`;
   if (!isRecord(value)) throw new Error(`Invalid ${path}`);
 
-  const { id, kind, name, origin, size, steps, risesToward } = value;
-  if (!isName(id) || !isName(name) || !isWorldPoint(origin) ||
+  const { id, kind, name, origin, size, steps, risesToward, layerId } = value;
+  if (!isName(id) || !isName(name) || (layerId !== undefined && !isName(layerId)) || !isWorldPoint(origin) ||
     !isWorldPoint(size) || size.some((dimension) => dimension <= 0) ||
     size.some((dimension, axis) => !Number.isFinite(dimension + origin[axis]!))) {
     throw new Error(`Invalid bounds or metadata for ${path}`);
   }
 
+  const layer = layerId === undefined ? {} : { layerId };
   if (kind === 'floor' || kind === 'wall' || kind === 'platform') {
-    return { id, name, kind, origin, size };
+    return { id, name, kind, origin, size, ...layer };
   }
   if (kind === 'stairs' && typeof steps === 'number' &&
     Number.isInteger(steps) && steps >= 2 && steps <= 64 &&
     (risesToward === '+x' || risesToward === '-x' || risesToward === '+z' || risesToward === '-z')) {
-    return { id, name, kind, origin, size, steps, risesToward };
+    return { id, name, kind, origin, size, ...layer, steps, risesToward };
   }
   throw new Error(`Invalid kind or step settings for ${path}`);
 };
@@ -74,7 +79,16 @@ export const parseMap = (value: unknown): MapDefinition => {
   if (new Set(terrain.map(({ id }) => id)).size !== terrain.length) {
     throw new Error('Duplicate terrain id');
   }
-  return { schemaVersion: 1, id: value.id, name: value.name, terrain };
+  if (value.layers !== undefined && !Array.isArray(value.layers)) throw new Error('Invalid map layers');
+  const layers = Array.from(value.layers ?? [], (item: unknown, index): MapLayer => {
+    if (!isRecord(item) || !isName(item.id) || !isName(item.name)) throw new Error(`Invalid layers[${index}]`);
+    return { id: item.id, name: item.name };
+  });
+  const layerIds = new Set(layers.map(({ id }) => id));
+  if (layerIds.size !== layers.length || terrain.some(({ layerId }) => layerId !== undefined && !layerIds.has(layerId))) {
+    throw new Error('Duplicate or unknown map layer ID');
+  }
+  return { schemaVersion: 1, id: value.id, name: value.name, terrain, ...(layers.length ? { layers } : {}) };
 };
 
 const blockAt = ([x, y, z]: WorldPoint, size: WorldPoint): TerrainBlock => ({
@@ -100,6 +114,9 @@ export const terrainBlocks = (terrain: Terrain): TerrainBlock[] => {
     return blockAt(stepOrigin, stepSize);
   });
 };
+
+export const visibleTerrainForLayer = (terrain: Terrain[], layerId: string) =>
+  terrain.filter((item) => !layerId || !item.layerId || item.layerId === layerId);
 
 export const topElevation = ({ origin, size }: Terrain) => origin[1] + size[1];
 

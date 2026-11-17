@@ -5,7 +5,7 @@ import { mapBounds, parseMap, terrainBlocks, topElevation } from './map';
 describe('map schema', () => {
   it('loads the versioned blockout and computes its world bounds', () => {
     const map = parseMap(mapJson);
-    expect(map.terrain).toHaveLength(9);
+    expect(map.terrain).toHaveLength(10);
     expect(mapBounds(map.terrain)).toEqual({
       min: [-18, -0.65, -12],
       max: [18, 4, 12],
@@ -17,6 +17,14 @@ describe('map schema', () => {
     expect(() => parseMap({ ...mapJson, schemaVersion: 2 })).toThrow(/unsupported/);
     expect(() => parseMap({ ...mapJson, terrain: [mapJson.terrain[0], mapJson.terrain[0]] }))
       .toThrow(/Duplicate terrain id/);
+  });
+
+  it('validates layer references and keeps older maps loadable', () => {
+    expect(parseMap(mapJson).layers?.map(({ id }) => id)).toEqual(['ground', 'upper']);
+    expect(() => parseMap({ ...mapJson, layers: [] })).toThrow(/layer ID/);
+    expect(() => parseMap({ ...mapJson, layers: [mapJson.layers[0], mapJson.layers[0]] })).toThrow(/layer ID/);
+    expect(parseMap({ ...mapJson, layers: undefined, terrain: [{ ...mapJson.terrain[0], layerId: undefined }] }).layers)
+      .toBeUndefined();
   });
 
   it('rejects invalid vectors, nonpositive sizes, and invalid stairs', () => {

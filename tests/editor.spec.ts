@@ -1,3 +1,4 @@
+import { PerspectiveCamera, Vector3 } from 'three';
 import { expect, test } from '@playwright/test';
 
 test('renders and manipulates the same elevated terrain in both views', async ({ page }, testInfo) => {
@@ -289,4 +290,55 @@ test('snaps a placement, locks edits, and keeps hidden layers in the strategy', 
   await expect(canvas).toHaveCSS('cursor', 'crosshair');
   await page.mouse.click(box.x + box.width / 2 - 9.4 / scale, box.y + box.height / 2 + 2.94 / scale);
   await expect(inspector.getByText('-9, 2, 3', { exact: true })).toBeVisible();
+});
+
+
+test('picks stacked floors and places and selects heroes in both views', async ({ page }) => {
+  await page.goto('/');
+  const canvas = page.getByTestId('viewport').locator('canvas');
+  const inspector = page.getByRole('complementary', { name: '지형 정보' });
+  const layer = page.getByLabel('표시 층');
+  const place = page.getByRole('button', { name: '배치 시작' });
+  await page.getByRole('button', { name: '2D 탑다운' }).click();
+  await expect(canvas).toHaveAttribute('data-view-mode', '2d');
+  const box = await canvas.boundingBox();
+  if (!box) throw new Error('Canvas has no bounds');
+  const scale = Math.max(36 / box.width, 24 / box.height) * 1.22;
+  const clickTopDown = (x: number, z: number) =>
+    page.mouse.click(box.x + box.width / 2 + x / scale, box.y + box.height / 2 + z / scale);
+  await clickTopDown(0, -5.5);
+  await expect(inspector.getByRole('heading', { name: '상층 통로' })).toBeVisible();
+  await layer.selectOption('ground');
+  await expect(page.getByRole('button', { name: /상층 통로/ })).toHaveCount(0);
+  await place.click();
+  await expect(canvas).toHaveCSS('cursor', 'crosshair');
+  await clickTopDown(0, -5.5);
+  await expect(inspector.getByText('0 u', { exact: true })).toBeVisible();
+  await clickTopDown(5, 9);
+  await expect(inspector.getByRole('heading', { name: '중앙 바닥' })).toBeVisible();
+  await clickTopDown(0, -5.5);
+  await expect(inspector.getByRole('heading', { name: '트레이서' })).toBeVisible();
+
+  await page.getByRole('button', { name: '3D 원근' }).click();
+  await expect(canvas).toHaveAttribute('data-view-mode', '3d');
+  await page.getByRole('checkbox', { name: '격자 스냅' }).check();
+  const perspective = new PerspectiveCamera(39, box.width / box.height, 0.072, 432);
+  perspective.position.set(36 * 0.62, 1.675 + 36 * 0.68, 36 * 0.85);
+  perspective.lookAt(0, 1.675, 0);
+  perspective.updateMatrixWorld();
+  const clickPerspective = (x: number, y: number, z: number) => {
+    const point = new Vector3(x, y, z).project(perspective);
+    return page.mouse.click(box.x + (point.x + 1) * box.width / 2, box.y + (1 - point.y) * box.height / 2);
+  };
+  await place.click();
+  await expect(canvas).toHaveCSS('cursor', 'crosshair');
+  await clickPerspective(0, 0, 0);
+  await expect(inspector.getByText('0, 0, 0', { exact: true })).toBeVisible();
+  await clickPerspective(5, 0, 6);
+  await clickPerspective(0, 0.3, 0);
+  await expect(inspector.getByText('0, 0, 0', { exact: true })).toBeVisible();
+  await inspector.getByRole('button', { name: '이동', exact: true }).click();
+  await expect(canvas).toHaveCSS('cursor', 'crosshair');
+  await clickPerspective(-3, 0, 3);
+  await expect(inspector.getByText('-3, 0, 3', { exact: true })).toBeVisible();
 });

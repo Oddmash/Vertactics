@@ -2,7 +2,7 @@ import { useReducer, useState } from 'react';
 import type { Annotation } from '../domain/annotation';
 import AnnotationTools from './annotation-tools';
 import type { SurfacePick } from './annotation-tools';
-import { mapBounds, terrainKinds, topElevation } from '../domain/map';
+import { mapBounds, terrainKinds, topElevation, visibleTerrainForLayer } from '../domain/map';
 import type { TerrainKind, WorldPoint } from '../domain/map';
 import { createStrategy } from '../domain/strategy';
 import type { Team } from '../domain/strategy';
@@ -33,6 +33,8 @@ const formatElevation = (value: number) => `${value > 0 ? '+' : ''}${formatNumbe
 const Editor = () => {
   const [mode, setMode] = useState<ViewMode>('3d');
   const [reset, setReset] = useState(0);
+  const [layerId, setLayerId] = useState('');
+  const visibleTerrain = visibleTerrainForLayer(sampleMap.terrain, layerId);
   const [snap, setSnap] = useState(false);
   const [locked, setLocked] = useState(false);
   const [showHeroes, setShowHeroes] = useState(true);
@@ -49,7 +51,7 @@ const Editor = () => {
   const [history, dispatch] = useReducer(reduceStrategyHistory, sampleMap.id, (mapId) =>
     createStrategyHistory(createStrategy('local-draft', mapId, '새 전략')));
   const { heroes, annotations } = history.present;
-  const selected = sampleMap.terrain.find(({ id }) => id === selectedId);
+  const selected = visibleTerrain.find(({ id }) => id === selectedId);
   const selectedHero = heroes.find(({ id }) => id === selectedHeroId);
 
   const selectTerrain = (id: string | null) => {
@@ -113,10 +115,10 @@ const Editor = () => {
         <aside className="terrain-panel panel" aria-labelledby="terrain-title">
           <div className="panel-heading">
             <h2 id="terrain-title">지형 목록</h2>
-            <span className="count">{sampleMap.terrain.length}</span>
+            <span className="count">{visibleTerrain.length}</span>
           </div>
           <ul className="terrain-list">
-            {sampleMap.terrain.map((terrain) => (
+            {visibleTerrain.map((terrain) => (
               <li key={terrain.id}>
                 <button
                   type="button"
@@ -171,6 +173,13 @@ const Editor = () => {
             </div>
           </div>
           <div className="view-options" role="group" aria-label="편집 및 표시 설정">
+            {sampleMap.layers && <label>표시 층 <select value={layerId} onChange={(event) => {
+              setLayerId(event.target.value);
+              selectTerrain(null);
+            }}>
+              <option value="">모든 층</option>
+              {sampleMap.layers.map(({ id, name }) => <option key={id} value={id}>{name}</option>)}
+            </select></label>}
             <label><input type="checkbox" checked={snap} onChange={(event) => setSnap(event.target.checked)} /> 격자 스냅</label>
             <label><input type="checkbox" checked={locked} onChange={(event) => {
               setTool(null);
@@ -188,6 +197,7 @@ const Editor = () => {
           <div className="viewport" data-testid="viewport">
             <MapViewport
               map={sampleMap}
+              layerId={layerId}
               mode={mode}
               reset={reset}
               selectedId={selectedId}
