@@ -578,7 +578,8 @@ const Editor = () => {
             ) : <p className="empty-selection">지도 또는 지형 목록에서 블록을 선택하세요.</p>}
           </div>
           {(measuring || first) && <section className="hero-tools" aria-label="측정 결과">
-            {distance ? <dl>
+            {distance && first && second ? <dl>
+              <div><dt>지점 높이</dt><dd>시작 {formatElevation(first[1])} · 끝 {formatElevation(second[1])}</dd></div>
               <div><dt>수평 거리</dt><dd>{formatNumber(distance.horizontal)} u</dd></div>
               <div><dt>높이 차</dt><dd>{formatElevation(distance.rise)}</dd></div>
               <div><dt>직선 거리</dt><dd>{formatNumber(distance.distance)} u</dd></div>
