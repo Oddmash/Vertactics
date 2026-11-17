@@ -54,6 +54,7 @@ type Props = {
   selectedTerrainIds: ReadonlySet<string>;
   onSelect: (id: string | null, extend?: boolean) => void;
   heroes: HeroPlacement[];
+  heroView?: HeroPlacement;
   sightline: Sightline | null;
   abilities: AbilityPlacement[];
   abilityPreview?: { hero: HeroPlacement; settings: AbilityPreviewSettings };
@@ -70,7 +71,7 @@ type Props = {
 
 const MapViewport = ({
   map, mode, reset, selectedTerrainIds, onSelect, heroes, selectedHeroId, onSelectHero, onEditSurface,
-  annotations, selectedAnnotationId, snap, layerId, onDragSurface, onDropSurface, abilities, abilityPreview, sightline,
+  annotations, selectedAnnotationId, snap, layerId, onDragSurface, onDropSurface, abilities, abilityPreview, sightline, heroView,
 }: Props) => {
   const bounds = useMemo(() => mapBounds(map.terrain), [map]);
   const blocks = useMemo(() => visibleTerrainForLayer(map.terrain, layerId).map((terrain) => ({
@@ -99,7 +100,7 @@ const MapViewport = ({
         <ambientLight intensity={1.15} />
         <directionalLight position={[-15, 24, 10]} intensity={1.5} />
         <directionalLight position={[18, 8, -15]} intensity={0.35} />
-        <MapCamera mode={mode} bounds={bounds} reset={reset} pointerEditing={Boolean(onDragSurface)} />
+        <MapCamera mode={mode} bounds={bounds} reset={reset} heroView={heroView} pointerEditing={Boolean(onDragSurface)} />
         <SurfaceCursor editing={Boolean(onEditSurface || onDragSurface)} />
         {onDragSurface && onDropSurface && <SurfaceDrag snap={snap} onPreview={onDragSurface} onFinish={onDropSurface} />}
         <gridHelper
@@ -154,7 +155,7 @@ const MapViewport = ({
         />}
         {sightline && <MapSightline {...sightline} />}
         <MapAnnotations items={annotations} selectedId={selectedAnnotationId} />
-        {heroes.map(({ id, position, yaw, team }) => (
+        {heroes.filter(({ id }) => id !== heroView?.id).map(({ id, position, yaw, team }) => (
           <group
             key={id}
             position={position}

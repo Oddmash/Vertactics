@@ -2,6 +2,8 @@ import { useLayoutEffect, useMemo, useRef } from 'react';
 import { useThree } from '@react-three/fiber';
 import { MOUSE, OrthographicCamera, PerspectiveCamera, TOUCH, Vector3 } from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { heroEyeHeight } from '../domain/strategy';
+import type { HeroPlacement } from '../domain/strategy';
 import type { mapBounds } from '../domain/map';
 
 export type ViewMode = '2d' | '3d';
@@ -11,10 +13,12 @@ type Props = {
   bounds: ReturnType<typeof mapBounds>;
   reset: number;
   pointerEditing: boolean;
+  heroView?: HeroPlacement;
 };
 
-const MapCamera = ({ mode, bounds, reset, pointerEditing }: Props) => {
+const MapCamera = ({ mode, bounds, reset, pointerEditing, heroView }: Props) => {
   const { gl, set, get, invalidate, size } = useThree();
+  const heroCamera = useMemo(() => Object.assign(new PerspectiveCamera(66), { manual: true }), []);
   const controls = useRef<OrbitControls | null>(null);
   const camera = useMemo(() => {
     const view = mode === '2d' ? new OrthographicCamera() : new PerspectiveCamera(39);
@@ -58,8 +62,8 @@ const MapCamera = ({ mode, bounds, reset, pointerEditing }: Props) => {
   }, [camera, get, gl, invalidate, mode, set, span]);
 
   useLayoutEffect(() => {
-    if (controls.current) controls.current.enabled = !pointerEditing;
-  }, [camera, pointerEditing, span]);
+    if (controls.current) controls.current.enabled = !pointerEditing && !heroView;
+  }, [camera, heroView, pointerEditing, span]);
 
   useLayoutEffect(() => {
     const target = new Vector3(...bounds.center);
@@ -97,9 +101,29 @@ const MapCamera = ({ mode, bounds, reset, pointerEditing }: Props) => {
       camera.fov = verticalFov * 180 / Math.PI;
     }
     camera.updateProjectionMatrix();
-    gl.domElement.dataset.viewMode = mode;
     invalidate();
-  }, [aspect, camera, gl, invalidate, mode, spanX, spanZ]);
+  }, [aspect, camera, invalidate, spanX, spanZ]);
+
+  useLayoutEffect(() => {
+    gl.domElement.dataset.viewMode = heroView ? 'hero' : mode;
+    if (!heroView) return;
+    const [x, y, z] = heroView.position;
+    const yaw = heroView.yaw * Math.PI / 180;
+    heroCamera.position.set(x, y + heroEyeHeight, z);
+    heroCamera.lookAt(x + Math.sin(yaw), y + heroEyeHeight, z - Math.cos(yaw));
+    heroCamera.aspect = aspect || 1;
+    heroCamera.near = 0.05;
+    heroCamera.far = span * 12;
+    heroCamera.updateProjectionMatrix();
+    heroCamera.updateMatrixWorld();
+    set({ camera: heroCamera });
+    invalidate();
+
+    return () => {
+      if (get().camera === heroCamera) set({ camera });
+      invalidate();
+    };
+  }, [aspect, camera, get, gl, heroCamera, heroView, invalidate, mode, set, span]);
 
   return null;
 };

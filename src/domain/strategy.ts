@@ -5,6 +5,8 @@ import type { Annotation } from './annotation';
 import { isWorldPoint } from './map';
 import type { WorldPoint } from './map';
 
+export const heroEyeHeight = 1.6;
+
 export const teams = ['attack', 'defense'] as const;
 export type Team = (typeof teams)[number];
 

@@ -13,7 +13,7 @@ import AnnotationTools from './annotation-tools';
 import type { SurfacePick } from './annotation-tools';
 import { mapBounds, mapSchemaVersion, terrainKinds, parseMap, topElevation, visibleTerrainForLayer } from '../domain/map';
 import type { MapDefinition, MapLayer, Terrain, TerrainKind, WorldPoint } from '../domain/map';
-import { createStrategy } from '../domain/strategy';
+import { createStrategy, heroEyeHeight } from '../domain/strategy';
 import type { Team } from '../domain/strategy';
 import { createStrategyHistory, reduceStrategyHistory } from '../domain/strategy-history';
 import type { StrategyAction, StrategyHistory } from '../domain/strategy-history';
@@ -46,10 +46,9 @@ const formatNumber = (value: number) => new Intl.NumberFormat('ko-KR', {
 }).format(value);
 const formatElevation = (value: number) => `${value > 0 ? '+' : ''}${formatNumber(value)} u`;
 
-const probeEyeHeight = 1.6;
 const exposureLabels = { blocked: '완전 차단', partial: '부분 노출', clear: '개방' };
 const sampleLabels = { lower: '하단', middle: '중단', upper: '상단' };
-const sightOrigin = ([x, y, z]: WorldPoint): WorldPoint => [x, y + probeEyeHeight, z];
+const sightOrigin = ([x, y, z]: WorldPoint): WorldPoint => [x, y + heroEyeHeight, z];
 
 const Editor = () => {
   const [catalogue, setCatalogue] = useState(maps);
@@ -74,6 +73,7 @@ const Editor = () => {
   const [mapHistory, setMapHistory] = useState<Record<string, { past: MapDefinition[]; future: MapDefinition[] }>>({});
   const timeline = Object.hasOwn(mapHistory, mapId) ? mapHistory[mapId]! : { past: [], future: [] };
   const importRequest = useRef(0);
+  const [heroViewId, setHeroViewId] = useState<string>();
   const [mode, setMode] = useState<ViewMode>('3d');
   const [reset, setReset] = useState(0);
   const [layerId, setLayerId] = useState('');
@@ -104,6 +104,7 @@ const Editor = () => {
     setDragPreview(null);
     setHeroTool(next);
     setProbeTool(null);
+    setHeroViewId(undefined);
     setSightPoints((points) => points.length === 2 ? points : []);
   }, []);
   const initialHistory = useMemo(() => createStrategyHistory(createStrategy('local-draft', mapId, '새 전략')), [mapId]);
@@ -225,6 +226,7 @@ const Editor = () => {
   const selected = visibleTerrain.find(({ id }) => id === selectedId);
   const selectedHero = heroes.find(({ id }) => id === selectedHeroId);
 
+  const heroView = !mapEditing && showHeroes && selectedHero?.id === heroViewId ? selectedHero : undefined;
   const selectedHeroProfile = selectedHero && getHero(selectedHero.heroId);
   const previewKey = selectedHero ? JSON.stringify([mapId, selectedHero.id]) : '';
   const activeAbility = abilityPreviews[previewKey];
@@ -255,11 +257,13 @@ const Editor = () => {
       }
     } else setSelectedId(id);
     setSelectedHeroId(null);
+    setHeroViewId(undefined);
   };
 
   const selectHero = (id: string) => {
     setSelectedId(null);
     setSelectedHeroId(id);
+    setHeroViewId((current) => current === id ? current : undefined);
   };
 
   const selectAnnotation = (id: string) => {
@@ -315,7 +319,7 @@ const Editor = () => {
 
   return (
     <div className="editor" onKeyDown={(event) => {
-      if (event.key === 'Escape' && (tool || annotationPick || abilityPick || probeTool)) {
+      if (event.key === 'Escape' && (heroView || tool || annotationPick || abilityPick || probeTool)) {
         event.preventDefault();
         setTool(null);
         return;
@@ -405,16 +409,18 @@ const Editor = () => {
                     key={view}
                     type="button"
                     aria-label={viewNames[view]}
-                    aria-pressed={mode === view}
-                    onClick={() => setMode(view)}
+                    aria-pressed={!heroView && mode === view}
+                    onClick={() => { setHeroViewId(undefined); setMode(view); }}
                   >
                     {view.toUpperCase()}
                   </button>
                 ))}
               </div>
-              <button className="reset-button" type="button" onClick={() => setReset((value) => value + 1)}>
-                시점 초기화
-              </button>
+              {heroView
+                ? <button className="reset-button" type="button" onClick={() => setHeroViewId(undefined)}>이전 시점으로</button>
+                : <button className="reset-button" type="button" onClick={() => setReset((value) => value + 1)}>
+                  시점 초기화
+                </button>}
             </div>
           </div>
           <div className="view-options" role="group" aria-label="편집 및 표시 설정">
@@ -458,6 +464,7 @@ const Editor = () => {
               map={map}
               layerId={layerId}
               mode={mode}
+              heroView={heroView}
               reset={reset}
               selectedTerrainIds={selectedTerrainIds}
               heroes={!mapEditing && showHeroes ? heroes.map((hero) =>
@@ -479,12 +486,14 @@ const Editor = () => {
               onDragSurface={!locked && tool?.kind === 'drag' ? setDragPreview : undefined}
               onDropSurface={!locked && tool?.kind === 'drag' ? finishDrag : undefined}
             />
-            <span className="view-label" aria-hidden="true">{viewNames[mode]}</span>
-            {mode === '2d' && <span className="north-label" aria-label="위쪽은 북쪽">↑ N</span>}
+            <span className="view-label" aria-hidden="true">{heroView ? `${heroName(heroView.heroId)} 시점` : viewNames[mode]}</span>
+            {!heroView && mode === '2d' && <span className="north-label" aria-label="위쪽은 북쪽">↑ N</span>}
           </div>
           <footer className="viewport-footer">
-            <span>{mode === '2d' ? '드래그로 이동' : '드래그로 회전 · 우클릭 드래그로 이동'}</span>
-            <span>휠 또는 핀치로 확대·축소</span>
+            {heroView ? <span>영웅의 눈높이와 배치 방향 · Esc로 종료</span> : <>
+              <span>{mode === '2d' ? '드래그로 이동' : '드래그로 회전 · 우클릭 드래그로 이동'}</span>
+              <span>휠 또는 핀치로 확대·축소</span>
+            </>}
           </footer>
         </section>
         <aside className="inspector-panel panel" aria-labelledby="inspector-title">
@@ -550,6 +559,10 @@ const Editor = () => {
                     </details>
                   </>}
                 </div>}
+                {showHeroes && <button className="reset-button" type="button" aria-pressed={Boolean(heroView)} onClick={() => {
+                  setTool(null);
+                  if (!heroView) setHeroViewId(selectedHero.id);
+                }}>영웅 시점</button>}
                 <fieldset className="hero-actions edit-controls" disabled={locked || !showHeroes}>
                   <button className="reset-button" type="button" onClick={() => setTool({ kind: 'move', id: selectedHero.id })}>이동</button>
                   <button className="reset-button" type="button" onClick={() => setTool({ kind: 'drag', id: selectedHero.id })}>드래그 이동</button>
@@ -587,7 +600,7 @@ const Editor = () => {
             {first && <button type="button" className="reset-button" onClick={() => setMeasurement([])}>측정 지우기</button>}
           </section>}
           {(sightPicking || sightFirst) && <section className="hero-tools" aria-label="지점 간 시야 결과">
-            <p>두 지면에서 {probeEyeHeight} u 위를 연결합니다.</p>
+            <p>두 지면에서 {heroEyeHeight} u 위를 연결합니다.</p>
             <p role="status">{terrainSight
               ? terrainSight.sight ? `시야 차단: ${terrainSight.sight.name}` : '시야 개방'
               : sightFirst ? '시야 목표점을 선택하세요.' : '시야 시작점을 선택하세요.'}</p>
