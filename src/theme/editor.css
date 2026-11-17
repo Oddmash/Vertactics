@@ -279,3 +279,9 @@ ul { padding: 0; list-style: none; }
 .terrain-swatch.drop-zone { background: var(--color-drop-zone); }
 .spatial-probe { display: grid; gap: var(--space-xs); margin-block: var(--space-sm); font-size: 12px; }
 .spatial-probe select { max-width: 100%; }
+
+
+.hero-tools .strategy-name { display: grid; grid-template-columns: minmax(0, 1fr); }
+.strategy-name input { width: 100%; min-width: 0; }
+.terrain-button.saved-strategy { grid-template-columns: minmax(0, 1fr); }
+.saved-strategy span, .saved-strategy small { white-space: normal; overflow-wrap: anywhere; }
