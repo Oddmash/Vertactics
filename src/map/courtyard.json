@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "id": "courtyard",
   "name": "훈련장 안뜰",
   "metadata": { "verification": "synthetic" },

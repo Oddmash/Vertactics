@@ -4,7 +4,7 @@ import { rotateTerrain, snapTerrain } from '../domain/terrain-edit';
 import TerrainTools from './terrain-tools';
 import AnnotationTools from './annotation-tools';
 import type { SurfacePick } from './annotation-tools';
-import { mapBounds, terrainKinds, parseMap, topElevation, visibleTerrainForLayer } from '../domain/map';
+import { mapBounds, mapSchemaVersion, terrainKinds, parseMap, topElevation, visibleTerrainForLayer } from '../domain/map';
 import type { MapDefinition, MapLayer, Terrain, TerrainKind, WorldPoint } from '../domain/map';
 import { createStrategy } from '../domain/strategy';
 import type { Team } from '../domain/strategy';
@@ -156,7 +156,7 @@ const Editor = () => {
   const createMap = () => {
     const id = crypto.randomUUID();
     const created = parseMap({
-      schemaVersion: 1, id, name: '새 지도', metadata: { verification: 'synthetic' },
+      schemaVersion: mapSchemaVersion, id, name: '새 지도', metadata: { verification: 'synthetic' },
       terrain: [{ id: 'base', name: '기본 바닥', kind: 'floor', origin: [-8, -1, -8], size: [16, 1, 16] }],
     });
     setCatalogue((current) => [...current, created]);

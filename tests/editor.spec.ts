@@ -1,3 +1,4 @@
+import { readFile } from 'node:fs/promises';
 import { PerspectiveCamera, Vector3 } from 'three';
 import { expect, test } from '@playwright/test';
 
@@ -410,7 +411,9 @@ test('switches maps without losing plans and registers validated JSON', async ({
   await expect(page.getByRole('heading', { name: '사용자 지도' })).toBeVisible();
   const download = page.waitForEvent('download');
   await page.getByRole('link', { name: '지도 JSON 저장' }).click();
-  expect((await download).suggestedFilename()).toBe('custom.json');
+  const exported = await download;
+  expect(exported.suggestedFilename()).toBe('custom.json');
+  expect(JSON.parse(await readFile(await exported.path(), 'utf8'))).toMatchObject({ schemaVersion: 2, id: 'custom' });
 });
 
 test('creates, edits and restores terrain using the shared map view', async ({ page }) => {

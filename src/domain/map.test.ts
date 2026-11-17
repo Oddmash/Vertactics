@@ -14,7 +14,7 @@ describe('map schema', () => {
   });
 
   it('rejects unsupported versions and duplicate terrain IDs', () => {
-    expect(() => parseMap({ ...mapJson, schemaVersion: 2 })).toThrow(/unsupported/);
+    expect(() => parseMap({ ...mapJson, schemaVersion: 3 })).toThrow(/unsupported/);
     expect(() => parseMap({ ...mapJson, terrain: [mapJson.terrain[0], mapJson.terrain[0]] }))
       .toThrow(/Duplicate terrain id/);
   });
@@ -89,4 +89,14 @@ it('validates terrain properties and preserves the doorway opening', () => {
     { center: [5, 4.5, 1], size: [10, 1, 2] },
   ]);
   expect(() => parseMap({ ...map, terrain: [{ ...doorway, material: 'url()' }] })).toThrow(/metadata/);
+});
+
+
+it('migrates v1 maps to v2 without changing terrain, layers or metadata', () => {
+  const legacy = { ...mapJson, schemaVersion: 1 };
+  const migrated = parseMap(legacy);
+  expect(legacy.schemaVersion).toBe(1);
+  expect(migrated).toEqual(parseMap(mapJson));
+  expect(migrated.schemaVersion).toBe(2);
+  expect(parseMap(JSON.parse(JSON.stringify(migrated)))).toEqual(migrated);
 });

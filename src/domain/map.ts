@@ -38,8 +38,10 @@ export const verificationStates = ['synthetic', 'unverified', 'verified'] as con
 export type MapVerification = (typeof verificationStates)[number];
 export type MapMetadata = { verification: MapVerification; source?: string };
 
+export const mapSchemaVersion = 2;
+
 export type MapDefinition = {
-  schemaVersion: 1;
+  schemaVersion: typeof mapSchemaVersion;
   id: string;
   name: string;
   terrain: Terrain[];
@@ -95,7 +97,7 @@ const parseTerrain = (value: unknown, index: number): Terrain => {
 };
 
 export const parseMap = (value: unknown): MapDefinition => {
-  if (!isRecord(value) || value.schemaVersion !== 1 || !isName(value.id) ||
+  if (!isRecord(value) || (value.schemaVersion !== 1 && value.schemaVersion !== mapSchemaVersion) || !isName(value.id) ||
     !isName(value.name) || !Array.isArray(value.terrain) || value.terrain.length === 0) {
     throw new Error('Invalid map definition or unsupported schema version');
   }
@@ -125,7 +127,7 @@ export const parseMap = (value: unknown): MapDefinition => {
     parsedMetadata = { verification, ...(source === undefined ? {} : { source }) };
   }
   return {
-    schemaVersion: 1, id: value.id, name: value.name, terrain,
+    schemaVersion: mapSchemaVersion, id: value.id, name: value.name, terrain,
     ...(layers.length ? { layers } : {}),
     ...(parsedMetadata ? { metadata: parsedMetadata } : {}),
   };
