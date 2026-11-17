@@ -20,7 +20,7 @@ In **Tactical markers**, connect waypoints into a route or add a line, circle, a
 
 Use the editor controls to snap placements to the grid, lock edits, or hide heroes and markers while keeping them in the strategy. Press **Esc** to cancel an active placement. **Ctrl/⌘+Z** undoes an edit, and **Ctrl/⌘+Shift+Z** redoes it.
 
-In the app’s **Local strategy** panel, save the current map and strategy together. After reopening Vertactics in the same browser, review the saved draft and restore it to keep editing. The browser keeps one draft.
+In **Local strategy**, save the current map and plan under a name. Use the saved-strategy list to reopen, duplicate, or delete plans in the same browser. Save under a new name to keep a separate copy while editing.
 
 ## Build a map
 
