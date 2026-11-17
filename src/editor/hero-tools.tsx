@@ -35,7 +35,7 @@ const HeroTools = ({
         (team === 'attack' || team === 'defense')) onPlace(hero, team);
     }}>
       <fieldset className="edit-controls" disabled={locked}>
-      <label>영웅 <select name="hero">
+      <label>영웅 <select name="hero" aria-label="영웅">
         {heroRoles.map((role) => (
           <optgroup key={role} label={roleNames[role]}>
             {Object.entries(heroCatalogue).filter(([, hero]) => hero.role === role).map(([id, hero]) => (
