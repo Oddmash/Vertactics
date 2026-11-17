@@ -76,7 +76,13 @@ Record the game build and compare the default map variant with the Vertactics bl
 - High ground: record the relative height and access paths to the two balconies from the plaza.
 - Clearance: record whether the same hero can walk through the arch and hotel entrance and where cover cuts sightlines. Include the hero and screenshots for any mismatch.
 
-Keep the map status unverified until these comparisons are recorded.
+Keep the map status unverified until geometric measurements, physical passage, and sightlines have been compared in the live client.
+
+In a private custom match, record matching endpoints with Workshop’s `Position Of (Event Player)` HUD or the ray-hit position when a surface cannot be stood on. Keep Y as elevation. Record the hero and whether each route passes, and capture the game build, map variant, and screenshot references. [Workshop coordinate capture](https://us.forums.blizzard.com/en/overwatch/t/how-can-i-record-my-spots-coordinates/614247)
+
+Run `node scripts/check-map-survey.mjs src/map/kings-row-point-a.json <survey.json>` to compare horizontal distances and signed rises in game units. The survey contains `mapId`, `gameBuild`, `variant`, `scaleReference`, `gameUnitsPerEditorUnit`, `tolerance`, and `segments`. Each segment contains `id`, `editor`, and `game`, with two ordered `[X, Y, Z]` points in each pair. Calibrate the scale using a separate measured distance. Use `main-arch-width`, `main-arch-height`, `hotel-entry-width`, `hotel-bypass-length`, `attack-balcony-rise`, and `defense-balcony-rise` for the Point A checks. The tool reports missing checkpoints and excess error. Record clearance and obstruction observations alongside its output.
+
+OWLib documents an MIT licence for its tooling. Track the rights for any geometry or artwork separately before including it in a public build. [OWLib](https://github.com/overtools/OWLib) · [Blizzard EULA](https://www.blizzard.com/en-us/legal/bfbbb648-bcc6-4b78-a5c7-e2fe20c135df/blizzard-end-user-license-agreement)
 
 ## Hero catalogue
 

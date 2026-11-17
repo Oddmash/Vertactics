@@ -87,3 +87,11 @@ Playwright는 `dist`의 프로덕션 빌드를 프리뷰 서버로 실행합니�
 ## OWKR 카탈로그
 
 영웅 ID, 한국어 이름, 역할과 기본 내전 전장 목록은 OWKR Match의 `owkr-custom-2026-10-20` 카탈로그를 바탕으로 관리합니다. 능력 이름은 Blizzard 공식 영웅 페이지를 참조합니다. 전장 목록에 내전 지도 31개를 표시하며 왕의 길 A 거점 근사 지도는 기존 저장 ID인 `kings-row-a`로 엽니다. 나머지 항목에는 지형 데이터가 준비 중이라고 표시합니다. [OWKR 카탈로그 출처](https://github.com/Overwatch-KR/owkr-balance/blob/91d786313399dad137b16efba21ad91c7388e05a/domains/draft/shared/default-catalog.ts)
+
+### 왕의 길 A 거점 실측 데이터 대조
+
+비공개 사용자 지정 게임에서 Workshop의 `Position Of (Event Player)` HUD로 좌표를 기록합니다. 서 있을 수 없는 표면은 광선이 처음 닿은 위치를 기록합니다. Y는 높이입니다. 게임 빌드, 전장 변형, 영웅, 통과 여부, 시야와 캡처 출처를 함께 기록합니다. [Workshop 좌표 기록](https://us.forums.blizzard.com/en/overwatch/t/how-can-i-record-my-spots-coordinates/614247)
+
+`node scripts/check-map-survey.mjs src/map/kings-row-point-a.json <survey.json>`으로 게임 단위에서 수평 거리와 높이차를 비교합니다. 측정 JSON에는 `mapId`, `gameBuild`, `variant`, `scaleReference`, `gameUnitsPerEditorUnit`, `tolerance`, `segments`를 넣습니다. 각 구간은 `id`와 시작점·끝점 `[X, Y, Z]` 쌍을 담은 `editor`, `game` 필드로 구성합니다. 별도로 실측한 거리에서 축척을 구합니다. A 거점은 `main-arch-width`, `main-arch-height`, `hotel-entry-width`, `hotel-bypass-length`, `attack-balcony-rise`, `defense-balcony-rise`를 비교합니다. 누락과 오차 초과가 출력되며, 영웅별 통과 여부와 시야 차단은 별도로 실측 기록에 남깁니다.
+
+OWLib 도구는 MIT 라이선스를 명시합니다. 공개 빌드에 지형이나 그림을 넣을 때는 해당 데이터의 사용 권한을 함께 확인합니다. [OWLib](https://github.com/overtools/OWLib) · [Blizzard 이용 약관](https://www.blizzard.com/en-us/legal/bfbbb648-bcc6-4b78-a5c7-e2fe20c135df/blizzard-end-user-license-agreement)

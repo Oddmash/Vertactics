@@ -78,6 +78,7 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 - [x] 4.09 Record acceptable references for the first objective of King's Row
 - [x] 4.10a Build the schematic Point A map, compare its landmarks with public references and verify it in the editor
 - [ ] 4.10b Verify dimensions, elevations and hero clearance against the live game client
+- [ ] 4.10c Compare the Point A Workshop survey with the editor using the [survey checker](development.md#check-kings-row-point-a-in-the-game-client). The live survey is pending.
 - [x] 4.11 Verify floor switching, overlapping selection and map registration, editing and import
 - [x] 4.12 Evaluate GLB and glTF and define loading boundaries if needed
 
