@@ -4,7 +4,7 @@
 
 See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [the development guide](development.md). Check an item when its stated scope has been verified. Track implementation, browser behavior, CI and deployment separately.
 
-**Current phase** Phase 3. Verify direct hero picking and placement in both views, stacked floors, and drag history.
+**Current phase** Phase 4. Extend terrain types, map editing controls, and layer management.
 
 ## Phase 1 · Project setup
 
@@ -47,32 +47,35 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 - [x] 3.04 Provide team colours and explicit team text and shapes
 - [x] 3.05 Select a hero and place it on a valid surface
 - [x] 3.06a Verify 2D placement and high ground movement, then 3D rotation and deletion
-- [ ] 3.06b Verify placement, movement and direct hero picking separately in both views
+- [x] 3.06b Verify placement, movement and direct hero picking separately in both views
 - [x] 3.07a Apply floor and high-ground elevation and reject wall placement
 - [x] 3.07b Verify stair tread placement and elevation above the base floor
-- [ ] 3.07c Verify selection between independently walkable stacked floors
+- [x] 3.07c Verify selection between independently walkable stacked floors
 - [x] 3.08 Show selection, coordinates, elevation, heading and team controls
 - [x] 3.09 Add, edit and delete tactical routes and waypoints
 - [x] 3.10 Edit and display line, circle, area and note markers
 - [x] 3.11 Support snapping, locking, visibility and keyboard actions
 - [x] 3.12a Unit test undo and redo for placement, update and deletion
 - [x] 3.12b Verify undo and redo restores placement elevation in the editor
-- [ ] 3.12c Verify that a continuous drag creates a single history entry
+- [x] 3.12c Verify that a continuous drag creates a single history entry
 - [x] 3.13 Verify that team, position and elevation survive switching to 3D
 
 ## Phase 4 · Map system
 
-- [ ] 4.01 Add metadata, verification states, map registration and selection
-- [ ] 4.02 Add layers and selection and visibility rules for non-active floors
+- [x] 4.01 Add metadata, verification states, map registration and selection
+- [x] 4.02 Add layers and selection and visibility rules for non-active floors
 - [ ] 4.03 Support ramps, buildings, columns, railings, openings and drop zones
 - [ ] 4.04 Add terrain rotation, materials, walkability, collision and sight blockers
-- [ ] 4.05 Share the renderer between map editing and tactical planning
-- [ ] 4.06 Create and open maps, add, delete and duplicate blocks, and select multiple objects
-- [ ] 4.07 Move, rotate, scale, snap and edit terrain and manage layers
-- [ ] 4.08 Support undo and redo, JSON import and export, schema migration and preview
+- [x] 4.05 Share the renderer between map editing and tactical planning
+- [x] 4.06a Create and open maps and add, delete and duplicate blocks
+- [ ] 4.06b Select multiple objects
+- [x] 4.07a Edit terrain dimensions and type
+- [ ] 4.07b Verify position and layer reassignment, then add rotation, snapping and layer definition management
+- [x] 4.08a Support undo and redo, validated JSON import and export, and immediate preview
+- [ ] 4.08b Migrate map documents across schema versions
 - [ ] 4.09 Record acceptable references for the first objective of King's Row
 - [ ] 4.10 Build and compare approaches, high ground, cover, objective, floors and placement areas
-- [ ] 4.11 Verify floor switching, overlapping selection and map registration, editing and import
+- [x] 4.11 Verify floor switching, overlapping selection and map registration, editing and import
 - [ ] 4.12 Evaluate GLB and glTF and define loading boundaries if needed
 
 ## Phase 5 · Heroes and abilities
@@ -137,3 +140,4 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 | CI #13 | Chromium 158 at 1440 × 900. 22 unit tests and two Chromium scenarios passed. Checked terrain picking, hero placement, team, coordinates, elevation and undo/redo. [Screenshots](https://github.com/qtaghdi/Vertactics/actions/runs/44028807455/artifacts/14304237794) |
 | Routes and markers | 24 unit tests and four Chromium scenarios passed. Verified route waypoint editing and undo, marker creation, note editing, and switching views. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44030502710) |
 | Editor controls | 26 unit tests and five Chromium scenarios passed. Verified grid snapping on platforms and stairs, edit lock, keyboard shortcuts and layer visibility. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44031144923) |
+| Phase 3 and map editing | 28 unit tests and nine Chromium scenarios passed. Verified stacked surface picking, 2D and 3D hero editing, a single history entry per drag, map switching and JSON transfer, and block editing with undo and redo. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44032978306) |
