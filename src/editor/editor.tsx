@@ -15,10 +15,11 @@ import type { StrategyAction, StrategyHistory } from '../domain/strategy-history
 import { maps } from '../map';
 import type { ViewMode } from '../render/map-camera';
 import MapViewport from '../render/map-viewport';
-import HeroTools, { heroName, teamNames } from './hero-tools';
-import type { SampleHero } from './hero-tools';
+import HeroTools, { roleNames, teamNames } from './hero-tools';
+import { getHero, heroName } from '../domain/hero-catalogue';
+import type { CatalogueHero } from '../domain/hero-catalogue';
 
-type EditTool = { kind: 'place'; heroId: SampleHero; team: Team } | { kind: 'move' | 'drag'; id: string };
+type EditTool = { kind: 'place'; heroId: CatalogueHero; team: Team } | { kind: 'move' | 'drag'; id: string };
 
 const kindNames: Record<TerrainKind, string> = {
   floor: '바닥',
@@ -188,6 +189,7 @@ const Editor = () => {
   const selected = visibleTerrain.find(({ id }) => id === selectedId);
   const selectedHero = heroes.find(({ id }) => id === selectedHeroId);
 
+  const selectedHeroProfile = selectedHero && getHero(selectedHero.heroId);
   const sightTarget = heroes.find((hero) => hero.id === sightTargetId && hero.id !== selectedHeroId);
   const spatialProbe = selectedHero && sightTarget ? (() => {
     const eye = ([x, y, z]: WorldPoint): WorldPoint => [x, y + 1.6, z];
@@ -422,6 +424,13 @@ const Editor = () => {
                     <div><dt>이동 미리보기 (X, Y, Z)</dt><dd>{dragPreview.map(formatNumber).join(', ')}</dd></div>
                   )}
                 </dl>
+                {selectedHeroProfile && <details>
+                  <summary>영웅 정보 · {roleNames[selectedHeroProfile.role]}</summary>
+                  <ul>
+                    {selectedHeroProfile.abilities.map(({ id, name }) => <li key={id}>{name}</li>)}
+                  </ul>
+                  <a href={selectedHeroProfile.source} target="_blank" rel="noreferrer">Blizzard 영웅 정보</a>
+                </details>}
                 {heroes.length > 1 && <div className="spatial-probe">
                   <label>시야 확인 대상 <select value={sightTarget?.id ?? ''} onChange={(event) => setSightTargetId(event.target.value)}>
                     <option value="">대상 선택</option>

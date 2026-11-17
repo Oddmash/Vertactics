@@ -585,3 +585,21 @@ test('measures height and distance across surfaces and keeps the result through 
   await page.getByRole('button', { name: '측정 지우기' }).click();
   await expect(result.getByText('첫 번째 지점을 선택하세요.')).toBeVisible();
 });
+
+test('shows the selected hero role, official source and abilities', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: '2D 탑다운' }).click();
+  const canvas = page.getByTestId('viewport').locator('canvas');
+  await expect(canvas).toHaveAttribute('data-view-mode', '2d');
+  await page.getByLabel('영웅', { exact: true }).selectOption('ana');
+  await page.getByRole('button', { name: '배치 시작' }).click();
+  await expect(canvas).toHaveCSS('cursor', 'crosshair');
+  await canvas.click();
+  const inspector = page.getByRole('complementary', { name: '지형 정보' });
+  await expect(inspector.getByRole('heading', { name: '아나' })).toBeVisible();
+  await inspector.getByText('영웅 정보 · 지원', { exact: true }).click();
+  await expect(inspector.getByText('Sleep Dart', { exact: true })).toBeVisible();
+  await expect(inspector.getByRole('link', { name: 'Blizzard 영웅 정보' })).toHaveAttribute(
+    'href', 'https://overwatch.blizzard.com/en-us/heroes/ana/',
+  );
+});

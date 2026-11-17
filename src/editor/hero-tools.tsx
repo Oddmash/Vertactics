@@ -1,18 +1,11 @@
 import type { HeroPlacement, Team } from '../domain/strategy';
 
-export const sampleHeroes = {
-  tracer: '트레이서',
-  reinhardt: '라인하르트',
-  ana: '아나',
-};
-
-export type SampleHero = keyof typeof sampleHeroes;
+import { heroCatalogue, heroName, heroRoles, isCatalogueHero } from '../domain/hero-catalogue';
+import type { CatalogueHero, HeroRole } from '../domain/hero-catalogue';
 
 export const teamNames: Record<Team, string> = { attack: '공격팀', defense: '수비팀' };
 
-export const heroName = (id: string) => Object.hasOwn(sampleHeroes, id)
-  ? sampleHeroes[id as SampleHero]
-  : id;
+export const roleNames: Record<HeroRole, string> = { damage: '공격', tank: '돌격', support: '지원' };
 
 type Props = {
   heroes: HeroPlacement[];
@@ -21,7 +14,7 @@ type Props = {
   pendingMessage: string;
   canUndo: boolean;
   canRedo: boolean;
-  onPlace: (heroId: SampleHero, team: Team) => void;
+  onPlace: (heroId: CatalogueHero, team: Team) => void;
   onSelect: (id: string) => void;
   onUndo: () => void;
   onRedo: () => void;
@@ -38,12 +31,18 @@ const HeroTools = ({
       const data = new FormData(event.currentTarget);
       const hero = data.get('hero');
       const team = data.get('team');
-      if (typeof hero === 'string' && Object.hasOwn(sampleHeroes, hero) &&
-        (team === 'attack' || team === 'defense')) onPlace(hero as SampleHero, team);
+      if (typeof hero === 'string' && isCatalogueHero(hero) &&
+        (team === 'attack' || team === 'defense')) onPlace(hero, team);
     }}>
       <fieldset className="edit-controls" disabled={locked}>
       <label>영웅 <select name="hero">
-        {Object.entries(sampleHeroes).map(([id, name]) => <option key={id} value={id}>{name}</option>)}
+        {heroRoles.map((role) => (
+          <optgroup key={role} label={roleNames[role]}>
+            {Object.entries(heroCatalogue).filter(([, hero]) => hero.role === role).map(([id, hero]) => (
+              <option key={id} value={id}>{hero.localizedName}</option>
+            ))}
+          </optgroup>
+        ))}
       </select></label>
       <label>팀 <select name="team">
         {Object.entries(teamNames).map(([id, name]) => <option key={id} value={id}>{name}</option>)}
