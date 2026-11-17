@@ -80,7 +80,7 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 - [ ] 4.10b Verify dimensions, elevations and hero clearance against the live game client
 - [ ] 4.10c Compare the Point A Workshop survey with the editor using the [survey checker](development.md#check-kings-row-point-a-in-the-game-client). The live survey is pending.
 - [ ] 4.10d Survey all 31 competitive maps in the catalogue and build playable 2D layouts. The catalogue links to public overhead references where the source has coverage.
-- [ ] 4.10e Verify the 31 single-surface 2D schematics and whole-map/location camera presets in the editor. Schematic coordinates are placeholders for planning, and the existing King’s Row Point A survey remains a separate map.
+- [ ] 4.10e Confirm the mode-grouped map picker and 2D location selector in the editor. The 31 OWKR artwork cards represent the catalogue. Fifteen have legacy StatBanana overhead references, which need current-build comparison before use as terrain. King’s Row Point A is the existing approximate reference. Old schematic drafts can still be restored.
 - [x] 4.11 Verify floor switching, overlapping selection and map registration, editing and import
 - [x] 4.12 Evaluate GLB and glTF and define loading boundaries if needed
 
@@ -140,7 +140,7 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 - [x] 8.08d Rebuild hero, ability, terrain, and analysis controls around active tool and selection states
 - [x] 8.08e Adapt tool and inspector access for narrow screens and verify touch targets and canvas space
 - [x] 8.08f Verify keyboard, responsive layouts, 2D and 3D view continuity, and save and restore in a browser, then capture the redesigned workspace
-- [ ] 8.08g Add patch-verified ability descriptions and statistics across the hero roster. The sidebar links to official hero profiles and shows sourced descriptions and statistics where verified. Portrait URLs come from the OWKR manifest and point to Blizzard's CDN.
+- [ ] 8.08g Add patch-verified ability descriptions and statistics across the hero roster. The sidebar links to official hero profiles and shows sourced descriptions and statistics where verified. Portrait URLs come from the OWKR manifest and point to Blizzard's CDN. Ability text is bundled. Ability icons currently have pinned artwork references for Ana and Tracer.
 - [x] 8.09a After reviewing the integrated Phase 8 UI, open a separate PR to refactor workspace state and module boundaries around the verified workflows
 - [x] 8.09b Keep map and strategy switching, restoration, and document commands under workspace ownership. Give UI panels the data and actions they need
 - [x] 8.09c Keep world rules and document validation independent of React, rendering, and browser storage. Verify existing editor, playback, and save and restore flows after the refactor

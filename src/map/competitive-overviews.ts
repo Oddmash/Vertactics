@@ -1,4 +1,3 @@
-import { mapSchemaVersion, parseMap } from '../domain/map';
 import type { MapDefinition, WorldPoint } from '../domain/map';
 import owkrCatalogue from '../domain/owkr-catalogue.json';
 
@@ -41,19 +40,6 @@ const fractions: Record<string, readonly (readonly [x: number, z: number])[]> = 
 
 const catalogueById = new Map(owkrCatalogue.maps.map((item) => [item.id, item]));
 
-export const competitiveOverviews = owkrCatalogue.maps.map(({ id, nameKo, nameEn, mode }) => {
-  const wide = mode === 'escort' || mode === 'hybrid' || mode === 'push';
-  const width = wide ? 108 : 88;
-  const depth = wide ? 62 : 72;
-  return parseMap({
-    schemaVersion: mapSchemaVersion,
-    id,
-    name: nameKo,
-    metadata: { verification: 'unverified' },
-    terrain: [{ id: 'overview-board', name: nameEn, kind: 'floor', origin: [-width / 2, -1, -depth / 2], size: [width, 1, depth] }],
-  });
-});
-
 export const competitiveOverview = (map: MapDefinition) => {
   const entry = catalogueById.get(map.id);
   const board = map.terrain.find(({ id, kind }) => id === 'overview-board' && kind === 'floor');
@@ -74,4 +60,20 @@ export const competitiveOverview = (map: MapDefinition) => {
   });
 
   return { entry, locations };
+};
+
+export const terrainLocations = (map: MapDefinition): MapLocation[] => {
+  if (map.id !== 'kings-row-a') return [];
+  const names: Record<string, SiteName> = {
+    gate: ['정면 아치', 'Main arch'],
+    statue: ['광장 동상', 'Plaza statue'],
+    'point-a': ['A 점령 거점', 'Point A'],
+    'hotel-corridor': ['호텔 우회 통로', 'Hotel flank'],
+  };
+  return map.terrain.flatMap(({ id, origin, size }) => {
+    const name = names[id];
+    return name ? [{
+      id, name, point: [origin[0] + size[0] / 2, origin[1] + size[1], origin[2] + size[2] / 2],
+    }] : [];
+  });
 };

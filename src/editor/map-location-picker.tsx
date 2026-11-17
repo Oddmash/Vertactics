@@ -1,5 +1,5 @@
 import type { MapLocation } from '../map/competitive-overviews';
-import { Select } from '../ui/controls';
+import { SelectDropdown } from '../ui/oddmash/select-dropdown';
 import { useLocale } from '../ui/locale';
 
 const MapLocationPicker = ({ locations, value, onChange }: {
@@ -9,15 +9,13 @@ const MapLocationPicker = ({ locations, value, onChange }: {
 }) => {
   const { locale, t } = useLocale();
   return (
-    <label className="location-picker">
-      {t('주요 위치')}
-      <Select value={value} onChange={(event) => onChange(event.target.value)}>
-        <option value="">{t('전장 전체')}</option>
-        {locations.map(({ id, name }) => (
-          <option key={id} value={id}>{name[locale === 'ko' ? 0 : 1]}</option>
-        ))}
-      </Select>
-    </label>
+    <div className="location-picker">
+      <span aria-hidden="true">{t('주요 위치')}</span>
+      <SelectDropdown aria-label={t('주요 위치')} value={value} onValueChange={onChange} options={[
+        { value: '', label: t('전장 전체') },
+        ...locations.map(({ id, name }) => ({ value: id, label: name[locale === 'ko' ? 0 : 1] })),
+      ]} />
+    </div>
   );
 };
 

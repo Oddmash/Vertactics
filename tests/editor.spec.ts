@@ -1,3 +1,4 @@
+import { openMap } from './open-map';
 import { readFile } from 'node:fs/promises';
 import { PerspectiveCamera, Vector3 } from 'three';
 import { expect, test } from '@playwright/test';
@@ -391,7 +392,6 @@ test('commits a continuous hero drag as one undoable edit', async ({ page }) => 
 
 test('switches maps without losing plans and registers validated JSON', async ({ page }) => {
   await page.goto('/');
-  const catalogue = page.getByLabel('지도', { exact: true });
   const canvas = page.getByTestId('viewport').locator('canvas');
   const placements = page.getByRole('list', { name: '배치한 영웅' });
   await page.getByRole('button', { name: '2D 탑다운' }).click();
@@ -402,10 +402,10 @@ test('switches maps without losing plans and registers validated JSON', async ({
   if (!box) throw new Error('Canvas has no bounds');
   await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
   await expect(placements.getByRole('listitem')).toHaveCount(1);
-  await catalogue.selectOption('courtyard');
+  await openMap(page, '훈련장 안뜰');
   await expect(page.getByRole('heading', { name: '훈련장 안뜰' })).toBeVisible();
   await expect(placements).toHaveCount(0);
-  await catalogue.selectOption('elevation-lab');
+  await openMap(page, '고저차 테스트 맵');
   await expect(placements.getByRole('listitem')).toHaveCount(1);
 
   const input = page.getByLabel('지도 JSON 가져오기');
@@ -417,7 +417,6 @@ test('switches maps without losing plans and registers validated JSON', async ({
       terrain: [{ id: 'base', name: '바닥', kind: 'floor', origin: [-4, -1, -4], size: [8, 1, 8] }],
     })),
   });
-  await expect(catalogue).toHaveValue('custom');
   await expect(page.getByRole('heading', { name: '사용자 지도' })).toBeVisible();
   const download = page.waitForEvent('download');
   await page.getByRole('link', { name: '지도 JSON 저장' }).click();
@@ -494,7 +493,7 @@ test('duplicates multiple terrain blocks and undoes them together', async ({ pag
 
 test('places and drags heroes at continuous ramp elevations', async ({ page }) => {
   await page.goto('/');
-  await page.getByLabel('지도', { exact: true }).selectOption('courtyard');
+  await openMap(page, '훈련장 안뜰');
   await page.getByRole('button', { name: '2D 탑다운' }).click();
   const canvas = page.getByTestId('viewport').locator('canvas');
   await expect(canvas).toHaveAttribute('data-view-mode', '2d');
@@ -523,7 +522,7 @@ test('places and drags heroes at continuous ramp elevations', async ({ page }) =
 
 test('opens the approximate Kings Row blockout and places a hero on Point A', async ({ page }, testInfo) => {
   await page.goto('/');
-  await page.getByLabel('지도', { exact: true }).selectOption('kings-row-a');
+  await openMap(page, '왕의 길 열기');
   await expect(page.getByRole('heading', { name: /왕의 길 A 거점/ })).toBeVisible();
   await expect(page.getByText(/미검증 · 40 × 46 u/)).toBeVisible();
   await page.getByRole('button', { name: '2D 탑다운' }).click();
