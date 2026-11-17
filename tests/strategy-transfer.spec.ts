@@ -1,3 +1,4 @@
+import { openMap } from './open-map';
 import { readFile } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
 
@@ -45,7 +46,7 @@ test('saves, restores and transfers a strategy with its map and timed event', as
   expect(download.suggestedFilename()).toBe('round-trip-strategy.json');
   const exported = JSON.parse(await readFile(await download.path(), 'utf8'));
   expect(exported).toMatchObject({ version: 1, map, strategy: { ...strategy, id: expect.any(String) } });
-  await page.getByLabel('지도', { exact: true }).selectOption('elevation-lab');
+  await openMap(page, '고저차 테스트 맵');
   await importJson(exported);
   await files.getByRole('button', { name: '전략 파일 열기' }).click();
   await expect(page.getByRole('heading', { name: map.name })).toBeVisible();

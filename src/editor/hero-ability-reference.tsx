@@ -1,8 +1,6 @@
-import { useEffect, useId, useState } from 'react';
-import { getAbilityPatchReference, getAbilitySummary, getKoreanAbilityName } from '../domain/ability-reference';
+import { useId, useState } from 'react';
+import { getAbilityPatchReference, getAbilitySummary, getKoreanAbilityName, getAbilityIcon } from '../domain/ability-reference';
 import type { CatalogueHero } from '../domain/hero-catalogue';
-import { loadHeroAbilities } from '../domain/live-hero-abilities';
-import type { LiveAbility } from '../domain/live-hero-abilities';
 import { Button } from '../ui/controls';
 import { useLocale } from '../ui/locale';
 
@@ -17,31 +15,17 @@ const HeroAbilityReference = ({ heroId, heroName, source, abilities }: Props) =>
   const { locale, t } = useLocale();
   const title = useId();
   const detailsId = useId();
-  const [remote, setRemote] = useState<LiveAbility[]>();
-  const [loadFailed, setLoadFailed] = useState(false);
   const [hovered, setHovered] = useState<number>();
   const [focused, setFocused] = useState<number>();
   const [pinned, setPinned] = useState<number>();
   const [brokenIcons, setBrokenIcons] = useState<ReadonlySet<string>>(() => new Set());
 
-  useEffect(() => {
-    let cancelled = false;
-    loadHeroAbilities(heroId, locale).then((items) => {
-      if (!cancelled) setRemote(items);
-    }).catch(() => {
-      if (!cancelled) setLoadFailed(true);
-    });
-    return () => { cancelled = true; };
-  }, [heroId, locale]);
-
   const localizedName = ({ id, name }: Props['abilities'][number]) =>
     locale === 'ko' ? getKoreanAbilityName(heroId, id) ?? name : name;
-  const reference: (LiveAbility & { id?: string })[] = remote?.map((ability) => ({
-    ...ability,
-    id: abilities.find((local) => localizedName(local).toLowerCase() === ability.name.toLowerCase())?.id,
-  })) ?? abilities.map((ability) => ({
+  const reference = abilities.map((ability) => ({
     id: ability.id,
     name: localizedName(ability),
+    icon: getAbilityIcon(heroId, ability.id),
     description: getAbilitySummary(heroId, ability.id, locale) ?? '',
   }));
   const shown = hovered ?? focused ?? pinned;
@@ -73,7 +57,7 @@ const HeroAbilityReference = ({ heroId, heroName, source, abilities }: Props) =>
         ))}
         {detail && <div className="hero-ability-detail" id={detailsId} role="tooltip">
           <strong>{detail.name}</strong>
-          <p>{detail.description || t(loadFailed ? '스킬 설명은 공식 영웅 페이지에서 확인할 수 있습니다.' : '스킬 정보를 불러오는 중입니다.')}</p>
+          <p>{detail.description || t('스킬 설명은 공식 영웅 페이지에서 확인할 수 있습니다.')}</p>
           {patch && <dl className="hero-ability-stat"><dt>{t(patch.label)}</dt><dd>{patch.value}</dd></dl>}
         </div>}
       </div>

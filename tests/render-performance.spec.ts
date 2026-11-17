@@ -1,3 +1,4 @@
+import { openMap } from './open-map';
 import { arch, cpus, platform } from 'node:os';
 import { expect, test } from '@playwright/test';
 
@@ -56,10 +57,9 @@ test('records a map-rendering baseline with a real Chromium canvas', async ({ pa
   });
   const results = [];
 
-  const map = page.getByRole('combobox', { name: '지도', exact: true });
   const terrain = page.getByRole('complementary', { name: '지형 목록' }).getByRole('button');
-  for (const mapId of ['elevation-lab', 'courtyard', 'kings-row-a']) {
-    await map.selectOption(mapId);
+  for (const [mapId, name] of [['elevation-lab', '고저차 테스트 맵'], ['courtyard', '훈련장 안뜰'], ['kings-row-a', '왕의 길 열기']]) {
+    await openMap(page, name!);
     for (const [index, view] of ['2D 탑다운', '3D 원근'].entries()) {
       await page.getByRole('button', { name: view }).click();
       await terrain.nth(index).click();

@@ -33,7 +33,7 @@ import MapViewport from '../render/map-viewport';
 import HeroTools, { heroDragType, roleNames, teamNames } from './hero-tools';
 import { getHero, heroName, isCatalogueHero } from '../domain/hero-catalogue';
 import type { CatalogueHero } from '../domain/hero-catalogue';
-import { competitiveOverview } from '../map/competitive-overviews';
+import { competitiveOverview, terrainLocations } from '../map/competitive-overviews';
 
 type SurfaceTool =
   | { kind: 'place'; heroId: CatalogueHero; team: Team }
@@ -69,7 +69,8 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
   const mapId = map.id;
   const overview = useMemo(() => competitiveOverview(map), [map]);
   const [locationId, setLocationId] = useState('');
-  const focusedLocation = overview?.locations.find(({ id }) => id === locationId);
+  const locations = useMemo(() => overview?.locations ?? terrainLocations(map), [map, overview]);
+  const focusedLocation = locations.find(({ id }) => id === locationId);
   const { min, max } = useMemo(() => mapBounds(map.terrain), [map]);
   const [mapActionsOpen, setMapActionsOpen] = useState(false);
   const [displayOptionsOpen, setDisplayOptionsOpen] = useState(false);
@@ -332,13 +333,10 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
           Vertactics
         </div>
         <div className="map-catalogue" aria-label={t('지도 관리')} role="group">
-          <label>{t('지도') + ' '}<Select aria-label={t('지도')} value={mapId} onChange={(event) => switchMap(event.target.value)}>
-            {catalogue.map((item) => <option key={item.id} value={item.id}>{t(item.name)}</option>)}
-          </Select></label>
+          <MapCatalogue maps={catalogue} selectedId={mapId} onSelect={switchMap} />
           <Button type="button" className="reset-button mobile-panel-toggle" aria-expanded={mapActionsOpen}
             aria-controls="map-actions" onClick={() => setMapActionsOpen((open) => !open)}>{t('지도 관리')}</Button>
           <div className="map-actions" id="map-actions" data-expanded={mapActionsOpen}>
-            <MapCatalogue onSelect={switchMap} />
             <Button type="button" className="reset-button" onClick={createMap}>{t('새 지도')}</Button>
             <Button type="button" className="reset-button" aria-pressed={mapEditing} onClick={() => {
               activateTool(null);
@@ -374,7 +372,8 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
                   ` · ${max[0] - min[0]} × ${max[2] - min[2]} u`}</p>
             </div>
             <div className="viewport-actions">
-              {overview ? <MapLocationPicker locations={overview.locations} value={locationId} onChange={setLocationId} /> : <div className="mode-switch" role="group" aria-label={t('지도 보기')}>
+              {mode === '2d' && locations.length > 0 && <MapLocationPicker locations={locations} value={locationId} onChange={setLocationId} />}
+              {!overview && <div className="mode-switch" role="group" aria-label={t('지도 보기')}>
                 {viewportModes.map((view) => (
                   <Button
                     key={view}
@@ -456,7 +455,7 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
               capture={captureViewport}
               layerId={layerId}
               mode={mode}
-              locations={overview?.locations}
+              locations={locations}
               focusedLocation={focusedLocation}
               heroView={heroView}
               reset={reset}

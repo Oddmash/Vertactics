@@ -56,3 +56,13 @@ const koreanNames: Record<string, Record<string, string>> = {
 };
 
 export const getKoreanAbilityName = (heroId: string, abilityId: string) => koreanNames[heroId]?.[abilityId];
+
+const iconSlots: Record<string, Record<string, string>> = {
+  ana: { 'biotic-rifle': 'primary', 'sleep-dart': 'ability_1', 'biotic-grenade': 'ability_2', 'nano-boost': 'ultimate' },
+  tracer: { 'pulse-pistols': 'primary', blink: 'ability_1', recall: 'ability_2', 'pulse-bomb': 'ultimate' },
+};
+
+export const getAbilityIcon = (heroId: string, abilityId: string) => {
+  const slot = iconSlots[heroId]?.[abilityId];
+  return slot && `https://raw.githubusercontent.com/rolldeep-stepmerrily/watchpoint/bcb50e9690b11533ffbccee81f98455878f0822c/apps/web/public/icons/heroes/${heroId}/abilities/${slot}.png`;
+};
