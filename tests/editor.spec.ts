@@ -598,13 +598,13 @@ test('shows the selected hero role, official source and abilities', async ({ pag
   const inspector = page.getByRole('complementary', { name: '지형 정보' });
   await expect(inspector.getByRole('heading', { name: '아나' })).toBeVisible();
   await inspector.getByText('영웅 정보 · 지원', { exact: true }).click();
-  await expect(inspector.getByText('Sleep Dart', { exact: true })).toBeVisible();
+  await expect(inspector.getByText('Sleep Dart', { exact: true }).and(inspector.locator('li'))).toBeVisible();
   await expect(inspector.getByRole('link', { name: 'Blizzard 영웅 정보' })).toHaveAttribute(
     'href', 'https://overwatch.blizzard.com/en-us/heroes/ana/',
   );
 });
 
-test('renders a custom hero ability preview in both map views and hides it on request', async ({ page }) => {
+test('renders a custom hero ability preview in both map views and hides it on request', async ({ page }, testInfo) => {
   await page.goto('/');
   await page.getByRole('button', { name: '2D 탑다운' }).click();
   const canvas = page.getByTestId('viewport').locator('canvas');
@@ -622,9 +622,11 @@ test('renders a custom hero ability preview in both map views and hides it on re
   await expect(inspector.getByText('Blink · 8 u')).toBeVisible();
   await expect(inspector.getByText('사용자 설정 · 지도 단위 (u)')).toBeVisible();
   await expect.poll(async () => (await canvas.screenshot()).equals(before)).toBe(false);
+  await page.screenshot({ path: testInfo.outputPath('ability-preview-2d.png') });
   await page.getByRole('button', { name: '3D 원근' }).click();
   await expect(canvas).toHaveAttribute('data-view-mode', '3d');
   await expect(inspector.getByText('Blink · 8 u')).toBeVisible();
+  await page.screenshot({ path: testInfo.outputPath('ability-preview-3d.png') });
   const withPreview = await canvas.screenshot();
   await inspector.getByRole('button', { name: '범위 숨기기' }).click();
   await expect(inspector.getByText('Blink · 8 u')).toHaveCount(0);
