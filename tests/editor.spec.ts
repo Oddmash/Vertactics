@@ -143,11 +143,12 @@ test('places and moves a hero across views, then undoes and redoes elevation cha
   await clickWorld(-9.5, -5);
   await expect(inspector.getByText('+4 u')).toBeVisible();
   const coordinates = inspector.locator('dl div').filter({ hasText: '좌표 (X, Y, Z)' }).locator('dd');
+  const placedHeroes = inspector.getByRole('list', { name: '배치한 영웅' });
   const worldPosition = await coordinates.innerText();
   await threeD.click();
   await expect(canvas).toHaveAttribute('data-view-mode', '3d');
   await expect(inspector.getByText('+4 u')).toBeVisible();
-  await expect(inspector.getByRole('list', { name: '배치한 영웅' }).getByText('공격팀', { exact: true })).toBeVisible();
+  await expect(placedHeroes.getByText('공격팀', { exact: true })).toBeVisible();
   await expect(coordinates).toHaveText(worldPosition);
   await page.screenshot({ path: testInfo.outputPath('vertactics-hero-placement.png') });
 
@@ -159,9 +160,9 @@ test('places and moves a hero across views, then undoes and redoes elevation cha
   await inspector.getByRole('button', { name: '45° 회전' }).click();
   await expect(inspector.getByText('45°', { exact: true })).toBeVisible();
   await inspector.getByRole('button', { name: '팀 전환' }).click();
-  await expect(inspector.getByText('수비팀')).toBeVisible();
+  await expect(placedHeroes.getByText('수비팀', { exact: true })).toBeVisible();
   await inspector.getByRole('button', { name: '삭제' }).click();
-  await expect(page.getByRole('list', { name: '배치한 영웅' })).toHaveCount(0);
+  await expect(placedHeroes).toHaveCount(0);
   expect(pageErrors).toEqual([]);
 });
 
