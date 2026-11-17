@@ -1,3 +1,5 @@
+import AbilityPreviewTools from './ability-preview-tools';
+import type { AbilityPreviewSettings } from '../domain/ability-preview';
 import { measureSegment } from '../domain/measurement';
 import { useCallback, useMemo, useRef, useState } from 'react';
 import type { Annotation } from '../domain/annotation';
@@ -66,6 +68,7 @@ const Editor = () => {
   const visibleTerrain = visibleTerrainForLayer(map.terrain, layerId);
   const [snap, setSnap] = useState(false);
   const [locked, setLocked] = useState(false);
+  const [abilityPreviews, setAbilityPreviews] = useState<Record<string, AbilityPreviewSettings>>({});
   const [sightTargetId, setSightTargetId] = useState('');
   const [showHeroes, setShowHeroes] = useState(true);
   const [showAnnotations, setShowAnnotations] = useState(true);
@@ -190,6 +193,8 @@ const Editor = () => {
   const selectedHero = heroes.find(({ id }) => id === selectedHeroId);
 
   const selectedHeroProfile = selectedHero && getHero(selectedHero.heroId);
+  const previewKey = selectedHero ? JSON.stringify([mapId, selectedHero.id]) : '';
+  const activeAbility = abilityPreviews[previewKey];
   const sightTarget = heroes.find((hero) => hero.id === sightTargetId && hero.id !== selectedHeroId);
   const spatialProbe = selectedHero && sightTarget ? (() => {
     const eye = ([x, y, z]: WorldPoint): WorldPoint => [x, y + 1.6, z];
@@ -393,6 +398,8 @@ const Editor = () => {
               ) : []}
               snap={snap}
               selectedHeroId={selectedHeroId}
+              abilityPreview={!mapEditing && showHeroes && selectedHero && activeAbility
+                ? { hero: selectedHero, settings: activeAbility } : undefined}
               onSelect={selectTerrain}
               onSelectHero={selectHero}
               annotations={[...(!mapEditing && showAnnotations ? annotations : []), ...measurementOverlay]}
@@ -431,6 +438,17 @@ const Editor = () => {
                   </ul>
                   <a href={selectedHeroProfile.source} target="_blank" rel="noreferrer">Blizzard 영웅 정보</a>
                 </details>}
+                {selectedHeroProfile && <AbilityPreviewTools
+                  key={previewKey}
+                  abilities={selectedHeroProfile.abilities}
+                  preview={activeAbility}
+                  onPreview={(next) => setAbilityPreviews((current) => {
+                    if (next) return { ...current, [previewKey]: next };
+                    const copy = { ...current };
+                    delete copy[previewKey];
+                    return copy;
+                  })}
+                />}
                 {heroes.length > 1 && <div className="spatial-probe">
                   <label>시야 확인 대상 <select value={sightTarget?.id ?? ''} onChange={(event) => setSightTargetId(event.target.value)}>
                     <option value="">대상 선택</option>

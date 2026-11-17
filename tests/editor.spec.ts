@@ -603,3 +603,30 @@ test('shows the selected hero role, official source and abilities', async ({ pag
     'href', 'https://overwatch.blizzard.com/en-us/heroes/ana/',
   );
 });
+
+test('renders a custom hero ability preview in both map views and hides it on request', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: '2D 탑다운' }).click();
+  const canvas = page.getByTestId('viewport').locator('canvas');
+  await expect(canvas).toHaveAttribute('data-view-mode', '2d');
+  await page.getByRole('button', { name: '배치 시작' }).click();
+  await expect(canvas).toHaveCSS('cursor', 'crosshair');
+  await canvas.click();
+  const inspector = page.getByRole('complementary', { name: '지형 정보' });
+  await inspector.getByText('능력 범위 미리보기', { exact: true }).click();
+  await inspector.getByLabel('능력', { exact: true }).selectOption('blink');
+  await inspector.getByLabel('미리보기 형태', { exact: true }).selectOption('cone');
+  await inspector.getByLabel('범위 (u)', { exact: true }).fill('8');
+  const before = await canvas.screenshot();
+  await inspector.getByRole('button', { name: '범위 표시' }).click();
+  await expect(inspector.getByText('Blink · 8 u')).toBeVisible();
+  await expect(inspector.getByText('사용자 설정 · 지도 단위 (u)')).toBeVisible();
+  await expect.poll(async () => (await canvas.screenshot()).equals(before)).toBe(false);
+  await page.getByRole('button', { name: '3D 원근' }).click();
+  await expect(canvas).toHaveAttribute('data-view-mode', '3d');
+  await expect(inspector.getByText('Blink · 8 u')).toBeVisible();
+  const withPreview = await canvas.screenshot();
+  await inspector.getByRole('button', { name: '범위 숨기기' }).click();
+  await expect(inspector.getByText('Blink · 8 u')).toHaveCount(0);
+  await expect.poll(async () => (await canvas.screenshot()).equals(withPreview)).toBe(false);
+});

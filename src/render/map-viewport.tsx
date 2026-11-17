@@ -1,3 +1,5 @@
+import MapAbilityPreview from './map-ability-preview';
+import type { AbilityPreviewSettings } from '../domain/ability-preview';
 import { pickTerrainSurface } from '../domain/surface-height';
 import rampGeometry from './ramp-geometry';
 import type { Annotation } from '../domain/annotation';
@@ -50,6 +52,7 @@ type Props = {
   selectedTerrainIds: ReadonlySet<string>;
   onSelect: (id: string | null, extend?: boolean) => void;
   heroes: HeroPlacement[];
+  abilityPreview?: { hero: HeroPlacement; settings: AbilityPreviewSettings };
   selectedHeroId: string | null;
   annotations: Annotation[];
   selectedAnnotationId: string | null;
@@ -63,7 +66,7 @@ type Props = {
 
 const MapViewport = ({
   map, mode, reset, selectedTerrainIds, onSelect, heroes, selectedHeroId, onSelectHero, onEditSurface,
-  annotations, selectedAnnotationId, snap, layerId, onDragSurface, onDropSurface,
+  annotations, selectedAnnotationId, snap, layerId, onDragSurface, onDropSurface, abilityPreview,
 }: Props) => {
   const bounds = useMemo(() => mapBounds(map.terrain), [map]);
   const blocks = useMemo(() => visibleTerrainForLayer(map.terrain, layerId).map((terrain) => ({
@@ -139,6 +142,7 @@ const MapViewport = ({
           </group>
         ))}
         </group>
+        {abilityPreview && <MapAbilityPreview {...abilityPreview} />}
         <MapAnnotations items={annotations} selectedId={selectedAnnotationId} />
         {heroes.map(({ id, position, yaw, team }) => (
           <group
