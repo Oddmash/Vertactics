@@ -1,5 +1,6 @@
 import { useLocale } from '../ui/locale';
 import LocalePicker from '../ui/locale-picker';
+import MapCatalogue from './map-catalogue';
 import { downloadFile, fileStem } from './download-file';
 import StrategyFileTools from './strategy-file-tools';
 import useWorkspaceDocuments from './use-workspace-documents';
@@ -313,6 +314,7 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
           <button type="button" className="reset-button mobile-panel-toggle" aria-expanded={mapActionsOpen}
             aria-controls="map-actions" onClick={() => setMapActionsOpen((open) => !open)}>{t('지도 관리')}</button>
           <div className="map-actions" id="map-actions" data-expanded={mapActionsOpen}>
+            <MapCatalogue onSelect={switchMap} />
             <button type="button" className="reset-button" onClick={createMap}>{t('새 지도')}</button>
             <button type="button" className="reset-button" aria-pressed={mapEditing} onClick={() => {
               activateTool(null);

@@ -411,3 +411,31 @@ ul { padding: 0; list-style: none; }
 @media (pointer: coarse) {
   .editor .view-panel .display-options .reset-button { min-height: var(--size-touch); }
 }
+
+.map-library {
+  width: min(560px, calc(100% - 2 * var(--space-lg)));
+  max-height: min(740px, calc(100dvh - 2 * var(--space-lg)));
+  padding: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  color: var(--color-text);
+}
+
+.map-library::backdrop { background: color-mix(in srgb, var(--color-app) 75%, transparent); }
+.map-library .panel-heading { position: sticky; top: 0; background: var(--color-panel); }
+.map-library-body { display: grid; gap: var(--space-lg); padding: var(--space-lg); }
+.map-library h3 { color: var(--color-muted); font-size: 13px; padding-bottom: var(--space-sm); }
+
+.map-library li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-md);
+  min-height: var(--size-touch);
+  padding: var(--space-sm) 0;
+  border-top: 1px solid var(--color-border);
+  font-size: 13px;
+}
+
+.map-library li div { display: grid; gap: var(--space-xs); }
+.map-library li small { color: var(--color-muted); }
