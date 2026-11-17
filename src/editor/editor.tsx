@@ -1,3 +1,5 @@
+import StrategyDraftTools from './strategy-draft-tools';
+import type { StrategyDraft } from '../storage/strategy-draft';
 import AbilityPlacementTools from './ability-placement-tools';
 import AbilityPreviewTools from './ability-preview-tools';
 import type { AbilityPlacement, AbilityPreviewSettings } from '../domain/ability-preview';
@@ -112,6 +114,21 @@ const Editor = () => {
     setAnnotationId(null);
     setSelectedAbilityId(null);
     setMapId(id);
+  };
+  const restoreDraft = ({ map: savedMap, strategy }: StrategyDraft) => {
+    ++importRequest.current;
+    setImportMessage('');
+    setCatalogue((current) => current.some(({ id }) => id === savedMap.id)
+      ? current.map((item) => item.id === savedMap.id ? savedMap : item)
+      : [...current, savedMap]);
+    setHistories((current) => ({ ...current, [savedMap.id]: createStrategyHistory(strategy) }));
+    setMapHistory((current) => ({ ...current, [savedMap.id]: { past: [], future: [] } }));
+    setAbilityPreviews((current) => Object.fromEntries(
+      Object.entries(current).filter(([key]) => JSON.parse(key)[0] !== savedMap.id),
+    ));
+    switchMap(savedMap.id);
+    setMapEditing(false);
+    setReset((value) => value + 1);
   };
   const importMap = async (file: File) => {
     const request = ++importRequest.current;
@@ -345,6 +362,7 @@ const Editor = () => {
             onRedo={() => { setTool(null); dispatch({ type: 'redo' }); }}
             onCancel={() => setTool(null)}
           />}
+          <StrategyDraftTools draft={{ version: 1, map, strategy: history.present }} onRestore={restoreDraft} />
         </aside>
         <section className="view-panel panel" aria-labelledby="view-title">
           <div className="viewport-toolbar">

@@ -756,4 +756,42 @@ test('shows the source and status of a game distance reference separately from m
   await expect(placed.getByText('사용자 실측 · 8.5 m', { exact: true })).toHaveCount(0);
   await page.getByRole('button', { name: '실행 취소', exact: true }).click();
   await expect(placed.getByText('사용자 실측 · 8.5 m', { exact: true })).toBeVisible();
+
+  const local = page.getByRole('region', { name: '로컬 전략' });
+  await local.getByRole('button', { name: '전략 저장', exact: true }).click();
+  await expect(local.getByRole('status')).toHaveText('이 브라우저에 전략을 저장했습니다.');
+  await page.reload();
+  await expect(placed).toHaveCount(0);
+  await local.getByRole('button', { name: '저장본 확인' }).click();
+  await local.getByRole('button', { name: '전략 복원' }).click();
+  await expect(local.getByRole('status')).toHaveText('저장된 전략을 복원했습니다.');
+  await placed.getByRole('button', { name: 'Blink 표시 중' }).click();
+  await placed.getByText('게임 거리 참고값', { exact: true }).click();
+  await expect(placed.getByText('사용자 실측 · 8.5 m', { exact: true })).toBeVisible();
+  await expect(placed.getByText('Test reference notes', { exact: true })).toBeVisible();
+  await placed.getByRole('button', { name: '능력 45° 회전' }).click();
+  await expect(placed.getByText('45°', { exact: true })).toBeVisible();
+  await page.screenshot({ path: testInfo.outputPath('strategy-draft-restored.png') });
+});
+
+test('reports missing drafts and leaves the editor intact when storage is malformed', async ({ page }) => {
+  await page.goto('/');
+  const local = page.getByRole('region', { name: '로컬 전략' });
+  await local.getByRole('button', { name: '저장본 확인' }).click();
+  await expect(local.getByRole('status')).toHaveText('이 브라우저에 저장된 전략이 없습니다.');
+  await page.evaluate(() => new Promise<void>((resolve, reject) => {
+    const request = indexedDB.open('vertactics-strategy', 1);
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => {
+      const database = request.result;
+      const transaction = database.transaction('drafts', 'readwrite');
+      transaction.objectStore('drafts').put({ version: 99 }, 'workspace');
+      transaction.oncomplete = () => { database.close(); resolve(); };
+      transaction.onabort = () => { database.close(); reject(transaction.error); };
+    };
+  }));
+  await local.getByRole('button', { name: '저장본 확인' }).click();
+  await expect(local.getByRole('status')).toHaveText('저장된 전략을 읽을 수 없습니다. 현재 편집을 계속할 수 있습니다.');
+  await expect(local.getByRole('button', { name: '전략 복원' })).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: '고저차 테스트 맵' })).toBeVisible();
 });
