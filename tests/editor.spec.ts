@@ -235,3 +235,46 @@ test('draws each marker shape and edits a note in the shared view', async ({ pag
   await expect(markerList.getByRole('listitem')).toHaveCount(3);
   expect(errors).toEqual([]);
 });
+
+test('snaps a placement, locks edits, and keeps hidden layers in the strategy', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: '2D 탑다운' }).click();
+  const canvas = page.getByTestId('viewport').locator('canvas');
+  await expect(canvas).toHaveAttribute('data-view-mode', '2d');
+  const inspector = page.getByRole('complementary', { name: '지형 정보' });
+  const place = page.getByRole('button', { name: '배치 시작' });
+  await page.getByRole('checkbox', { name: '격자 스냅' }).check();
+  await place.click();
+  await expect(canvas).toHaveCSS('cursor', 'crosshair');
+  await place.press('Escape');
+  await expect(canvas).not.toHaveCSS('cursor', 'crosshair');
+  await place.click();
+  await expect(canvas).toHaveCSS('cursor', 'crosshair');
+
+  const box = await canvas.boundingBox();
+  if (!box) throw new Error('Canvas has no bounds');
+  const scale = Math.max(36 / box.width, 24 / box.height) * 1.22;
+  await page.mouse.click(box.x + box.width / 2 + 7.3 / scale, box.y + box.height / 2 + 5.2 / scale);
+  await expect(inspector.getByText('7, 2, 5', { exact: true })).toBeVisible();
+  const placed = await canvas.screenshot();
+  const heroes = page.getByRole('checkbox', { name: '영웅 표시' });
+  await heroes.uncheck();
+  await expect.poll(async () => (await canvas.screenshot()).equals(placed)).toBe(false);
+  await expect(place).toBeDisabled();
+  await expect(page.getByRole('list', { name: '배치한 영웅' }).getByRole('listitem')).toHaveCount(1);
+  await heroes.check();
+  await expect.poll(async () => (await canvas.screenshot()).equals(placed)).toBe(true);
+
+  const lock = page.getByRole('checkbox', { name: '편집 잠금' });
+  await lock.check();
+  await expect(place).toBeDisabled();
+  await expect(page.getByRole('button', { name: '마커 그리기' })).toBeDisabled();
+  await expect(inspector.getByRole('button', { name: '삭제' })).toBeDisabled();
+  await lock.press('Control+z');
+  await expect(inspector.getByText('7, 2, 5', { exact: true })).toBeVisible();
+  await lock.uncheck();
+  await lock.press('Control+z');
+  await expect(page.getByRole('list', { name: '배치한 영웅' })).toHaveCount(0);
+  await lock.press('Control+Shift+z');
+  await expect(inspector.getByText('7, 2, 5', { exact: true })).toBeVisible();
+});

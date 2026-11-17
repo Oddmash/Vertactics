@@ -33,6 +33,10 @@ const formatElevation = (value: number) => `${value > 0 ? '+' : ''}${formatNumbe
 const Editor = () => {
   const [mode, setMode] = useState<ViewMode>('3d');
   const [reset, setReset] = useState(0);
+  const [snap, setSnap] = useState(false);
+  const [locked, setLocked] = useState(false);
+  const [showHeroes, setShowHeroes] = useState(true);
+  const [showAnnotations, setShowAnnotations] = useState(true);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedHeroId, setSelectedHeroId] = useState<string | null>(null);
   const [tool, setHeroTool] = useState<EditTool | null>(null);
@@ -69,6 +73,7 @@ const Editor = () => {
   };
 
   const editSurface = (position: WorldPoint) => {
+    if (locked) return;
     if (annotationPick) { annotationPick.apply(position); return; }
     if (!tool) return;
     if (tool.kind === 'place') {
@@ -83,7 +88,21 @@ const Editor = () => {
   };
 
   return (
-    <div className="editor">
+    <div className="editor" onKeyDown={(event) => {
+      if (event.key === 'Escape' && (tool || annotationPick)) {
+        event.preventDefault();
+        setTool(null);
+        return;
+      }
+      if (locked || event.defaultPrevented || event.altKey ||
+        !(event.ctrlKey || event.metaKey) ||
+        (event.target instanceof Element && event.target.closest('input, textarea, select, [contenteditable]'))) return;
+      const key = event.key.toLowerCase();
+      if (key !== 'z' && key !== 'y') return;
+      event.preventDefault();
+      setTool(null);
+      dispatch({ type: key === 'y' || event.shiftKey ? 'redo' : 'undo' });
+    }}>
       <header className="app-header">
         <div className="brand">
           <span className="brand-mark" aria-hidden="true">V</span>
@@ -114,10 +133,11 @@ const Editor = () => {
           </ul>
           <HeroTools
             heroes={heroes}
+            locked={locked || !showHeroes}
             selectedId={selectedHeroId}
             pendingMessage={tool?.kind === 'place' ? '배치할 지면을 클릭하세요.' : tool ? '이동할 지면을 클릭하세요.' : ''}
-            canUndo={history.past.length > 0}
-            canRedo={history.future.length > 0}
+            canUndo={!locked && history.past.length > 0}
+            canRedo={!locked && history.future.length > 0}
             onPlace={(heroId, team) => setTool({ kind: 'place', heroId, team })}
             onSelect={(id) => { setTool(null); selectHero(id); }}
             onUndo={() => { setTool(null); dispatch({ type: 'undo' }); }}
@@ -150,19 +170,35 @@ const Editor = () => {
               </button>
             </div>
           </div>
+          <div className="view-options" role="group" aria-label="편집 및 표시 설정">
+            <label><input type="checkbox" checked={snap} onChange={(event) => setSnap(event.target.checked)} /> 격자 스냅</label>
+            <label><input type="checkbox" checked={locked} onChange={(event) => {
+              setTool(null);
+              setLocked(event.target.checked);
+            }} /> 편집 잠금</label>
+            <label><input type="checkbox" checked={showHeroes} onChange={(event) => {
+              setTool(null);
+              setShowHeroes(event.target.checked);
+            }} /> 영웅 표시</label>
+            <label><input type="checkbox" checked={showAnnotations} onChange={(event) => {
+              setTool(null);
+              setShowAnnotations(event.target.checked);
+            }} /> 마커 표시</label>
+          </div>
           <div className="viewport" data-testid="viewport">
             <MapViewport
               map={sampleMap}
               mode={mode}
               reset={reset}
               selectedId={selectedId}
-              heroes={heroes}
+              heroes={showHeroes ? heroes : []}
+              snap={snap}
               selectedHeroId={selectedHeroId}
               onSelect={selectTerrain}
               onSelectHero={selectHero}
-              annotations={annotations}
+              annotations={showAnnotations ? annotations : []}
               selectedAnnotationId={annotationId}
-              onEditSurface={tool || annotationPick ? editSurface : undefined}
+              onEditSurface={!locked && (tool || annotationPick) ? editSurface : undefined}
             />
             <span className="view-label" aria-hidden="true">{viewNames[mode]}</span>
             {mode === '2d' && <span className="north-label" aria-label="위쪽은 북쪽">↑ N</span>}
@@ -184,7 +220,7 @@ const Editor = () => {
                   <div><dt>높이</dt><dd>{formatElevation(selectedHero.position[1])}</dd></div>
                   <div><dt>방향</dt><dd>{selectedHero.yaw}°</dd></div>
                 </dl>
-                <div className="hero-actions">
+                <fieldset className="hero-actions edit-controls" disabled={locked || !showHeroes}>
                   <button className="reset-button" type="button" onClick={() => setTool({ kind: 'move', id: selectedHero.id })}>이동</button>
                   <button className="reset-button" type="button" onClick={() => dispatch({
                     type: 'update', id: selectedHero.id, patch: { yaw: (selectedHero.yaw + 45) % 360 },
@@ -196,7 +232,7 @@ const Editor = () => {
                     setTool(null);
                     dispatch({ type: 'remove', id: selectedHero.id });
                   }}>삭제</button>
-                </div>
+                </fieldset>
               </>
             ) : selected ? (
               <>
@@ -212,6 +248,7 @@ const Editor = () => {
           </div>
           <AnnotationTools
             items={annotations}
+            locked={locked || !showAnnotations}
             selected={annotations.find((item) => item.id === annotationId)}
             pending={annotationPick}
             onSelect={selectAnnotation}

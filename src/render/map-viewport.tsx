@@ -1,3 +1,4 @@
+import { snapSurfacePoint } from '../domain/surface-snap';
 import type { Annotation } from '../domain/annotation';
 import MapAnnotations from './map-annotations';
 import { Canvas, useThree } from '@react-three/fiber';
@@ -49,13 +50,14 @@ type Props = {
   selectedHeroId: string | null;
   annotations: Annotation[];
   selectedAnnotationId: string | null;
+  snap: boolean;
   onSelectHero: (id: string) => void;
   onEditSurface?: (position: WorldPoint) => void;
 };
 
 const MapViewport = ({
   map, mode, reset, selectedId, onSelect, heroes, selectedHeroId, onSelectHero, onEditSurface,
-  annotations, selectedAnnotationId,
+  annotations, selectedAnnotationId, snap,
 }: Props) => {
   const bounds = useMemo(() => mapBounds(map.terrain), [map]);
   const blocks = useMemo(() => map.terrain.map((terrain) => ({
@@ -103,7 +105,8 @@ const MapViewport = ({
                   if (onEditSurface) {
                     const top = center[1] + size[1] / 2;
                     if (terrain.kind !== 'wall' && Math.abs(event.point.y - top) < 0.0001) {
-                      onEditSurface([event.point.x, top, event.point.z]);
+                      const point: WorldPoint = [event.point.x, top, event.point.z];
+                      onEditSurface(snap ? snapSurfacePoint(point, center, size) : point);
                     }
                     return;
                   }

@@ -16,6 +16,7 @@ export const heroName = (id: string) => Object.hasOwn(sampleHeroes, id)
 
 type Props = {
   heroes: HeroPlacement[];
+  locked: boolean;
   selectedId: string | null;
   pendingMessage: string;
   canUndo: boolean;
@@ -28,7 +29,7 @@ type Props = {
 };
 
 const HeroTools = ({
-  heroes, selectedId, pendingMessage, canUndo, canRedo, onPlace, onSelect, onUndo, onRedo, onCancel,
+  heroes, locked, selectedId, pendingMessage, canUndo, canRedo, onPlace, onSelect, onUndo, onRedo, onCancel,
 }: Props) => (
   <section className="hero-tools" aria-labelledby="hero-tools-title">
     <h2 id="hero-tools-title">영웅 배치</h2>
@@ -40,6 +41,7 @@ const HeroTools = ({
       if (typeof hero === 'string' && Object.hasOwn(sampleHeroes, hero) &&
         (team === 'attack' || team === 'defense')) onPlace(hero as SampleHero, team);
     }}>
+      <fieldset className="edit-controls" disabled={locked}>
       <label>영웅 <select name="hero">
         {Object.entries(sampleHeroes).map(([id, name]) => <option key={id} value={id}>{name}</option>)}
       </select></label>
@@ -47,6 +49,7 @@ const HeroTools = ({
         {Object.entries(teamNames).map(([id, name]) => <option key={id} value={id}>{name}</option>)}
       </select></label>
       <button className="reset-button" type="submit">배치 시작</button>
+      </fieldset>
     </form>
     {pendingMessage && <div className="pending-edit">
       <p role="status">{pendingMessage}</p>

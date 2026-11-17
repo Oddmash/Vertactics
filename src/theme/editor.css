@@ -241,3 +241,15 @@ ul { padding: 0; list-style: none; }
 .annotation-properties ol { margin: 0; padding-left: var(--space-lg); font-size: 12px; }
 .annotation-properties li { margin-block: var(--space-xs); }
 .annotation-tools .terrain-button span:nth-child(2) { overflow-wrap: anywhere; }
+
+.view-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-sm) var(--space-lg);
+  padding: var(--space-sm) var(--space-lg);
+  font-size: 12px;
+}
+.view-options label { display: inline-flex; align-items: center; gap: var(--space-xs); }
+.view-options input { accent-color: var(--color-accent); }
+.edit-controls { border: 0; padding: 0; margin: 0; min-width: 0; }
+.edit-controls:not(.hero-actions) { display: grid; gap: var(--space-sm); }

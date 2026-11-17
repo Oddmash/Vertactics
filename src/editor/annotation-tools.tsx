@@ -11,6 +11,7 @@ const names: Record<AnnotationKind, string> = {
 
 type Props = {
   items: Annotation[];
+  locked: boolean;
   selected: Annotation | undefined;
   pending: SurfacePick | null;
   onSelect: (id: string) => void;
@@ -19,7 +20,7 @@ type Props = {
   onRemove: (id: string) => void;
 };
 
-const AnnotationTools = ({ items, selected, pending, onSelect, onPick, onSave, onRemove }: Props) => {
+const AnnotationTools = ({ items, locked, selected, pending, onSelect, onPick, onSave, onRemove }: Props) => {
   const [kind, setKind] = useState<AnnotationKind>('route');
   const start = () => onPick({
     hint: '첫 지점을 클릭하세요.',
@@ -33,6 +34,7 @@ const AnnotationTools = ({ items, selected, pending, onSelect, onPick, onSave, o
   return (
     <section className="hero-tools annotation-tools" aria-labelledby="annotation-title">
       <h2 id="annotation-title">전술 마커</h2>
+      <fieldset className="edit-controls" disabled={locked}>
       <label>유형 <select value={kind} onChange={(event) => {
         const value = annotationKinds.find((item) => item === event.target.value);
         if (value) setKind(value);
@@ -40,6 +42,7 @@ const AnnotationTools = ({ items, selected, pending, onSelect, onPick, onSave, o
         {annotationKinds.map((value) => <option key={value} value={value}>{names[value]}</option>)}
       </select></label>
       <button type="button" className="reset-button" onClick={start}>마커 그리기</button>
+      </fieldset>
       {pending && <div className="pending-edit">
         <p role="status">{pending.hint}</p>
         <button type="button" className="reset-button" onClick={() => onPick(null)}>그리기 취소</button>
@@ -53,7 +56,7 @@ const AnnotationTools = ({ items, selected, pending, onSelect, onPick, onSave, o
           </button></li>
         ))}
       </ul>}
-      {selected && <div className="annotation-properties">
+      {selected && <fieldset className="annotation-properties edit-controls" disabled={locked}>
         <form key={`${selected.id}:${selected.label}`} onSubmit={(event) => {
           event.preventDefault();
           const value = new FormData(event.currentTarget).get('label');
@@ -89,7 +92,7 @@ const AnnotationTools = ({ items, selected, pending, onSelect, onPick, onSave, o
             })}>지점 추가</button>}
           <button type="button" className="reset-button" onClick={() => onRemove(selected.id)}>마커 삭제</button>
         </div>
-      </div>}
+      </fieldset>}
     </section>
   );
 };
