@@ -371,7 +371,7 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
           <span className="brand-mark" aria-hidden="true">V</span>
           Vertactics
         </div>
-        <div className="map-catalogue">
+        <div className="map-catalogue" aria-label="지도 관리" role="group">
           <label>지도 <select aria-label="지도" value={mapId} onChange={(event) => switchMap(event.target.value)}>
             {catalogue.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
           </select></label>
@@ -390,11 +390,132 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
             href={`data:application/json;charset=utf-8,${encodeURIComponent(JSON.stringify(map, null, 2))}`}>지도 JSON 저장</a>
           {importMessage && <span role="status">{importMessage}</span>}
         </div>
+        <nav className="workspace-links" aria-label="작업 공간">
+          <a className="reset-button" href="#view-title">지도 보기</a>
+          <a className="reset-button" href="#strategy-draft-title">{draft.strategy.title}</a>
+          <a className="reset-button" href="#inspector-title">속성</a>
+          <a className="reset-button" href="#workspace-help">도움말</a>
+        </nav>
       </header>
-      <main className="workspace">
+      <main className="workspace editor-workspace">
+        <section className="view-panel panel" aria-labelledby="view-title">
+          <div className="viewport-toolbar">
+            <div>
+              <h1 id="view-title" tabIndex={-1}>{map.name}</h1>
+              <p className="world-size">
+                {map.metadata?.verification === 'verified' ? '검증됨' : map.metadata?.verification === 'synthetic' ? '가상 지도' : '미검증'} · {max[0] - min[0]} × {max[2] - min[2]} u</p>
+            </div>
+            <div className="viewport-actions">
+              <div className="mode-switch" role="group" aria-label="지도 보기">
+                {viewportModes.map((view) => (
+                  <button
+                    key={view}
+                    type="button"
+                    aria-label={viewNames[view]}
+                    aria-pressed={!heroView && mode === view}
+                    onClick={() => { setHeroViewId(undefined); setMode(view); }}
+                  >
+                    {view.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+              {heroView
+                ? <button className="reset-button" type="button" onClick={() => setHeroViewId(undefined)}>이전 시점으로</button>
+                : <button className="reset-button" type="button" onClick={() => setReset((value) => value + 1)}>
+                  시점 초기화
+                </button>}
+              <button className="reset-button" type="button" onClick={() => void saveViewport()}>지도 PNG 저장</button>
+            </div>
+          </div>
+          {imageMessage && <p role="status">{imageMessage}</p>}
+          <div className="view-options" role="group" aria-label="편집 및 표시 설정">
+            {map.layers && <label>표시 층 <select value={layerId} onChange={(event) => {
+              setLayerId(event.target.value);
+              setSelectedId(null);
+            }}>
+              <option value="">모든 층</option>
+              {map.layers.map(({ id, name }) => <option key={id} value={id}>{name}</option>)}
+            </select></label>}
+            <label><input type="checkbox" checked={snap} onChange={(event) => setSnap(event.target.checked)} /> 격자 스냅</label>
+            <label><input type="checkbox" checked={locked} onChange={(event) => {
+              activateTool(null);
+              setLocked(event.target.checked);
+            }} /> 편집 잠금</label>
+            <label><input type="checkbox" checked={showHeroes} onChange={(event) => {
+              activateTool(null);
+              setShowHeroes(event.target.checked);
+            }} /> 영웅 표시</label>
+            <label><input type="checkbox" checked={showAnnotations} onChange={(event) => {
+              activateTool(null);
+              setShowAnnotations(event.target.checked);
+            }} /> 마커 표시</label>
+          </div>
+          {!mapEditing && durationMs > 0 && (!playback
+            ? <div className="view-options"><button type="button" className="reset-button" onClick={() => {
+              activateTool(null);
+              start();
+            }}>전략 재생</button></div>
+            : <TimelinePlaybackControls durationMs={durationMs} phaseLabel={frame?.phaseLabel ?? ''}
+              timeMs={playback.timeMs} playing={playback.playing} speed={playback.speed}
+              onToggle={toggle} onSeek={seek} onSpeed={changeSpeed} onExit={stop}
+            />)}
+          <nav className="canvas-tools" aria-label="지도 도구">
+            <a className="reset-button" href="#terrain-title">지형 목록</a>
+            {!mapEditing && <a className="reset-button" href="#hero-tools-title">영웅</a>}
+            <button type="button" className="reset-button" aria-pressed={measuring} onClick={() => {
+              activateTool(measuring ? null : { kind: 'distance' });
+              if (!measuring) setMeasurement([]);
+            }}>거리 측정</button>
+            <button type="button" className="reset-button" aria-pressed={sightPicking} onClick={() => {
+              activateTool(sightPicking ? null : { kind: 'sight' });
+              if (!sightPicking || !sightSecond) setSightPoints([]);
+            }}>지점 간 시야</button>
+          </nav>
+          <div className="viewport" data-testid="viewport"
+            onPointerCancel={() => { if (tool?.kind === 'drag') changeSurfaceTool(null); }}
+            onPointerLeave={(event) => { if (tool?.kind === 'drag' && event.buttons === 1) changeSurfaceTool(null); }}
+          >
+            <MapViewport
+              key={mapId}
+              map={map}
+              capture={captureViewport}
+              layerId={layerId}
+              mode={mode}
+              heroView={heroView}
+              reset={reset}
+              selectedTerrainIds={selectedTerrainIds}
+              heroes={!mapEditing && showHeroes ? (frame?.heroes ?? heroes).map((hero) =>
+                tool?.kind === 'drag' && hero.id === tool.id && dragPreview ? { ...hero, position: dragPreview } : hero
+              ) : []}
+              snap={snap}
+              selectedHeroId={selectedHeroId}
+              sightline={!frame && activeSight ? {
+                start: activeSight.start, end: activeSight.endpoint, blocked: Boolean(activeSight.sight),
+              } : null}
+              abilities={mapEditing ? [] : frame?.abilities ?? abilities}
+              abilityPreview={!frame && !mapEditing && showHeroes && selectedHero && activeAbility
+                ? { hero: selectedHero, settings: activeAbility } : undefined}
+              onSelect={(id, extend) => { if (!frame) selectTerrain(id, extend); }}
+              onSelectHero={(id) => { if (!frame) selectHero(id); }}
+              annotations={[...(!mapEditing && showAnnotations ? annotations : []), ...measurementOverlay, ...sightOverlay]}
+              selectedAnnotationId={annotationId}
+              onEditSurface={measuring || sightPicking || (!locked && tool && tool.kind !== 'drag') ? editSurface : undefined}
+              onDragSurface={!locked && tool?.kind === 'drag' ? setDragPreview : undefined}
+              onDropSurface={!locked && tool?.kind === 'drag' ? finishDrag : undefined}
+            />
+            <span className="view-label" aria-hidden="true">{heroView ? `${heroName(heroView.heroId)} 시점` : viewNames[mode]}</span>
+            {!heroView && mode === '2d' && <span className="north-label" aria-label="위쪽은 북쪽">↑ N</span>}
+          </div>
+          <footer className="viewport-footer">
+            {heroView ? <span>영웅의 눈높이와 배치 방향 · Esc로 종료</span> : <>
+              <span>{mode === '2d' ? '드래그로 이동' : '드래그로 회전 · 우클릭 드래그로 이동'}</span>
+              <span>휠 또는 핀치로 확대·축소</span>
+            </>}
+          </footer>
+        </section>
         <aside className="terrain-panel panel" aria-labelledby="terrain-title">
           <div className="panel-heading">
-            <h2 id="terrain-title">지형 목록</h2>
+            <h2 id="terrain-title" tabIndex={-1}>지형 목록</h2>
             <span className="count">{visibleTerrain.length}</span>
           </div>
           <ul className="terrain-list">
@@ -454,119 +575,8 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
             onChange={(timeline) => { activateTool(null); dispatch({ type: 'set-timeline', timeline }); }}
           />}
         </aside>
-        <section className="view-panel panel" aria-labelledby="view-title">
-          <div className="viewport-toolbar">
-            <div>
-              <h1 id="view-title">{map.name}</h1>
-              <p className="world-size">
-                {map.metadata?.verification === 'verified' ? '검증됨' : map.metadata?.verification === 'synthetic' ? '가상 지도' : '미검증'} · {max[0] - min[0]} × {max[2] - min[2]} u</p>
-            </div>
-            <div className="viewport-actions">
-              <div className="mode-switch" role="group" aria-label="지도 보기">
-                {viewportModes.map((view) => (
-                  <button
-                    key={view}
-                    type="button"
-                    aria-label={viewNames[view]}
-                    aria-pressed={!heroView && mode === view}
-                    onClick={() => { setHeroViewId(undefined); setMode(view); }}
-                  >
-                    {view.toUpperCase()}
-                  </button>
-                ))}
-              </div>
-              {heroView
-                ? <button className="reset-button" type="button" onClick={() => setHeroViewId(undefined)}>이전 시점으로</button>
-                : <button className="reset-button" type="button" onClick={() => setReset((value) => value + 1)}>
-                  시점 초기화
-                </button>}
-              <button className="reset-button" type="button" onClick={() => void saveViewport()}>지도 PNG 저장</button>
-            </div>
-          </div>
-          {imageMessage && <p role="status">{imageMessage}</p>}
-          <div className="view-options" role="group" aria-label="편집 및 표시 설정">
-            {map.layers && <label>표시 층 <select value={layerId} onChange={(event) => {
-              setLayerId(event.target.value);
-              setSelectedId(null);
-            }}>
-              <option value="">모든 층</option>
-              {map.layers.map(({ id, name }) => <option key={id} value={id}>{name}</option>)}
-            </select></label>}
-            <button type="button" className="reset-button" aria-pressed={measuring} onClick={() => {
-              activateTool(measuring ? null : { kind: 'distance' });
-              if (!measuring) setMeasurement([]);
-            }}>거리 측정</button>
-            <button type="button" className="reset-button" aria-pressed={sightPicking} onClick={() => {
-              activateTool(sightPicking ? null : { kind: 'sight' });
-              if (!sightPicking || !sightSecond) setSightPoints([]);
-            }}>지점 간 시야</button>
-            <label><input type="checkbox" checked={snap} onChange={(event) => setSnap(event.target.checked)} /> 격자 스냅</label>
-            <label><input type="checkbox" checked={locked} onChange={(event) => {
-              activateTool(null);
-              setLocked(event.target.checked);
-            }} /> 편집 잠금</label>
-            <label><input type="checkbox" checked={showHeroes} onChange={(event) => {
-              activateTool(null);
-              setShowHeroes(event.target.checked);
-            }} /> 영웅 표시</label>
-            <label><input type="checkbox" checked={showAnnotations} onChange={(event) => {
-              activateTool(null);
-              setShowAnnotations(event.target.checked);
-            }} /> 마커 표시</label>
-          </div>
-          {!mapEditing && durationMs > 0 && (!playback
-            ? <div className="view-options"><button type="button" className="reset-button" onClick={() => {
-              activateTool(null);
-              start();
-            }}>전략 재생</button></div>
-            : <TimelinePlaybackControls durationMs={durationMs} phaseLabel={frame?.phaseLabel ?? ''}
-              timeMs={playback.timeMs} playing={playback.playing} speed={playback.speed}
-              onToggle={toggle} onSeek={seek} onSpeed={changeSpeed} onExit={stop}
-            />)}
-          <div className="viewport" data-testid="viewport"
-            onPointerCancel={() => { if (tool?.kind === 'drag') changeSurfaceTool(null); }}
-            onPointerLeave={(event) => { if (tool?.kind === 'drag' && event.buttons === 1) changeSurfaceTool(null); }}
-          >
-            <MapViewport
-              key={mapId}
-              map={map}
-              capture={captureViewport}
-              layerId={layerId}
-              mode={mode}
-              heroView={heroView}
-              reset={reset}
-              selectedTerrainIds={selectedTerrainIds}
-              heroes={!mapEditing && showHeroes ? (frame?.heroes ?? heroes).map((hero) =>
-                tool?.kind === 'drag' && hero.id === tool.id && dragPreview ? { ...hero, position: dragPreview } : hero
-              ) : []}
-              snap={snap}
-              selectedHeroId={selectedHeroId}
-              sightline={!frame && activeSight ? {
-                start: activeSight.start, end: activeSight.endpoint, blocked: Boolean(activeSight.sight),
-              } : null}
-              abilities={mapEditing ? [] : frame?.abilities ?? abilities}
-              abilityPreview={!frame && !mapEditing && showHeroes && selectedHero && activeAbility
-                ? { hero: selectedHero, settings: activeAbility } : undefined}
-              onSelect={(id, extend) => { if (!frame) selectTerrain(id, extend); }}
-              onSelectHero={(id) => { if (!frame) selectHero(id); }}
-              annotations={[...(!mapEditing && showAnnotations ? annotations : []), ...measurementOverlay, ...sightOverlay]}
-              selectedAnnotationId={annotationId}
-              onEditSurface={measuring || sightPicking || (!locked && tool && tool.kind !== 'drag') ? editSurface : undefined}
-              onDragSurface={!locked && tool?.kind === 'drag' ? setDragPreview : undefined}
-              onDropSurface={!locked && tool?.kind === 'drag' ? finishDrag : undefined}
-            />
-            <span className="view-label" aria-hidden="true">{heroView ? `${heroName(heroView.heroId)} 시점` : viewNames[mode]}</span>
-            {!heroView && mode === '2d' && <span className="north-label" aria-label="위쪽은 북쪽">↑ N</span>}
-          </div>
-          <footer className="viewport-footer">
-            {heroView ? <span>영웅의 눈높이와 배치 방향 · Esc로 종료</span> : <>
-              <span>{mode === '2d' ? '드래그로 이동' : '드래그로 회전 · 우클릭 드래그로 이동'}</span>
-              <span>휠 또는 핀치로 확대·축소</span>
-            </>}
-          </footer>
-        </section>
         <aside className="inspector-panel panel" aria-labelledby="inspector-title">
-          <div className="panel-heading"><h2 id="inspector-title">지형 정보</h2></div>
+          <div className="panel-heading"><h2 id="inspector-title" tabIndex={-1}>지형 정보</h2></div>
           <div className="inspector-body" role="status">
             {selectedHero ? (
               <>
@@ -731,14 +741,24 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
               }}
             />
           </>}
-          <div className="legend">
-            <h3>범례</h3>
+          <details className="legend">
+            <summary>지형 범례</summary>
             <ul>
               {terrainKinds.map((kind) => (
                 <li key={kind}><span className={`terrain-swatch ${kind}`} aria-hidden="true" />{kindNames[kind]}</li>
               ))}
             </ul>
-          </div>
+          </details>
+          <details className="legend">
+            <summary id="workspace-help">도움말</summary>
+            <ul>
+              <li>지도나 지형 목록에서 블록을 선택하면 좌표와 높이를 확인할 수 있습니다.</li>
+              <li>영웅을 배치한 뒤 속성 패널에서 팀과 방향을 바꿀 수 있습니다.</li>
+              <li>Esc로 도구를 취소하거나 재생을 종료합니다.</li>
+              <li>Ctrl 또는 ⌘와 Z로 실행 취소하고, Shift를 함께 눌러 다시 실행합니다.</li>
+              <li>Vertactics는 Blizzard Entertainment와 제휴하지 않은 Overwatch 팬 프로젝트입니다.</li>
+            </ul>
+          </details>
         </aside>
       </main>
     </div>

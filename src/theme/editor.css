@@ -288,3 +288,70 @@ ul { padding: 0; list-style: none; }
 
 
 .workspace.shared-workspace { grid-template-columns: minmax(0, 1fr); }
+
+.editor .app-header { flex-wrap: wrap; gap: var(--space-sm) var(--space-lg); }
+.brand { white-space: nowrap; }
+.brand-mark { flex: none; }
+.map-catalogue, .workspace-links, .viewport-actions { min-width: 0; }
+.map-catalogue, .workspace-links { flex: 1 1 auto; }
+.map-catalogue label { flex-wrap: wrap; }
+.workspace-links, .canvas-tools { display: flex; flex-wrap: wrap; gap: var(--space-xs); }
+.workspace-links { justify-content: flex-end; }
+.workspace-links a, .canvas-tools a { display: inline-flex; align-items: center; text-decoration: none; color: inherit; }
+.editor-workspace { grid-template-areas: "terrain canvas inspector"; grid-template-columns: var(--size-rail) minmax(0, 1fr) var(--size-inspector); }
+.editor-workspace > .terrain-panel { grid-area: terrain; }
+.editor-workspace > .view-panel { grid-area: canvas; }
+.editor-workspace > .inspector-panel { grid-area: inspector; }
+.editor-workspace > .panel { min-width: 0; }
+.editor .view-panel { min-width: 0; }
+.viewport-actions { flex-wrap: wrap; }
+.canvas-tools { padding: var(--space-sm) var(--space-lg); border-bottom: 1px solid var(--color-border); }
+.canvas-tools .reset-button, .workspace-links .reset-button { min-height: var(--size-control); }
+.reset-button[aria-pressed="true"] { background: var(--color-accent); color: var(--color-accentText); border-color: var(--color-accent); }
+.reset-button { border-color: var(--color-controlBorder); background: var(--color-control); }
+.reset-button:hover { background: var(--color-border); }
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.editor :where(select, input:not([type=checkbox], [type=radio], [type=range])) {
+  max-width: 100%;
+  border: 1px solid var(--color-controlBorder);
+  border-radius: var(--radius-control);
+  background: var(--color-app);
+  color: var(--color-text);
+  padding: var(--space-xs) var(--space-sm);
+  font: inherit;
+}
+
+.editor :where([role=status], h1, h2, h3, dd, .terrain-button span) { overflow-wrap: anywhere; }
+.editor .legend summary { align-content: center; cursor: pointer; font-size: 13px; font-weight: 690; }
+.editor .legend li { line-height: 1.5; }
+.editor .terrain-swatch.ramp { background: var(--color-ramp); }
+.editor .view-panel > p[role=status], .editor .inspector-panel > p[role=status] { padding: var(--space-sm) var(--space-lg); }
+
+@media (min-width: 1001px) and (min-height: 720px) {
+  .editor .view-panel { min-height: 0; }
+  .editor .viewport { min-height: 0; }
+  .editor .viewport-toolbar { flex-wrap: wrap; }
+}
+
+@media (max-width: 1000px) {
+  .editor-workspace { grid-template-areas: "canvas canvas" "terrain inspector"; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .workspace-links { justify-content: flex-start; }
+}
+
+@media (max-width: 680px) {
+  .editor-workspace { grid-template-areas: "canvas" "terrain" "inspector"; grid-template-columns: minmax(0, 1fr); }
+  .editor .viewport-toolbar { flex-wrap: wrap; }
+  .editor .workspace-links { flex-basis: 100%; }
+  .editor .viewport { min-height: clamp(260px, 48svh, 420px); }
+  .editor .view-options { gap: var(--space-xs) var(--space-md); }
+}
+
+@media (pointer: coarse) {
+  .editor .reset-button, .editor .mode-switch button, .editor .terrain-button, .editor .legend summary,
+  .editor :where(input:not([type=checkbox], [type=radio]), select) { min-height: var(--size-touch); }
+  .editor .view-options label { min-height: var(--size-touch); }
+}

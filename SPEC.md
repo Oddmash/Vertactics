@@ -4,7 +4,7 @@
 
 See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [the development guide](development.md). Check an item when its stated scope has been verified. Track implementation, browser behavior, CI and deployment separately.
 
-**Current phase** Phase 4. The Point A schematic and map-system checks are complete. Live-game geometry and clearance verification remain open before Phase 4 closes.
+**Current work** Phase 8 workspace polish. Phase 4 live-game geometry and clearance verification and Phase 5 roster and asset verification remain open.
 
 ## Phase 1 · Project setup
 
@@ -187,3 +187,4 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 | Workspace autosave and recovery | 60 unit tests and 31 Chromium scenarios passed. Verified autosave, page-hide flush, reload and explicit restoration, malformed recovery and write failure, and preservation of named saves. Legacy named-draft migration is covered by the local strategy library checkpoint. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44053504783) |
 | Strategy file transfer and image export | 60 unit tests and 33 Chromium scenarios passed. Verified invalid import handling, saving, reload, restore, export and re-import of a map and timed plan. Decoded both PNG downloads and verified distinct nonblank views. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44054863071) |
 | Strategy share links | 62 unit tests and 35 Chromium scenarios passed. Verified read-only view, playback, JSON export, local duplication, malformed links and payload limits. Links carry a compressed snapshot. Strategies over the link limit can be transferred as JSON. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44055871444) |
+| Canvas-first workspace | Added workspace navigation, a tool strip next to the canvas, touch sizing, and narrow-screen browser coverage. Local dependency installation is blocked by npm DNS resolution and missing offline packages. Browser evidence and CI are tracked separately. |
