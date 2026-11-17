@@ -1,3 +1,4 @@
+import StrategyFileTools from './strategy-file-tools';
 import useWorkspaceRecovery from './use-workspace-recovery';
 import TimelinePlaybackControls from './timeline-playback-controls';
 import useTimelinePlayback from './use-timeline-playback';
@@ -404,6 +405,10 @@ const Editor = () => {
             onCancel={() => setTool(null)}
           />}
           <StrategyDraftTools draft={draft} onRestore={restoreDraft} />
+          <StrategyFileTools draft={draft} onImport={(imported) => {
+            restoreDraft(imported);
+            markWorkspaceChanged();
+          }} />
           <section className="hero-tools" aria-label="작업 복구">
             {recovery.saved ? <>
               <p>이전 작업 · {recovery.saved.map.name}</p>
