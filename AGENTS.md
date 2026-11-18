@@ -26,6 +26,14 @@
 - Make one reviewable change per commit. Push the topic branch with a fast-forward and open a PR for each independently reviewable change. Include its SPEC IDs, verification evidence, and known gaps.
 - Confirm that all CI workflows for the current PR head have passed and that the PR can merge. Merge the verified head, preserving logical commits. If CI fails or the PR is blocked, resolve what you can and continue independent work on a separate branch.
 
+## AI review
+
+- Use this repository's root and nested `AGENTS.md` files and skill guides as review rules.
+- Combine ESLint, TypeScript, test, build, and browser-check results with AI analysis. Do not restate deterministic failures as separate findings.
+- Prioritize actual bugs, rendering and interaction performance, accessibility, data compatibility, and release regressions. Review visual changes against `skills/vertactics-design/SKILL.md`, `skills/editor-design/SKILL.md`, and the affected JSON tokens.
+- Give each finding a severity and confidence level, cite concrete evidence, and avoid duplicate comments across reruns.
+- Limit the review agent to reading repository and pull request data and writing review comments. Do not let it modify code, approve, merge, publish, deploy, or access secrets.
+
 | Work | Instructions |
 | --- | --- |
 | Phase delivery and SPEC updates | [phase-delivery](skills/phase-delivery/SKILL.md) |
