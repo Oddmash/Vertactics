@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { savedHeroPosition } from './workspace-map';
 
 test('selects heroes by portrait and reveals sourced skills in the right panel', async ({ page }) => {
   const externalRequests: string[] = [];
@@ -115,4 +116,105 @@ test('keeps a hero badge visible when its local portrait fails', async ({ page }
   const badge = page.getByTestId('viewport').locator('[data-hero="tracer"][data-image-state="failed"]');
   await expect(badge).toHaveText('트레');
   await expect(badge).toBeVisible();
+});
+
+test('moves a held portrait and deletes it only on release over the open trash', async ({ page }, testInfo) => {
+  await page.goto('./');
+  const map = page.getByTestId('viewport');
+  const canvas = map.locator('canvas');
+  const portrait = map.locator('[data-hero="tracer"]');
+  const trash = map.locator('.map-hero-trash');
+  const roster = page.getByRole('group', { name: '영웅 선택' });
+  const undo = page.getByRole('button', { name: '실행 취소', exact: true });
+  await expect(canvas).toHaveAttribute('data-view-mode', '2d');
+  await page.getByRole('checkbox', { name: '격자 스냅' }).check();
+
+  const center = async (locator: typeof canvas): Promise<[number, number]> => {
+    const box = await locator.boundingBox();
+    if (!box) throw new Error('Missing drag target');
+    return [box.x + box.width / 2, box.y + box.height / 2];
+  };
+  const screen = await canvas.boundingBox();
+  if (!screen) throw new Error('Missing map bounds');
+  const units = Math.max(36 / screen.width, 24 / screen.height) * 1.22;
+  await roster.getByRole('button', { name: '트레이서', exact: true }).dragTo(canvas);
+  await expect(portrait).toBeVisible();
+  await expect.poll(() => savedHeroPosition(page)).toBe('0, 0, 0');
+  await expect(trash).toBeHidden();
+  await page.mouse.click(screen.x + screen.width / 2 - 6 / units, screen.y + screen.height / 2);
+  await expect(portrait).toHaveAttribute('data-selected', 'false');
+  await portrait.click();
+  await expect(portrait).toHaveAttribute('data-selected', 'true');
+  await expect(trash).toBeHidden();
+  await page.mouse.move(...await center(portrait));
+  await page.mouse.down();
+  await expect(trash).toBeVisible();
+  await expect(trash).toHaveAttribute('data-open', 'false');
+  await page.mouse.move(screen.x + screen.width / 2 + 7 / units, screen.y + screen.height / 2 + 5 / units, { steps: 8 });
+  await expect.poll(() => savedHeroPosition(page)).toBe('0, 0, 0');
+  await page.mouse.up();
+  await expect.poll(() => savedHeroPosition(page)).toBe('7, 2, 5');
+  await undo.click();
+  await expect.poll(() => savedHeroPosition(page)).toBe('0, 0, 0');
+
+  await page.mouse.move(...await center(portrait));
+  await page.mouse.down();
+  await expect(trash).toBeVisible();
+  await page.mouse.move(...await center(trash));
+  await expect(trash).toHaveAttribute('data-open', 'true');
+  await map.screenshot({ path: testInfo.outputPath('hero-trash-2d.png') });
+  await page.keyboard.press('Escape');
+  await page.mouse.up();
+  await expect(trash).toBeHidden();
+  await expect(portrait).toBeVisible();
+
+  await page.getByRole('button', { name: '3D 원근' }).click();
+  await expect(canvas).toHaveAttribute('data-view-mode', '3d');
+  await page.mouse.move(...await center(portrait));
+  await page.mouse.down();
+  await expect(trash).toBeVisible();
+  await page.mouse.move(...await center(trash));
+  await expect(trash).toHaveAttribute('data-open', 'true');
+  await expect(trash).toHaveText('놓아서 삭제');
+  await expect(portrait).toBeVisible();
+  await map.screenshot({ path: testInfo.outputPath('hero-trash-3d.png') });
+  await page.mouse.up();
+  await expect(portrait).toHaveCount(0);
+  await expect(trash).toBeHidden();
+  await undo.click();
+  await expect(portrait).toBeVisible();
+  await expect.poll(() => savedHeroPosition(page)).toBe('0, 0, 0');
+});
+
+test.describe('touch map', () => {
+  test.use({ hasTouch: true, viewport: { width: 430, height: 900 } });
+
+  test('opens the trash under a held touch and deletes on touch release', async ({ page, browserName }) => {
+    test.skip(browserName !== 'chromium', 'Uses Chromium touch dispatch');
+    await page.goto('./');
+    const map = page.getByTestId('viewport');
+    const canvas = map.locator('canvas');
+    const portrait = map.locator('[data-hero="tracer"]');
+    const trash = map.locator('.map-hero-trash');
+    await page.getByRole('button', { name: '지도에서 위치 선택' }).tap();
+    await canvas.tap();
+    await expect(portrait).toBeVisible();
+    const marker = await portrait.boundingBox();
+    if (!marker) throw new Error('Missing hero portrait');
+    const session = await page.context().newCDPSession(page);
+    await session.send('Input.dispatchTouchEvent', {
+      type: 'touchStart',
+      touchPoints: [{ x: marker.x + marker.width / 2, y: marker.y + marker.height / 2 }],
+    });
+    await expect(trash).toBeVisible();
+    const target = await trash.boundingBox();
+    if (!target) throw new Error('Missing trash target');
+    await session.send('Input.dispatchTouchEvent', {
+      type: 'touchMove',
+      touchPoints: [{ x: target.x + target.width / 2, y: target.y + target.height / 2 }],
+    });
+    await expect(trash).toHaveAttribute('data-open', 'true');
+    await session.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    await expect(portrait).toHaveCount(0);
+  });
 });

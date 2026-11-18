@@ -10,8 +10,10 @@ import rampGeometry from './ramp-geometry';
 import type { Annotation } from '../domain/annotation';
 import MapAnnotations from './map-annotations';
 import SurfaceDrag from './surface-drag';
+import HeroDrag from './hero-drag';
+import type { HeroDragPreview, HeroDrop } from './hero-drag';
 import { Canvas, useThree } from '@react-three/fiber';
-import { Component, useEffect, useLayoutEffect, useMemo } from 'react';
+import { Component, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { BoxGeometry, BufferAttribute, BufferGeometry, EdgesGeometry } from 'three';
 import { mapBounds, terrainBlocks, visibleTerrainForLayer } from '../domain/map';
@@ -102,6 +104,7 @@ type Props = {
   snap: boolean;
   layerId: string;
   onSelectHero: (id: string) => void;
+  onDropHero?: (id: string, drop: HeroDrop) => void;
   onEditSurface?: (position: WorldPoint) => void;
   onDragSurface?: (position: WorldPoint | null) => void;
   sampleDragStart?: boolean;
@@ -114,9 +117,12 @@ type Props = {
 const MapViewport = ({
   map, capture, mode, reset, selectedTerrainIds, onSelect, heroes, selectedHeroId, onSelectHero, onEditSurface,
   annotations, selectedAnnotationId, snap, layerId, onDragSurface, onDropSurface, sampleDragStart, externalDrop, abilities, abilityPreview, sightline, heroView,
-  locations, focusedLocation,
+  locations, focusedLocation, onDropHero,
 }: Props) => {
   const { locale, t } = useLocale();
+  const [heroDrag, setHeroDrag] = useState<HeroDragPreview | null>(null);
+  const trash = useRef<HTMLDivElement>(null);
+  const canDragHero = Boolean(onDropHero && !onEditSurface && !onDragSurface && !heroView);
   const bounds = useMemo(() => mapBounds(map.terrain), [map]);
   const blocks = useMemo(() => visibleTerrainForLayer(map.terrain, layerId).map((terrain) => ({
     terrain,
@@ -131,6 +137,7 @@ const MapViewport = ({
   ) + 12);
 
   return (
+    <>
     <ViewportBoundary>
       <Canvas
         className="map-canvas"
@@ -148,8 +155,10 @@ const MapViewport = ({
         <ambientLight intensity={1.15} />
         <directionalLight position={[-15, 24, 10]} intensity={1.5} />
         <directionalLight position={[18, 8, -15]} intensity={0.35} />
-        <MapCamera mode={mode} bounds={bounds} reset={reset} heroView={heroView} pointerEditing={Boolean(onDragSurface)}
+        <MapCamera mode={mode} bounds={bounds} reset={reset} heroView={heroView} pointerEditing={Boolean(onDragSurface || heroDrag)}
           focusPoint={focusedLocation?.point} />
+        <HeroDrag enabled={canDragHero} trash={trash} snap={snap} onPreview={setHeroDrag}
+          onSelect={onSelectHero} onDrop={onDropHero} />
         <SurfaceCursor editing={Boolean(onEditSurface || onDragSurface)} />
         {(onDropSurface || externalDrop) && <SurfaceDrag snap={snap} onPreview={onDragSurface} onFinish={onDropSurface} sampleStart={sampleDragStart} externalDrop={externalDrop} />}
         <gridHelper
@@ -212,7 +221,7 @@ const MapViewport = ({
         {heroes.filter(({ id }) => id !== heroView?.id).map(({ id, heroId, position, yaw, team }) => (
           <group
             key={id}
-            position={position}
+            position={(heroDrag?.id === id && heroDrag.point) || position}
             rotation={[0, -yaw * Math.PI / 180, 0]}
             onClick={(event) => {
               if (event.delta > 4 || onEditSurface || onDragSurface) return;
@@ -228,7 +237,8 @@ const MapViewport = ({
                 emissiveIntensity={id === selectedHeroId ? 0.6 : 0}
               />
             </mesh>
-            <HeroPortraitMarker heroId={heroId}
+            <HeroPortraitMarker id={id} heroId={heroId} draggable={canDragHero}
+              dragging={heroDrag?.id === id} overTrash={heroDrag?.id === id && heroDrag.overTrash}
               label={(locale === 'ko' ? getHero(heroId)?.localizedName : getHero(heroId)?.name) ?? heroId}
               color={tokens.team[team]} selected={id === selectedHeroId} />
             <mesh position={[0, 0.46, -0.75]} rotation={[-Math.PI / 2, 0, 0]}>
@@ -239,6 +249,11 @@ const MapViewport = ({
         ))}
       </Canvas>
     </ViewportBoundary>
+    {canDragHero && heroDrag && <div ref={trash} className="map-hero-trash" role="status" data-open={heroDrag.overTrash}>
+      <span className="map-hero-trash-icon" aria-hidden="true"><span /><span /></span>
+      <span>{t(heroDrag.overTrash ? '놓아서 삭제' : '휴지통')}</span>
+    </div>}
+    </>
   );
 };
 
