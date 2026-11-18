@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 2,
+  "id": "tidal-relay",
+  "name": "조수 중계소",
+  "metadata": { "verification": "synthetic", "source": "Vertactics original layout" },
+  "layers": [
+    { "id": "grounds", "name": "중계소 지상" },
+    { "id": "channel", "name": "배수로 하층" },
+    { "id": "gantry", "name": "정비 교량 상층" }
+  ],
+  "terrain": [
+    { "id": "west-yard", "layerId": "grounds", "name": "서쪽 작업장", "kind": "floor", "origin": [-22, -0.5, -16], "size": [12, 0.5, 32], "material": "#355e61" },
+    { "id": "west-bank", "layerId": "grounds", "name": "서쪽 제방", "kind": "floor", "origin": [-10, -0.5, -16], "size": [6, 0.5, 24], "material": "#355e61" },
+    { "id": "west-bank-end", "layerId": "grounds", "name": "서쪽 남단", "kind": "floor", "origin": [-10, -0.5, 12], "size": [6, 0.5, 4], "material": "#355e61" },
+    { "id": "east-yard", "layerId": "grounds", "name": "동쪽 작업장", "kind": "floor", "origin": [10, -0.5, -16], "size": [12, 0.5, 32], "material": "#3e596d" },
+    { "id": "east-bank", "layerId": "grounds", "name": "동쪽 제방", "kind": "floor", "origin": [4, -0.5, -16], "size": [6, 0.5, 24], "material": "#3e596d" },
+    { "id": "east-bank-end", "layerId": "grounds", "name": "동쪽 남단", "kind": "floor", "origin": [4, -0.5, 12], "size": [6, 0.5, 4], "material": "#3e596d" },
+    { "id": "channel-bed", "layerId": "channel", "name": "배수로 하층", "kind": "floor", "origin": [-4, -2.5, -16], "size": [8, 0.5, 24], "material": "#29404d" },
+    { "id": "channel-access", "layerId": "channel", "name": "배수로 진입부", "kind": "floor", "origin": [-4, -2.5, 8], "size": [8, 0.5, 8], "material": "#304f5b" },
+    { "id": "west-ramp", "layerId": "channel", "name": "서쪽 배수로 경사로", "kind": "ramp", "origin": [-10, -2, 8], "size": [6, 2, 4], "risesToward": "-x", "material": "#567477" },
+    { "id": "east-ramp", "layerId": "channel", "name": "동쪽 배수로 경사로", "kind": "ramp", "origin": [4, -2, 8], "size": [6, 2, 4], "risesToward": "+x", "material": "#567477" },
+    { "id": "relay-span", "layerId": "grounds", "name": "중앙 중계 교량", "kind": "platform", "origin": [-4, -0.5, -2.5], "size": [8, 0.5, 5], "material": "#82989c" },
+    { "id": "gantry", "layerId": "gantry", "name": "정비 교량 상층", "kind": "platform", "origin": [-9, 2.1, -11.5], "size": [18, 0.4, 4], "material": "#a47748" },
+    { "id": "west-stairs", "layerId": "gantry", "name": "서쪽 정비 계단", "kind": "stairs", "origin": [-15, 0, -11.5], "size": [6, 2.5, 4], "steps": 10, "risesToward": "+x", "material": "#87674e" },
+    { "id": "east-stairs", "layerId": "gantry", "name": "동쪽 정비 계단", "kind": "stairs", "origin": [9, 0, -11.5], "size": [6, 2.5, 4], "steps": 10, "risesToward": "-x", "material": "#87674e" },
+    { "id": "west-screen", "layerId": "grounds", "name": "서쪽 방벽", "kind": "wall", "origin": [-16, 0, -5], "size": [1, 3, 5], "material": "#668184" },
+    { "id": "east-shelter", "layerId": "grounds", "name": "동쪽 펌프실", "kind": "building", "origin": [13, 0, 3], "size": [4, 3.2, 4], "material": "#627d90" },
+    { "id": "west-cover", "layerId": "grounds", "name": "서쪽 장비 상자", "kind": "wall", "origin": [-14, 0, 5], "size": [3, 1.5, 2], "material": "#668184" },
+    { "id": "east-cover", "layerId": "grounds", "name": "동쪽 장비 상자", "kind": "wall", "origin": [8, 0, -5], "size": [2, 1.5, 2], "material": "#627d90" }
+  ]
+}

@@ -62,14 +62,25 @@ export const competitiveOverview = (map: MapDefinition) => {
   return { entry, locations };
 };
 
-export const terrainLocations = (map: MapDefinition): MapLocation[] => {
-  if (map.id !== 'kings-row-a') return [];
-  const names: Record<string, SiteName> = {
+const terrainLocationNames: Record<string, Record<string, SiteName>> = {
+  'kings-row-a': {
     gate: ['정면 아치', 'Main arch'],
     statue: ['광장 동상', 'Plaza statue'],
     'point-a': ['A 점령 거점', 'Point A'],
     'hotel-corridor': ['호텔 우회 통로', 'Hotel flank'],
-  };
+  },
+  'tidal-relay': {
+    'west-yard': ['서쪽 작업장', 'West yard'],
+    'east-yard': ['동쪽 작업장', 'East yard'],
+    'channel-access': ['배수로 진입부', 'Drainage access'],
+    'relay-span': ['중앙 중계 교량', 'Relay bridge'],
+    gantry: ['정비 교량 상층', 'Maintenance gantry'],
+  },
+};
+
+export const terrainLocations = (map: MapDefinition): MapLocation[] => {
+  const names = terrainLocationNames[map.id];
+  if (!names) return [];
   return map.terrain.flatMap(({ id, origin, size }) => {
     const name = names[id];
     return name ? [{

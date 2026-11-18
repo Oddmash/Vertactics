@@ -81,6 +81,7 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 - [ ] 4.10c Compare the Point A Workshop survey with the editor using the [survey checker](development.md#check-kings-row-point-a-in-the-game-client). The live survey is pending.
 - [ ] 4.10d Build playable 2D layouts for the 31 competitive maps. The offline audit resolves direct models and primary entity meshes. Pass `--objectives <MapObjectives/Areas.json>` to check objective boxes against the selected map and variant. The 31 real geometry candidates and fixture objective records were checked. Live objective extraction is blocked by Wine server socket permissions. Walkability, collisions and real objective coordinates remain unverified.
 - [ ] 4.10e Confirm the mode-grouped map picker and 2D location selector in the editor. The 31 OWKR artwork cards represent the catalogue. Fifteen have legacy StatBanana overhead references, which need current-build comparison before use as terrain. King’s Row Point A is the existing approximate reference. Old schematic drafts can still be restored.
+- 4.11 Tidal Relay is an original, three-layer map with a central crossing, drainage flank, and maintenance gantry. The map catalogue browser test covers location focus, hero placement below grade, marker points, and persistent sightline results across 2D and 3D.
 - [x] 4.11 Verify floor switching, overlapping selection and map registration, editing and import
 - [x] 4.12 Evaluate GLB and glTF and define loading boundaries if needed
 
