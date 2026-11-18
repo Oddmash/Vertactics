@@ -457,5 +457,21 @@
   "은신 지속시간": "Stealth duration",
   "구역 반경": "Zone radius",
   "구역 지속시간": "Zone duration",
-  "검증된 수치가 아직 없습니다.": "No verified statistics yet."
+  "검증된 수치가 아직 없습니다.": "No verified statistics yet.",
+  "공격 속도 증가": "Attack speed increase",
+  "중앙 투사체 피해": "Center projectile damage",
+  "흡수 지속시간": "Absorption duration",
+  "직격 피해": "Impact damage",
+  "폭발 내부 반경": "Inner explosion radius",
+  "폭발 외부 반경": "Outer explosion radius",
+  "5대5 재사용 대기시간": "5v5 cooldown",
+  "최대 지속시간": "Maximum duration",
+  "받는 피해 감소": "Damage reduction",
+  "초당 치유": "Healing per second",
+  "초기 탄 퍼짐": "Initial spread",
+  "회차별 시전·이동 시간": "Cast / move time per volley",
+  "약화 효과": "Weaken effect",
+  "구역 초당 피해": "Zone damage per second",
+  "구역 초당 치유": "Zone healing per second",
+  "첫 공격 준비 시간": "Initial swing delay"
 }

@@ -68,12 +68,17 @@ const patchReferences: Record<string, Record<string, PatchReference | PatchRefer
   },
   doctrine: {
     'eternal-scepter': november(['주 공격 회복 시간', 0.65, 's'], ['주입 피해', 80], ['주입 치유', 110]),
+    'invigorating-drones': [octoberHotfix(['지속시간', 5, 's']), october(['공격 속도 증가', 30, '%'])],
     'shrouded-momentum': november(['재사용 대기시간', 10, 's']),
     infuse: november(['재사용 대기시간', 9, 's']),
   },
   brigitte: { inspire: november(['내부 재사용 대기시간', 1, 's'], ['즉시 치유', 15]) },
-  emre: { 'cyber-frag': november(['폭발까지 걸리는 시간', 0.5, 's']) },
-  genji: { deflect: november(['지속시간', 1.5, 's']) },
+  emre: { 'cyber-frag': [november(['폭발까지 걸리는 시간', 0.5, 's']), october(['재사용 대기시간', 9, 's'])] },
+  genji: {
+    deflect: november(['지속시간', 1.5, 's']),
+    'swift-strike': october(['피해량', 60]),
+    dragonblade: october(['피해량', 100]),
+  },
   illari: {
     'solar-rifle': november(['최대 충전 시간', 0.575, 's']),
     'healing-pylon': november(['투사체당 치유', 50]),
@@ -84,18 +89,32 @@ const patchReferences: Record<string, Record<string, PatchReference | PatchRefer
     'void-barrier-omnic-form': { patch: '2026-07-30', values: [['재사용 대기시간', 13, 's']] },
     'ravenous-vortex': { patch: '2026-07-14', values: [['폭발 피해', 30]] },
   },
-  roadhog: { 'chain-hook': october(['대상 정지 거리', 4.5, 'm'], ['당긴 후 기절 지속시간', 0.3, 's']) },
+  roadhog: {
+    'scrap-gun': octoberHotfix(['중앙 투사체 피해', 40]),
+    'trash-compactor': october(['흡수 지속시간', 2, 's'], ['폭발 피해', '75–200'], ['직격 피해', 10],
+      ['폭발 내부 반경', 2, 'm'], ['폭발 외부 반경', 6, 'm'], ['5대5 재사용 대기시간', 10, 's']),
+    'chain-hook': october(['대상 정지 거리', 4.5, 'm'], ['당긴 후 기절 지속시간', 0.3, 's'],
+      ['5대5 재사용 대기시간', 6, 's']),
+    'take-a-breather': [octoberHotfix(['재사용 대기시간', 1.25, 's'], ['최대 지속시간', 2.5, 's'],
+      ['받는 피해 감소', 40, '%']), october(['초당 치유', 200])],
+  },
+  shion: {
+    execution: november(['초기 탄 퍼짐', 5.7, '°']),
+    'satsuriku-spree': november(['회차별 시전·이동 시간', 0.5, 's']),
+  },
   sombra: {
     'machine-pistol': [octoberHotfix(['투사체당 피해', 6.5]), october(['피해 감소 시작 거리', 20, 'm'])],
     hotfix: november(['지속시간', 10, 's']),
     translocator: october(['투사체 사거리', 12.25, 'm'], ['은신 지속시간', 6.5, 's']),
-    cyberspace: [octoberHotfix(['폭발 피해', 20], ['재사용 대기시간', 13, 's']),
-      october(['구역 반경', 5, 'm'], ['구역 지속시간', 3, 's'])],
+    cyberspace: [november(['약화 효과', 40, '%']), octoberHotfix(['폭발 피해', 20], ['재사용 대기시간', 13, 's']),
+      october(['구역 반경', 5, 'm'], ['구역 지속시간', 3, 's'], ['구역 초당 피해', 25], ['구역 초당 치유', 30])],
   },
+  vendetta: { 'palatine-fang': november(['첫 공격 준비 시간', 0.2, 's']) },
 };
 
 export const getAbilityPatchReferences = (heroId: string, abilityId: string) => {
-  const reference = patchReferences[heroId]?.[abilityId];
+  const hero = Object.hasOwn(patchReferences, heroId) ? patchReferences[heroId] : undefined;
+  const reference = hero && Object.hasOwn(hero, abilityId) ? hero[abilityId] : undefined;
   if (!reference) return [];
   return (Array.isArray(reference) ? reference : [reference]).map((entry) => {
     const monthPath = entry.patch.slice(0, 7).replace('-', '/');
