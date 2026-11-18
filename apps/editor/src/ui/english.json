@@ -530,5 +530,20 @@
   "사거리": "Range",
   "충전 횟수": "Charges",
   "휴지통": "Trash",
-  "놓아서 삭제": "Release to delete"
+  "놓아서 삭제": "Release to delete",
+  "지속 치유 총량": "Total healing over time",
+  "강화 시 연쇄 타격 거리 증가": "Empowered collateral range bonus",
+  "강화 시 연쇄 타격 반경 증가": "Empowered collateral radius bonus",
+  "대상 운반 중 연료 회복 속도": "Fuel regeneration rate while carrying a target",
+  "초과 치유의 추가 생명력 전환율": "Excess healing converted to overhealth",
+  "주 공격 사거리": "Primary fire range",
+  "공격력 증폭": "Damage boost",
+  "초당 피해": "Damage per second",
+  "구슬당 최대 피해": "Maximum damage per orb",
+  "생명력 흡수": "Lifesteal",
+  "탑승 중 충돌 피해": "Impact damage while riding",
+  "드론 설치 속도": "Drone deployment speed",
+  "갈고리 사거리": "Grapple range",
+  "수직 베기 추가 사거리": "Overhead swing bonus range",
+  "초당 에너지 감소량": "Energy decay per second"
 }

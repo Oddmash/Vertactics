@@ -52,6 +52,8 @@ export const getAbilitySummary = (heroId: string, abilityId: string, locale: 'ko
 type Stat = [label: string, value: number | string, unit?: string];
 type PatchReference = { patch: string; values: Stat[] };
 
+const june = (...values: Stat[]): PatchReference => ({ patch: '2026-06-16', values });
+const july = (...values: Stat[]): PatchReference => ({ patch: '2026-07-14', values });
 const august = (...values: Stat[]): PatchReference => ({ patch: '2026-08-11', values });
 const augustHotfix = (...values: Stat[]): PatchReference => ({ patch: '2026-08-14', values });
 const november = (...values: Stat[]): PatchReference => ({ patch: '2026-11-03', values });
@@ -61,17 +63,19 @@ const septemberHotfix = (...values: Stat[]): PatchReference => ({ patch: '2026-0
 const octoberHotfix = (...values: Stat[]): PatchReference => ({ patch: '2026-10-13', values });
 
 const patchReferences: Record<string, Record<string, PatchReference | PatchReference[]>> = {
-  ana: { 'biotic-grenade': november(['폭발 피해', 60]) },
+  ana: { 'biotic-grenade': [november(['폭발 피해', 60]), july(['폭발 치유', 90])] },
   anran: {
     'zhuque-fans': november(['피해량', 24]),
     'vermillion-ascent': november(['시전 시간', 1, 's']),
     'vermillion-revival': september(['시전 시간', 2.5, 's']),
+    'inferno-rush': june(['회복 시간', 0.1, 's']),
+    'dancing-blaze': june(['회복 시간', 0.1, 's']),
   },
   baptiste: {
     'immortality-field': september(['최소 생명력 비율', 25, '%'], ['재사용 대기시간', 20, 's'], ['장치 생명력', 150]),
   },
   bastion: { reconfigure: october(['지속시간', 5, 's']) },
-  brigitte: { inspire: november(['내부 재사용 대기시간', 1, 's'], ['즉시 치유', 15]) },
+  brigitte: { inspire: [november(['내부 재사용 대기시간', 1, 's'], ['즉시 치유', 15]), july(['지속 치유 총량', 45])] },
   dmon: {
     'plasma-saber': september(['피해량', 60]),
     'portable-fusion-repeater': september(['탄 퍼짐', 1.75, '°'], ['피해 감소 시작 거리', 20, 'm']),
@@ -94,42 +98,53 @@ const patchReferences: Record<string, Record<string, PatchReference | PatchRefer
     'crystal-charge': october(['재사용 대기시간', 7, 's']),
     panopticon: august(['방벽 생명력', 500]),
   },
-  doomfist: { 'seismic-slam': august(['피해량', 60]) },
+  doomfist: {
+    'seismic-slam': august(['피해량', 60]),
+    'rocket-punch': july(['강화 시 연쇄 타격 거리 증가', 40, '%'], ['강화 시 연쇄 타격 반경 증가', 40, '%']),
+  },
   dva: { 'micro-missiles': october(['초당 발사 수', 14]) },
   emre: { 'cyber-frag': [november(['폭발까지 걸리는 시간', 0.5, 's']), october(['재사용 대기시간', 9, 's'])] },
-  freja: { 'take-aim': september(['폭발 피해', 75]) },
+  freja: { 'take-aim': [september(['폭발 피해', 75]), july(['회복 시간', 0.4, 's'], ['폭발까지 걸리는 시간', 0.8, 's'])] },
   genji: {
-    deflect: november(['지속시간', 1.5, 's']),
+    deflect: [november(['지속시간', 1.5, 's']), june(['재사용 대기시간', 8, 's'])],
     'swift-strike': october(['피해량', 60]),
     dragonblade: october(['피해량', 100]),
   },
+  hazard: { 'spike-guard': june(['최대 지속시간', 2.5, 's']) },
   illari: {
     'solar-rifle': november(['최대 충전 시간', 0.575, 's']),
     'healing-pylon': november(['투사체당 치유', 50]),
   },
   'jetpack-cat': {
     'biotic-pawjectiles': september(['투사체당 피해', 4], ['투사체당 치유', 4]),
-    'frenetic-flight': november(['초당 연료 회복률', 20, '%']),
+    'frenetic-flight': [november(['초당 연료 회복률', 20, '%']), june(['대상 운반 중 연료 회복 속도', '⅓×'])],
     lifeline: august(['이동 속도 증가', 30, '%']),
     purr: augustHotfix(['자가 치유 감소', 40, '%']),
   },
-  'junker-queen': { carnage: november(['재사용 대기시간', 7, 's']) },
+  'junker-queen': { carnage: november(['재사용 대기시간', 7, 's']), 'commanding-shout': july(['5대5 재사용 대기시간', 10, 's']) },
   juno: { 'pulsar-torpedoes': august(['최소 조준 고정 시간', 0.35, 's']) },
   junkrat: { 'concussion-mine': september(['재사용 대기시간', 7, 's']) },
   kiriko: {
-    'healing-ofuda': september(['투사체 속도', 18, 'm/s'], ['최대 추적 거리', 30, 'm']),
+    'healing-ofuda': [september(['투사체 속도', 18, 'm/s'], ['최대 추적 거리', 30, 'm']), july(['투사체당 치유', 12])],
     'protection-suzu': september(['무적 지속시간', 0.5, 's'], ['폭발 반경', 4, 'm']),
   },
-  lifeweaver: { 'life-grip': august(['기본 끌어당김 속도', 25, 'm/s'], ['취소 가능 시점', 0.6, 's']) },
-  lucio: { 'sound-barrier': october(['지속시간', 6, 's']) },
+  lifeweaver: {
+    'life-grip': august(['기본 끌어당김 속도', 25, 'm/s'], ['취소 가능 시점', 0.6, 's']),
+    'tree-of-life': june(['초과 치유의 추가 생명력 전환율', 50, '%']),
+  },
+  lucio: { 'sound-barrier': october(['지속시간', 6, 's']), 'sonic-amplifier': july(['투사체당 피해', 22]) },
   mauga: { overrun: august(['5대5 재사용 대기시간', 6, 's']) },
-  mizuki: { 'katashiro-return': august(['재사용 대기시간', 12, 's']) },
+  mei: { 'endothermic-blaster': june(['주 공격 사거리', 12, 'm']) },
+  mercy: { 'caduceus-staff': june(['공격력 증폭', 25, '%']) },
+  mizuki: { 'katashiro-return': [august(['재사용 대기시간', 12, 's']), june(['지속시간', 5.5, 's'])] },
+  moira: { 'biotic-orb': june(['초당 피해', 60], ['초당 치유', 75], ['구슬당 최대 피해', 250]) },
   pharah: { 'concussive-blast': august(['재사용 대기시간', 8, 's']) },
   ramattra: {
     'void-accelerator-omnic-form': november(['탄창', 125]),
-    'void-barrier-omnic-form': { patch: '2026-07-30', values: [['재사용 대기시간', 13, 's']] },
-    'ravenous-vortex': { patch: '2026-07-14', values: [['폭발 피해', 30]] },
+    'ravenous-vortex': july(['폭발 피해', 30]),
   },
+  reaper: { 'the-reaping': july(['생명력 흡수', 30, '%']) },
+  reinhardt: { 'fire-strike': june(['피해량', 125], ['투사체 속도', 33, 'm/s']) },
   roadhog: {
     'scrap-gun': [octoberHotfix(['중앙 투사체 피해', 40]), october(['탄창', 12],
       ['산탄 개수', 16], ['산탄 1발당 피해', 4.25], ['치명타 배율', 1.5, '×'],
@@ -143,14 +158,16 @@ const patchReferences: Record<string, Record<string, PatchReference | PatchRefer
       ['받는 피해 감소', 40, '%']), october(['초당 치유', 200])],
   },
   shion: {
-    joyride: august(['지상 발사 감지 반경', 1, 'm']),
-    execution: november(['초기 탄 퍼짐', 5.7, '°']),
+    joyride: [august(['지상 발사 감지 반경', 1, 'm']), july(['탑승 중 충돌 피해', 30])],
+    execution: [november(['초기 탄 퍼짐', 5.7, '°']), july(['회복 시간', 0.3, 's'])],
     'satsuriku-spree': november(['회차별 시전·이동 시간', 0.5, 's']),
   },
   sierra: {
     'helix-rifle': september(['피해량', 8.5], ['투사체 속도', 120, 'm/s']),
     'tracking-shot': september(['피해량', 8.5]),
     'tremor-charge': september(['재사용 대기시간', 7, 's']),
+    'anchor-drone': [july(['재사용 대기시간', 11, 's'], ['지속시간', 9, 's'], ['장치 생명력', 125]),
+      june(['드론 설치 속도', 40, 'm/s'], ['설치 거리', 16, 'm'], ['갈고리 사거리', 19, 'm'])],
   },
   sombra: {
     'machine-pistol': [octoberHotfix(['투사체당 피해', 6.5]), october(['피해 감소 시작 거리', 20, 'm'],
@@ -169,7 +186,7 @@ const patchReferences: Record<string, Record<string, PatchReference | PatchRefer
   tracer: { recall: august(['재사용 대기시간', 12, 's']) },
   vendetta: {
     'soaring-slice': august(['부활 직후 재사용 대기시간', 3, 's']),
-    'palatine-fang': [november(['첫 공격 준비 시간', 0.2, 's']), september(['수평 베기 지속시간', 0.2, 's'], ['연계 입력 시간', 0.9, 's'])],
+    'palatine-fang': [november(['첫 공격 준비 시간', 0.2, 's']), september(['수평 베기 지속시간', 0.2, 's'], ['연계 입력 시간', 0.9, 's']), july(['수직 베기 추가 사거리', 2.5, 'm'])],
     'whirlwind-dash': september(['회복 시간', 0.75, 's']),
     'sundering-blade': september(['회복 시간', 0.5, 's']),
   },
@@ -178,7 +195,10 @@ const patchReferences: Record<string, Record<string, PatchReference | PatchRefer
     'restorative-stream': september(['시야 이탈 유예 시간', 3, 's'], ['초당 자원 회복률', 15, '%']),
     'guardian-wave': august(['최대 각도', 15, '°']),
   },
-  zarya: { 'particle-barrier': september(['5대5 재사용 대기시간', 12, 's']) },
+  zarya: {
+    'particle-barrier': september(['5대5 재사용 대기시간', 12, 's']),
+    energy: june(['초당 에너지 감소량', 2]),
+  },
   zenyatta: { 'orb-of-harmony': september(['시야 이탈 유예 시간', 3, 's']) },
 };
 

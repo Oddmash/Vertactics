@@ -57,6 +57,11 @@ it('keeps sourced range and hotfix values tied to their own patch dates', () => 
   expect(breather.map(({ patch }) => patch)).toEqual(['2026-10-13', '2026-10-06']);
   expect(breather[0]?.values).toContainEqual(['최대 지속시간', 2.5, 's']);
   expect(getAbilityPatchReferences('toString', 'constructor')).toEqual([]);
+  expect(getAbilityPatchReferences('ramattra', 'void-barrier-omnic-form')).toEqual([]);
+  const drone = getAbilityPatchReferences('sierra', 'anchor-drone');
+  expect(drone.map(({ patch }) => patch)).toEqual(['2026-07-14', '2026-06-16']);
+  expect(drone[0]?.values).toContainEqual(['재사용 대기시간', 11, 's']);
+  expect(drone[1]?.values).toContainEqual(['갈고리 사거리', 19, 'm']);
 });
 
 it('keeps the latest published change for each skill statistic localized and dated', () => {

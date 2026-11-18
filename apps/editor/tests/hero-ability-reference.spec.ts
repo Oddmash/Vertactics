@@ -46,6 +46,8 @@ test('selects heroes by portrait and reveals sourced skills in the right panel',
   await grenade.focus();
   await expect(details).toContainText('폭발 피해');
   await expect(details.getByText('60', { exact: true })).toBeVisible();
+  await expect(details.getByText('90', { exact: true })).toBeVisible();
+  await expect(panel.getByRole('link', { name: '2026-07-14 패치 노트' })).toHaveAttribute('href', /#patch-2026-07-14$/);
   await expect(panel.getByRole('link', { name: '2026-11-03 패치 노트' })).toHaveAttribute('href', /2026\/11\//);
   await grenade.press('Escape');
   await expect(details).toHaveCount(0);
