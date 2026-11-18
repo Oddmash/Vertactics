@@ -63,21 +63,21 @@ const LandingPage = () => (
               <h3>고지대와 시야를 확인하세요.</h3>
               <p>2D에서 진입로를 살펴보고, 3D로 바꿔 계단과 높이 차를 확인하세요. 두 지점 사이에 시야를 가리는 지형이 있는지도 확인할 수 있습니다.</p>
             </div>
-            <img src={assets + 'editor-sightline.webp'} alt="두 지점 사이의 시야가 서쪽 계단에 막힌 2D 편집 화면" width={1440} height={900} loading="lazy" />
+            <img src={assets + 'editor-sightline.webp'} alt="왕의 길 광장에서 두 지점 사이의 시야가 동상에 가려지는 2D 편집 화면" width={1440} height={900} loading="lazy" />
           </article>
           <article className="workflow-feature">
             <div className="feature-copy">
               <h3>영웅을 배치하고 경로를 그리세요.</h3>
               <p>공격팀과 수비팀의 위치를 정한 뒤 웨이포인트로 이동 경로를 그리세요. 영웅을 선택하면 스킬 설명과 검증된 수치를 확인할 수 있습니다.</p>
             </div>
-            <img src={assets + 'editor-route.png'} alt="웨이포인트를 잇는 이동 경로와 경로 측정값이 보이는 편집기" width={1440} height={900} loading="lazy" />
+            <img src={assets + 'editor-route.webp'} alt="왕의 길 정면 아치를 통과하는 세 지점의 이동 경로와 배치한 영웅이 보이는 3D 편집 화면" width={1440} height={900} loading="lazy" />
           </article>
           <article className="workflow-feature">
             <div className="feature-copy">
               <h3>진입 순서를 기록하고 공유하세요.</h3>
               <p>단계별 영웅 위치와 스킬 사용 타이밍을 기록하세요. 팀원은 읽기 전용 링크에서 전술을 보고 타임라인을 재생할 수 있습니다.</p>
             </div>
-            <img src={assets + 'editor-playback.webp'} alt="고지대에 영웅이 배치된 읽기 전용 3D 전장과 상단 재생 컨트롤" width={1440} height={900} loading="lazy" />
+            <img src={assets + 'editor-playback.webp'} alt="왕의 길 고지대에 영웅이 배치된 읽기 전용 3D 전장과 상단 재생 컨트롤" width={1440} height={900} loading="lazy" />
           </article>
         </div>
       </section>

@@ -146,7 +146,7 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 - [x] 8.09a After reviewing the integrated Phase 8 UI, open a separate PR to refactor workspace state and module boundaries around the verified workflows
 - [x] 8.09b Keep map and strategy switching, restoration, and document commands under workspace ownership. Give UI panels the data and actions they need
 - [x] 8.09c Keep world rules and document validation independent of React, rendering, and browser storage. Verify existing editor, playback, and save and restore flows after the refactor
-- [x] 8.10a Present the same elevation test map in switchable 2D and 3D product previews, with editor links and current map availability. Verified the production-base static build.
+- [x] 8.10a Present the King’s Row Point A schematic in switchable 2D and 3D product previews. Use captures from that same public workspace to demonstrate sightlines, route planning and read-only playback. Verified the production-base static build and captured all three scenarios in Chromium.
 - [x] 8.10b Verify landing preview keyboard and touch interactions, responsive layout, asset loading, and metadata. Chromium 153 passed both release scenarios at 1440 × 900 and 390 × 844. The production-base capture also verified both preview images and the editor link.
 
 ## Phase 9 · Quality and release
