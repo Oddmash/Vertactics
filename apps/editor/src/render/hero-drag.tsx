@@ -114,6 +114,20 @@ const HeroDrag = ({ snap, enabled, trash, onPreview, onSelect, onDrop }: Props) 
       if (getMarker(event)) event.stopPropagation();
     };
 
+    const zoomOverMarker = (event: WheelEvent) => {
+      if (!getMarker(event)) return;
+      const zoom = new WheelEvent('wheel', {
+        cancelable: true,
+        clientX: event.clientX,
+        clientY: event.clientY,
+        deltaY: event.deltaY,
+        deltaMode: event.deltaMode,
+        ctrlKey: event.ctrlKey,
+      });
+      if (!canvas.dispatchEvent(zoom)) event.preventDefault();
+    };
+
+    host.addEventListener('wheel', zoomOverMarker, { passive: false });
     host.addEventListener('click', handleMarkerClick);
     host.addEventListener('pointerdown', start);
     host.addEventListener('pointermove', move);
@@ -124,6 +138,7 @@ const HeroDrag = ({ snap, enabled, trash, onPreview, onSelect, onDrop }: Props) 
     window.addEventListener('keydown', cancelKey);
     return () => {
       cancel();
+      host.removeEventListener('wheel', zoomOverMarker);
       host.removeEventListener('click', handleMarkerClick);
       host.removeEventListener('pointerdown', start);
       host.removeEventListener('pointermove', move);
