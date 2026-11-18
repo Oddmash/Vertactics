@@ -4,7 +4,7 @@
 
 **Explore Overwatch tactics in 2D and see the elevation in 3D.**
 
-Vertactics is a map tool for planning approaches, cover, and high-ground positions. Try two fictional training maps or a schematic reconstruction of King’s Row Point A.
+Vertactics is a map tool for planning approaches, cover, and high-ground positions. Open **Tidal Relay** to plan around a central bridge, a lower drainage route and an elevated maintenance crossing. The catalogue also includes the training maps.
 
 [Open Vertactics](https://qtaghdi.github.io/Vertactics/)
 

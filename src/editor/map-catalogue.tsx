@@ -43,6 +43,17 @@ const MapCatalogue = ({ maps, selectedId, onSelect }: {
           <Button type="button" className="reset-button" onClick={() => dialog.current?.close()}>{t('닫기')}</Button>
         </div>
         <div className="map-library-body">
+          {otherMaps.length > 0 && <section aria-labelledby="other-maps-title">
+            <h3 id="other-maps-title">{t('연습 및 가져온 지도')}</h3>
+            <ul className="map-card-grid" role="list">
+              {otherMaps.map(({ id, name }) => (
+                <li key={id}>
+                  <Button type="button" className="reset-button map-card-action" onClick={() => selectMap(id)}
+                    aria-current={id === selectedId ? 'true' : undefined}>{t(name)}</Button>
+                </li>
+              ))}
+            </ul>
+          </section>}
           {Object.entries(modeNames).map(([mode, name]) => (
             <section key={mode} aria-labelledby={`map-mode-${mode}`}>
               <h3 id={`map-mode-${mode}`}>{t(name)}</h3>
@@ -76,17 +87,6 @@ const MapCatalogue = ({ maps, selectedId, onSelect }: {
               </ul>
             </section>
           ))}
-          {otherMaps.length > 0 && <section aria-labelledby="other-maps-title">
-            <h3 id="other-maps-title">{t('연습 및 가져온 지도')}</h3>
-            <ul className="map-card-grid" role="list">
-              {otherMaps.map(({ id, name }) => (
-                <li key={id}>
-                  <Button type="button" className="reset-button map-card-action" onClick={() => selectMap(id)}
-                    aria-current={id === selectedId ? 'true' : undefined}>{t(name)}</Button>
-                </li>
-              ))}
-            </ul>
-          </section>}
           <small>{t('전장 이미지 © Blizzard Entertainment')}</small>
         </div>
       </dialog>
