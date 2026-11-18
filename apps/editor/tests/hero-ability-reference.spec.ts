@@ -141,6 +141,11 @@ test('moves a held portrait and deletes it only on release over the open trash',
   await expect(portrait).toBeVisible();
   await expect.poll(() => savedHeroPosition(page)).toBe('0, 0, 0');
   await expect(trash).toBeHidden();
+  await page.mouse.click(screen.x + screen.width / 2 - 6 / units, screen.y + screen.height / 2);
+  await expect(portrait).toHaveAttribute('data-selected', 'false');
+  await portrait.click();
+  await expect(portrait).toHaveAttribute('data-selected', 'true');
+  await expect(trash).toBeHidden();
   await page.mouse.move(...await center(portrait));
   await page.mouse.down();
   await expect(trash).toBeVisible();

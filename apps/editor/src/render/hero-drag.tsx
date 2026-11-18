@@ -62,12 +62,16 @@ const HeroDrag = ({ snap, enabled, trash, onPreview, onSelect, onDrop }: Props) 
       preview({ id: current.id, point: null, overTrash: false });
     };
 
+    const getMarker = (event: Event) => event.target instanceof Element
+      ? event.target.closest<HTMLElement>('[data-draggable="true"][data-placement]') : null;
+
     const start = (event: PointerEvent) => {
-      if (gesture || event.button !== 0 || !event.isPrimary || !(event.target instanceof Element)) return;
-      const marker = event.target.closest<HTMLElement>('[data-draggable="true"][data-placement]');
+      if (gesture || event.button !== 0 || !event.isPrimary) return;
+      const marker = getMarker(event);
       const id = marker?.dataset.placement;
       if (!marker || !id) return;
       event.preventDefault();
+      event.stopPropagation();
       marker.setPointerCapture(event.pointerId);
       const current: Gesture = {
         id, marker, pointerId: event.pointerId, x: event.clientX, y: event.clientY,
@@ -80,6 +84,7 @@ const HeroDrag = ({ snap, enabled, trash, onPreview, onSelect, onDrop }: Props) 
     const move = (event: PointerEvent) => {
       const current = gesture;
       if (!current || event.pointerId !== current.pointerId) return;
+      event.stopPropagation();
       current.moved ||= Math.hypot(event.clientX - current.x, event.clientY - current.y) >= 5;
       if (!current.moved) return;
       activate(current);
@@ -91,6 +96,7 @@ const HeroDrag = ({ snap, enabled, trash, onPreview, onSelect, onDrop }: Props) 
     const finish = (event: PointerEvent) => {
       const current = gesture;
       if (!current || event.pointerId !== current.pointerId) return;
+      event.stopPropagation();
       const target = current.active && current.moved ? (overTrash(event) ? 'trash' : getPoint(event)) : null;
       cancel();
       if (target) drop(current.id, target);
@@ -104,6 +110,11 @@ const HeroDrag = ({ snap, enabled, trash, onPreview, onSelect, onDrop }: Props) 
       if (event.key === 'Escape') cancel();
     };
 
+    const handleMarkerClick = (event: MouseEvent) => {
+      if (getMarker(event)) event.stopPropagation();
+    };
+
+    host.addEventListener('click', handleMarkerClick);
     host.addEventListener('pointerdown', start);
     host.addEventListener('pointermove', move);
     host.addEventListener('pointerup', finish);
@@ -113,6 +124,7 @@ const HeroDrag = ({ snap, enabled, trash, onPreview, onSelect, onDrop }: Props) 
     window.addEventListener('keydown', cancelKey);
     return () => {
       cancel();
+      host.removeEventListener('click', handleMarkerClick);
       host.removeEventListener('pointerdown', start);
       host.removeEventListener('pointermove', move);
       host.removeEventListener('pointerup', finish);
