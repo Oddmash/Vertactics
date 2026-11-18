@@ -33,7 +33,7 @@ test('supports keyboard mode changes and preserves browser context menus outside
     button: 2, bubbles: true, cancelable: true,
   }));
   const canvas = page.getByTestId('viewport').locator('canvas');
-  await expect(canvas).toBeVisible();
+  await expect(canvas).toHaveAttribute('data-view-mode', '2d');
   expect(await canvas.evaluate(contextMenuAllowed)).toBe(false);
   expect(await twoD.evaluate(contextMenuAllowed)).toBe(true);
 
