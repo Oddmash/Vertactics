@@ -52,6 +52,7 @@ const kindNames: Record<TerrainKind, string> = {
   'drop-zone': '낙하 구역',
 };
 const viewNames: Record<ViewMode, string> = { '2d': '2D 탑다운', '3d': '3D 원근' };
+const landingUrl = import.meta.env.DEV ? 'http://localhost:3000/about/' : `${import.meta.env.BASE_URL}about/`;
 const viewportModes = ['2d', '3d'] as const;
 
 const exposureLabels = { blocked: '완전 차단', partial: '부분 노출', clear: '개방' };
@@ -313,7 +314,7 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
       dispatch({ type: key === 'y' || event.shiftKey ? 'redo' : 'undo' });
     }}>
       <header className="app-header">
-        <a className="brand workspace-brand" href="about.html">
+        <a className="brand workspace-brand" href={landingUrl}>
           <span className="workspace-brand-symbol" aria-hidden="true">V</span>
           <span>Vertactics</span>
         </a>
@@ -644,7 +645,7 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
               <li>{t('Esc로 도구를 취소하거나 재생을 종료합니다.')}</li>
               <li>{t('Ctrl 또는 ⌘와 Z로 실행 취소하고, Shift를 함께 눌러 다시 실행합니다.')}</li>
               <li>{t('Vertactics는 Blizzard Entertainment와 제휴하지 않은 Overwatch 팬 프로젝트입니다.')}</li>
-              <li><a href="about.html" target="_blank" rel="noopener">{t('서비스 소개')}</a></li>
+              <li><a href={landingUrl} target="_blank" rel="noopener">{t('서비스 소개')}</a></li>
             </ul>
           </Disclosure>
         </aside>

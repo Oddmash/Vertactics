@@ -15,17 +15,37 @@ test('serves the editor, favicon, preview metadata and static recovery page', as
   await expect(page.getByTestId('viewport').locator('canvas')).toBeVisible();
   expect(errors).toEqual([]);
 
-  const about = await page.goto('./about.html');
+  const canonicalLanding = 'https://qtaghdi.github.io/Vertactics/about/';
+  const about = await page.goto('./about/');
   expect(about?.ok()).toBe(true);
+  await expect(page.locator('html')).toHaveAttribute('lang', 'ko');
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', canonicalLanding);
+  await expect(page.locator('meta[property="og:url"]')).toHaveAttribute('content', canonicalLanding);
+  await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute('content', 'summary_large_image');
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /2D·3D 전술 지도/);
+  const schema = JSON.parse(await page.locator('script[type="application/ld+json"]').textContent() ?? '');
+  expect(schema).toMatchObject({ '@type': 'WebApplication', url: canonicalLanding });
+  const robots = await page.request.get('./robots.txt');
+  expect(robots.ok()).toBe(true);
+  expect(await robots.text()).toContain('Sitemap: https://qtaghdi.github.io/Vertactics/sitemap.xml');
+  const sitemap = await page.request.get('./sitemap.xml');
+  expect(sitemap.ok()).toBe(true);
+  expect(await sitemap.text()).toContain(`<loc>${canonicalLanding}</loc>`);
+  const shareImage = (await page.locator('meta[property="og:image"]').getAttribute('content'))!;
+  expect((await page.request.get(new URL(shareImage).pathname.split('/').at(-1)!)).ok()).toBe(true);
   await expect(page.getByRole('heading', { level: 1 })).toContainText('다음 교전을');
   await expect(page.getByRole('heading', { name: '전술은 이렇게 만드세요.' })).toBeVisible();
+  await expect(page.locator('.hero')).toHaveCSS('display', 'grid');
   await expect(page.locator('.hero-map img')).toHaveJSProperty('naturalWidth', 1440);
   await expect(page.locator('.workflow-list img')).toHaveCount(3);
   await expect(page.getByRole('heading', { name: '지금 열 수 있는 지도' })).toBeVisible();
   await expect(page.locator('#maps')).toContainText('왕의 길 A 거점 근사 지도');
   await expect(page.locator('#maps')).toContainText('내전 전장 31개');
+  await page.goto('./about.html');
+  await expect(page).toHaveURL(/\/about\/$/);
   await page.getByRole('link', { name: /Open map editor/ }).click();
   await expect(page).toHaveTitle('Vertactics');
+  expect(errors).toEqual([]);
 
   const missing = await page.goto(process.env.VERTACTICS_PUBLIC_URL ? './missing-workspace' : './404.html');
   expect(missing?.status()).toBe(process.env.VERTACTICS_PUBLIC_URL ? 404 : 200);

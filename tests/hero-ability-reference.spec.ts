@@ -97,3 +97,18 @@ test('drops a portrait directly on the 2D map and places it on the selected team
     await expect(portrait).toHaveJSProperty('naturalWidth', 16);
   }
 });
+
+test('keeps a hero badge visible when its external portrait fails', async ({ page }) => {
+  await page.route('https://d15f34w2p8l1cc.cloudfront.net/overwatch/*.png', (route) => route.abort());
+  await page.goto('./');
+  const hero = page.getByRole('group', { name: '영웅 선택' }).getByRole('button', { name: '트레이서', exact: true });
+  await expect(hero.locator('[data-image-state="failed"]')).toBeVisible();
+  await expect(hero.locator('.image-placeholder')).toHaveText('트레');
+  await expect(hero.locator('.image-placeholder')).toBeVisible();
+
+  const canvas = page.getByTestId('viewport').locator('canvas');
+  await hero.dragTo(canvas);
+  const badge = page.getByTestId('viewport').locator('[data-hero="tracer"][data-image-state="failed"]');
+  await expect(badge).toHaveText('트레');
+  await expect(badge).toBeVisible();
+});

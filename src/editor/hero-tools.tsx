@@ -66,7 +66,7 @@ const HeroTools = ({
                 event.dataTransfer.setData(heroDragType, `${id}:${team}`);
               }}
               onClick={() => { if (isCatalogueHero(id)) onChooseHero(id); }}>
-              {portrait ? <LoadingImage src={portrait} width={48} height={48} fallback={label.slice(0, 2)} />
+              {portrait ? <LoadingImage src={portrait} width={48} height={48} loading="eager" fallback={label.slice(0, 2)} />
                 : <span className="hero-portrait-fallback" aria-hidden="true">{label.slice(0, 2)}</span>}
               <span className="hero-roster-name">{label}</span>
             </Button>

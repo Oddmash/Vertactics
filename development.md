@@ -13,6 +13,12 @@ pnpm dev
 
 Open the local address printed by Vite. The map needs a browser with WebGL 2 support.
 
+Run `pnpm dev:landing` in a separate terminal and open `http://localhost:3000/about/` to develop the landing page. The landing uses the editor dev server for shared images and the editor link.
+
+The pnpm workspace keeps the Vite editor at the root and the Next.js landing in `apps/landing`. They share a lockfile and release, and keeping the editor root preserves its current URLs and tools. Add a shared package when both apps need a stable API. Split deployments or introduce a task orchestrator when independent releases or build caching justify the extra setup.
+
+`pnpm build` assembles the two apps in `dist`. GitHub Pages serves the editor from the project root and the static landing from `/about/`. The legacy `about.html` navigates to the canonical landing. The sitemap is published at the project root. Domain-wide crawler directives come from the host’s root `robots.txt`, so submit the project sitemap directly when using a search console.
+
 ## Run checks
 
 ```sh

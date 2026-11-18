@@ -25,6 +25,7 @@ const HeroPortraitMarker = ({ heroId, label, color, selected }: Props) => {
     const badge = document.createElement('span');
     badge.className = 'map-hero-portrait';
     badge.dataset.hero = heroId;
+    badge.dataset.hasPlaceholder = 'true';
     badge.setAttribute('aria-hidden', 'true');
     badge.hidden = true;
     badge.textContent = label.slice(0, 2);
