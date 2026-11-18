@@ -6,14 +6,17 @@ type Props = {
   width: number;
   height: number;
   fallback?: ReactNode;
+  loading?: 'eager' | 'lazy';
 };
 
-const LoadingImage = ({ src, width, height, fallback }: Props) => {
+const LoadingImage = ({ src, width, height, fallback, loading = 'lazy' }: Props) => {
   const [state, setState] = useState<'loading' | 'loaded' | 'failed'>('loading');
   const style = { '--image-width': `${width}px`, aspectRatio: width / height } as CSSProperties;
-  return <span className="loading-image" data-image-state={state} style={style} aria-hidden="true">
-    {state === 'failed' ? fallback : <img src={src} alt="" width={width} height={height}
-      loading="lazy" draggable={false} referrerPolicy="no-referrer"
+  return <span className="loading-image" data-image-state={state} data-has-placeholder={fallback !== undefined}
+    style={style} aria-hidden="true">
+    {state !== 'loaded' && fallback !== undefined && <span className="image-placeholder">{fallback}</span>}
+    {state !== 'failed' && <img src={src} alt="" width={width} height={height}
+      loading={loading} draggable={false} referrerPolicy="no-referrer"
       onLoad={() => setState('loaded')} onError={() => setState('failed')} />}
   </span>;
 };
