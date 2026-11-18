@@ -150,12 +150,7 @@ def write_cloud(path, instances, bounds, resolution):
                      chunk(b'IDAT', zlib.compress(scanlines)) + chunk(b'IEND', b''))
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('map', type=Path)
-    parser.add_argument('--preview', type=Path)
-    args = parser.parse_args()
-    path = args.map.resolve()
+def inspect_geometry(path):
     name, records = read_map(path)
     root = path.parent
     model_refs = {ref for ref, _ in records if ref.lower().endswith('.owmdl')}
@@ -180,7 +175,7 @@ def main():
     missing = Counter(ref for ref, _ in records if ref in direct_models and not direct_models[ref])
     rendered_entities = sum(entity_models.get(ref) is not None for ref, _ in records)
     entity_count = sum(ref in entity_refs for ref, _ in records)
-    print(json.dumps({
+    report = {
         'map': name, 'variant': path.name, 'instances': len(records), 'model_instances': len(instances),
         'resolved_models': len({model for model in models.values() if model}),
         'vertex_instances': vertex_instances, 'bounds_xyz': [low, high] if vertex_instances else None,
@@ -192,11 +187,22 @@ def main():
         'missing_entity_model_references': {
             ref: asset for ref, (asset, file, _) in sorted(entities.items()) if asset and not file
         },
-    }, indent=2))
+    }
+    return report, instances
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('map', type=Path)
+    parser.add_argument('--preview', type=Path)
+    args = parser.parse_args()
+    path = args.map.resolve()
+    report, instances = inspect_geometry(path)
+    print(json.dumps(report, indent=2))
     if args.preview:
-        if not vertex_instances:
+        if not report['bounds_xyz']:
             raise ValueError('No model vertices for preview')
-        write_cloud(args.preview, instances, (low, high), 1400)
+        write_cloud(args.preview, instances, report['bounds_xyz'], 1400)
 
 
 if __name__ == '__main__':

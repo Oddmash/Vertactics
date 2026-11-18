@@ -1,4 +1,5 @@
 import argparse
+from collections import Counter
 import json
 import math
 from pathlib import Path
@@ -66,17 +67,42 @@ def read_objectives(path):
     return by_variant
 
 
+def objective_matches(entry, objectives):
+    name = f"{entry['internalName']} - {Path(entry['selectedVariant']).stem}"
+    return objectives.get(name, set())
+
+
 def objective_summary(entry, objectives):
     if entry['selectedVariant'] is None:
         return {'status': 'not-selected'}
-    name = f"{entry['internalName']} - {Path(entry['selectedVariant']).stem}"
-    matches = objectives.get(name, set())
+    matches = objective_matches(entry, objectives)
     if len(matches) != 1:
         return {'status': 'ambiguous' if matches else 'not-found'}
     areas, = matches
     box_count = sum(len(boxes) for _, boxes in areas)
     status = 'matched' if areas and all(boxes for _, boxes in areas) else 'incomplete-boxes'
     return {'status': status, 'areas': len(areas), 'boxes': box_count}
+
+
+def check_objective_centers(maps_root, entry, objectives):
+    if entry['objectives']['status'] != 'matched':
+        return {'status': 'no-matched-boxes'}
+    report, _ = INSPECTOR['inspect_geometry'](maps_root / entry['selectedVariant'])
+    if report['bounds_xyz'] is None:
+        return {'status': 'no-geometry'}
+    low, high = report['bounds_xyz']
+    areas, = objective_matches(entry, objectives)
+    center_count = entry['objectives']['boxes']
+    outside = 0
+    for _, boxes in areas:
+        for box in boxes:
+            point = json.loads(box)['Translation']
+            outside += not all(start <= value <= end for start, value, end in zip(low, point, high))
+    return {
+        'status': 'outside-geometry-bounds' if outside else 'inside-geometry-bounds',
+        'centersChecked': center_count,
+        'centersOutside': outside,
+    }
 
 
 def inspect_candidate(path):
@@ -138,7 +164,10 @@ def main():
     parser.add_argument('--game-build', required=True)
     parser.add_argument('--output', type=Path)
     parser.add_argument('--objectives', type=Path)
+    parser.add_argument('--check-objective-centers', action='append', metavar='MAP_ID', default=[])
     args = parser.parse_args()
+    if args.check_objective_centers and not args.objectives:
+        parser.error('--check-objective-centers requires --objectives')
     maps_root = args.maps.resolve()
     folders = {normalized_name(path.name): path for path in sorted(maps_root.iterdir()) if path.is_dir()}
     catalogue = json.loads((ROOT / 'apps/editor/src/domain/owkr-catalogue.json').read_text())['maps']
@@ -146,6 +175,10 @@ def main():
     ready = sum(bool(entry.get('directModels')) and not entry['missingDirectModels'] for entry in maps)
     data = {'schemaVersion': 1, 'gameBuild': args.game_build, 'completeDirectModelSets': ready, 'maps': maps}
     if args.objectives:
+        entries_by_id = {entry['id']: entry for entry in maps}
+        invalid_ids = set(args.check_objective_centers) - entries_by_id.keys()
+        if invalid_ids:
+            parser.error(f'Unknown map IDs: {", ".join(sorted(invalid_ids))}')
         try:
             objectives = read_objectives(args.objectives)
         except (ValueError, OSError) as error:
@@ -153,12 +186,27 @@ def main():
         for entry in maps:
             entry['objectives'] = objective_summary(entry, objectives)
         data['mapsWithObjectiveBoxes'] = sum(entry['objectives']['status'] == 'matched' for entry in maps)
+        data['objectiveCoverageByMode'] = {
+            mode: dict(sorted(Counter(entry['objectives']['status'] for entry in maps if entry['mode'] == mode).items()))
+            for mode in sorted({entry['mode'] for entry in maps})
+        }
+        for map_id in dict.fromkeys(args.check_objective_centers):
+            entry = entries_by_id[map_id]
+            try:
+                entry['objectiveCenterCheck'] = check_objective_centers(maps_root, entry, objectives)
+            except (ValueError, OSError, INSPECTOR['struct'].error) as error:
+                entry['objectiveCenterCheck'] = {'status': 'unreadable-geometry', 'error': str(error)}
+    failed_center_check = any(
+        entry.get('objectiveCenterCheck', {}).get('status', 'inside-geometry-bounds') != 'inside-geometry-bounds'
+        for entry in maps
+    )
     report = json.dumps(data, ensure_ascii=False, indent=2) + '\n'
     if args.output:
         args.output.write_text(report)
     else:
         print(report, end='')
-    return int(ready != len(maps) or (args.objectives is not None and data['mapsWithObjectiveBoxes'] != len(maps)))
+    missing_boxes = args.objectives is not None and data['mapsWithObjectiveBoxes'] != len(maps)
+    return int(ready != len(maps) or missing_boxes or failed_center_check)
 
 
 if __name__ == '__main__':

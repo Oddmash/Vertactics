@@ -90,6 +90,16 @@ In a private custom match, record matching endpoints with Workshop’s `Position
 
 Run `node scripts/check-map-survey.mjs apps/editor/src/map/kings-row-point-a.json <survey.json>` to compare horizontal distances and signed rises in game units. The survey contains `mapId`, `gameBuild`, `variant`, `scaleReference`, `gameUnitsPerEditorUnit`, `tolerance`, and `segments`. Each segment contains `id`, `editor`, and `game`, with two ordered `[X, Y, Z]` points in each pair. Calibrate the scale using a separate measured distance. Use `main-arch-width`, `main-arch-height`, `hotel-entry-width`, `hotel-bypass-length`, `attack-balcony-rise`, and `defense-balcony-rise` for the Point A checks. The tool reports missing checkpoints and excess error. Record clearance and obstruction observations alongside its output.
 
+### Audit an extracted objective against geometry
+
+```sh
+python3 scripts/audit-owmap-catalogue.py "$MAPS_ROOT" \
+  --game-build 2.25.1.0.155284 --objectives "$OBJECTIVES_ROOT/MapObjectives/Areas.json" \
+  --check-objective-centers kings-row --output /tmp/owmap-audit.json
+```
+
+The report matches records by the exact map and variant, counts coverage by mode, and checks the requested objective centers against the decoded model bounds in X, Y and Z. Repeat the option to check other map IDs. An incomplete catalogue still produces a report and returns exit status 1. Center containment is a coordinate sanity check. Scale and walkability require separate in-game measurements.
+
 OWLib documents an MIT licence for its tooling. Track the rights for any geometry or artwork separately before including it in a public build. [OWLib](https://github.com/overtools/OWLib) · [Blizzard EULA](https://www.blizzard.com/en-us/legal/bfbbb648-bcc6-4b78-a5c7-e2fe20c135df/blizzard-end-user-license-agreement)
 
 ## Hero catalogue
