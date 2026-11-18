@@ -92,7 +92,7 @@ const patchReferences: Record<string, Record<string, PatchReference | PatchRefer
   roadhog: {
     'scrap-gun': octoberHotfix(['중앙 투사체 피해', 40]),
     'trash-compactor': october(['흡수 지속시간', 2, 's'], ['폭발 피해', '75–200'], ['직격 피해', 10],
-      ['최대 피해 반경', 2, 'm'], ['최대 폭발 반경', 6, 'm'], ['5대5 재사용 대기시간', 10, 's']),
+      ['폭발 내부 반경', 2, 'm'], ['폭발 외부 반경', 6, 'm'], ['5대5 재사용 대기시간', 10, 's']),
     'chain-hook': october(['대상 정지 거리', 4.5, 'm'], ['당긴 후 기절 지속시간', 0.3, 's'],
       ['5대5 재사용 대기시간', 6, 's']),
     'take-a-breather': [octoberHotfix(['재사용 대기시간', 1.25, 's'], ['최대 지속시간', 2.5, 's'],
@@ -100,7 +100,7 @@ const patchReferences: Record<string, Record<string, PatchReference | PatchRefer
   },
   shion: {
     execution: november(['초기 탄 퍼짐', 5.7, '°']),
-    'satsuriku-spree': november(['연사 간격', 0.5, 's']),
+    'satsuriku-spree': november(['회차별 시전·이동 시간', 0.5, 's']),
   },
   sombra: {
     'machine-pistol': [octoberHotfix(['투사체당 피해', 6.5]), october(['피해 감소 시작 거리', 20, 'm'])],

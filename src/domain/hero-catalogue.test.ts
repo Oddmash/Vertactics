@@ -41,7 +41,7 @@ it('covers each catalogue ability with bilingual text and its official icon', ()
 it('keeps sourced range and hotfix values tied to their own patch dates', () => {
   const [compactor] = getAbilityPatchReferences('roadhog', 'trash-compactor');
   expect(compactor?.values).toEqual(expect.arrayContaining([
-    ['폭발 피해', '75–200'], ['최대 피해 반경', 2, 'm'], ['최대 폭발 반경', 6, 'm'],
+    ['폭발 피해', '75–200'], ['폭발 내부 반경', 2, 'm'], ['폭발 외부 반경', 6, 'm'],
   ]));
   const breather = getAbilityPatchReferences('roadhog', 'take-a-breather');
   expect(breather.map(({ patch }) => patch)).toEqual(['2026-10-13', '2026-10-06']);
