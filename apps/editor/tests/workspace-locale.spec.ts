@@ -6,10 +6,14 @@ test('switches language without clearing selection and restores a save in Englis
   const publicMap = Boolean(process.env.VERTACTICS_PUBLIC_URL);
   if (publicMap) {
     const canvas = page.getByTestId('viewport').locator('canvas');
+    await expect(canvas).toHaveAttribute('data-view-mode', '2d');
     const box = await canvas.boundingBox();
     if (!box) throw new Error('Missing map bounds');
     const units = Math.max(40 / box.width, 46 / box.height) * 1.22;
-    await canvas.click({ position: { x: box.width / 2 + 10 / units, y: box.height / 2 + 3 / units } });
+    await expect(async () => {
+      await canvas.click({ position: { x: box.width / 2 + 10 / units, y: box.height / 2 + 3 / units } });
+      await expect(page.getByRole('heading', { name: '공격 측 고지대', exact: true })).toBeVisible({ timeout: 500 });
+    }).toPass({ timeout: 5000 });
   } else {
     await clickWestHighGround(page);
   }
