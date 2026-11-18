@@ -50,7 +50,9 @@ jobs:
   application:
     needs: scope
     if: needs.scope.outputs.application == 'true'
-    runs-on: ubuntu-latest
+    # Playwright's browser dependencies are validated against this image.
+    # Pin it so an ubuntu-latest rollout cannot stall installs mid-release.
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v6
@@ -79,7 +81,7 @@ jobs:
   compatibility:
     needs: scope
     if: needs.scope.outputs.application == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v6
@@ -162,7 +164,7 @@ jobs:
 
   verify-public-site:
     needs: deploy-pages
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     env:
       VERTACTICS_PUBLIC_URL: ${{ needs.deploy-pages.outputs.url }}
