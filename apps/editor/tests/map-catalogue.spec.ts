@@ -1,4 +1,3 @@
-import elevationLab from '../src/map/elevation-lab.json';
 import { expect, test } from '@playwright/test';
 
 test('changes maps through mode cards and zooms the King’s Row reference', async ({ page }) => {
@@ -109,7 +108,10 @@ test('plans across both views of the Tidal Relay test fixture', async ({ page },
 
 
 test('restores a legacy strategy without adding its terrain to the map catalogue', async ({ page }) => {
-  const map = { ...elevationLab, id: 'legacy-map', name: '이전 전략 지도' };
+  const map = {
+    schemaVersion: 2, id: 'legacy-map', name: '이전 전략 지도',
+    terrain: [{ id: 'base', name: '바닥', kind: 'floor', origin: [-4, -1, -4], size: [8, 1, 8] }],
+  };
   await page.addInitScript((snapshot) => {
     localStorage.setItem('vertactics-workspace-recovery', JSON.stringify({
       version: 1, map: snapshot, strategy: {
