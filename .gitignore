@@ -5,3 +5,6 @@ test-results/
 .DS_Store
 /architecture.md
 /docs/research/
+apps/*/.next/
+apps/*/out/
+apps/*/next-env.d.ts

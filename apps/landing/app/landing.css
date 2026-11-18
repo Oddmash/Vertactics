@@ -185,13 +185,3 @@ h2 { margin: 0; font-size: clamp(1.75rem, 3.5vw, 2.8rem); font-weight: 800; lett
   .hero { width: min(100% - 2rem, 40rem); grid-template-columns: minmax(0, 1fr); }
   .workflow-list img { grid-column: 1 / -1; }
 }
-
-:is(.hero-map, .workflow-list) img[data-loading] {
-  background: linear-gradient(110deg, #212330 25%, #333545 50%, #212330 75%);
-  background-size: 220% 100%;
-  color: transparent;
-}
-@media (prefers-reduced-motion: no-preference) {
-  :is(.hero-map, .workflow-list) img[data-loading] { animation: product-image-loading 1.4s ease-in-out infinite; }
-}
-@keyframes product-image-loading { to { background-position: -220% 0; } }
