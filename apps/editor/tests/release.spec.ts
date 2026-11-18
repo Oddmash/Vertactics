@@ -42,7 +42,7 @@ test('serves the editor, favicon, preview metadata and static recovery page', as
   const preview = terrain.getByRole('img');
   await expect(perspective).toHaveAttribute('aria-pressed', 'true');
   await expect(preview).toHaveAttribute('src', /terrain-3d\.webp$/);
-  await expect(preview).toHaveJSProperty('naturalWidth', 840);
+  await expect(preview).toHaveJSProperty('naturalWidth', 1440);
   await page.keyboard.press('Tab');
   await expect(page.getByRole('link', { name: '본문 바로가기' })).toBeFocused();
   await topDown.press('Enter');

@@ -119,6 +119,10 @@ test('keeps a hero badge visible when its local portrait fails', async ({ page }
 });
 
 test('moves a held portrait and deletes it only on release over the open trash', async ({ page }, testInfo) => {
+  const publicMap = Boolean(process.env.VERTACTICS_PUBLIC_URL);
+  const origin = publicMap ? '0, 0, 3' : '0, 0, 0';
+  const highGround = publicMap ? '10, 4, 6' : '7, 2, 5';
+  const [targetX, targetZ] = publicMap ? [10, 3] : [7, 5];
   await page.goto('./');
   const map = page.getByTestId('viewport');
   const canvas = map.locator('canvas');
@@ -136,10 +140,10 @@ test('moves a held portrait and deletes it only on release over the open trash',
   };
   const screen = await canvas.boundingBox();
   if (!screen) throw new Error('Missing map bounds');
-  const units = Math.max(36 / screen.width, 24 / screen.height) * 1.22;
+  const units = Math.max((publicMap ? 40 : 36) / screen.width, (publicMap ? 46 : 24) / screen.height) * 1.22;
   await roster.getByRole('button', { name: '트레이서', exact: true }).dragTo(canvas);
   await expect(portrait).toBeVisible();
-  await expect.poll(() => savedHeroPosition(page)).toBe('0, 0, 0');
+  await expect.poll(() => savedHeroPosition(page)).toBe(origin);
   await expect(trash).toBeHidden();
   await page.mouse.click(screen.x + screen.width / 2 - 6 / units, screen.y + screen.height / 2);
   await expect(portrait).toHaveAttribute('data-selected', 'false');
@@ -150,12 +154,12 @@ test('moves a held portrait and deletes it only on release over the open trash',
   await page.mouse.down();
   await expect(trash).toBeVisible();
   await expect(trash).toHaveAttribute('data-open', 'false');
-  await page.mouse.move(screen.x + screen.width / 2 + 7 / units, screen.y + screen.height / 2 + 5 / units, { steps: 8 });
-  await expect.poll(() => savedHeroPosition(page)).toBe('0, 0, 0');
+  await page.mouse.move(screen.x + screen.width / 2 + targetX / units, screen.y + screen.height / 2 + targetZ / units, { steps: 8 });
+  await expect.poll(() => savedHeroPosition(page)).toBe(origin);
   await page.mouse.up();
-  await expect.poll(() => savedHeroPosition(page)).toBe('7, 2, 5');
+  await expect.poll(() => savedHeroPosition(page)).toBe(highGround);
   await undo.click();
-  await expect.poll(() => savedHeroPosition(page)).toBe('0, 0, 0');
+  await expect.poll(() => savedHeroPosition(page)).toBe(origin);
 
   await page.mouse.move(...await center(portrait));
   await page.mouse.down();
@@ -183,7 +187,7 @@ test('moves a held portrait and deletes it only on release over the open trash',
   await expect(trash).toBeHidden();
   await undo.click();
   await expect(portrait).toBeVisible();
-  await expect.poll(() => savedHeroPosition(page)).toBe('0, 0, 0');
+  await expect.poll(() => savedHeroPosition(page)).toBe(origin);
 });
 
 test.describe('touch map', () => {

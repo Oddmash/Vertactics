@@ -82,7 +82,7 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 - [ ] 4.10c Compare the Point A Workshop survey with the editor using the [survey checker](development.md#check-kings-row-point-a-in-the-game-client). The live survey is pending.
 - [ ] 4.10d Build playable 2D layouts for the 31 competitive maps. The offline audit resolves direct models for all 31 candidates. The live OWLib objective export for build 2.25.1.0.155284 contains exact variant matches for 18 maps. All 141 objective box centers across the 18 maps fall inside their respective decoded geometry bounds, including King’s Row Overcast Hybrid. The export has no matches for Escort (9) or Push (4). Scale, walkability and collision remain unverified.
 - [ ] 4.10e Confirm the mode-grouped map picker and 2D location selector in the editor. The 31 OWKR artwork cards represent the catalogue. Fifteen have legacy StatBanana overhead references, which need current-build comparison before use as terrain. King’s Row Point A is the existing approximate reference. Old schematic drafts can still be restored.
-- 4.11 Tidal Relay is an original, three-layer map with a central crossing, drainage flank, and maintenance gantry. The map catalogue browser test covers location focus, hero placement below grade, marker points, and persistent sightline results across 2D and 3D.
+- 4.11 The public workspace uses the Overwatch catalogue. Map authoring and standalone map-file commands have been removed. Fictional maps remain browser fixtures; legacy strategies can still reopen their own terrain snapshots.
 - [x] 4.11 Verify floor switching, overlapping selection and map registration, editing and import
 - [x] 4.12 Evaluate GLB and glTF and define loading boundaries if needed
 

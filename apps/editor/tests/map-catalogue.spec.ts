@@ -1,11 +1,19 @@
+import elevationLab from '../src/map/elevation-lab.json';
 import { expect, test } from '@playwright/test';
 
 test('changes maps through mode cards and zooms the King’s Row reference', async ({ page }) => {
   await page.goto('./');
+  if (process.env.VERTACTICS_PUBLIC_URL) {
+    await expect(page.getByRole('heading', { name: '왕의 길 A 거점 (근사 지도)' })).toBeVisible();
+  }
   const open = page.getByRole('button', { name: '전장 변경' });
   await open.click();
   const library = page.getByRole('dialog', { name: '전장 변경' });
   await expect(library.locator('.map-card')).toHaveCount(31);
+  if (process.env.VERTACTICS_PUBLIC_URL) {
+    await expect(library.getByRole('heading', { name: '테스트 전장' })).toHaveCount(0);
+    await expect(library.getByRole('button', { name: '조수 중계소', exact: true })).toHaveCount(0);
+  }
   await expect(library.locator('.map-card img[src*="/images/maps/"]')).toHaveCount(31);
   const busan = library.locator('.map-card img[src$="/busan.webp"]');
   await busan.scrollIntoViewIfNeeded();
@@ -38,7 +46,8 @@ test('changes maps through mode cards and zooms the King’s Row reference', asy
   await expect(englishOpen).toBeFocused();
 });
 
-test('plans across both views of the original Tidal Relay map', async ({ page }, testInfo) => {
+test('plans across both views of the Tidal Relay test fixture', async ({ page }, testInfo) => {
+  test.skip(Boolean(process.env.VERTACTICS_PUBLIC_URL), 'Uses the test-only Tidal Relay terrain');
   await page.goto('./');
   await page.getByRole('button', { name: '전장 변경', exact: true }).click();
   const library = page.getByRole('dialog', { name: '전장 변경' });
@@ -96,4 +105,24 @@ test('plans across both views of the original Tidal Relay map', async ({ page },
 
   await page.getByRole('combobox', { name: '언어' }).selectOption('en');
   await expect(page.getByRole('heading', { name: 'Tidal Relay', exact: true })).toBeVisible();
+});
+
+
+test('restores a legacy strategy without adding its terrain to the map catalogue', async ({ page }) => {
+  const map = { ...elevationLab, id: 'legacy-map', name: '이전 전략 지도' };
+  await page.addInitScript((snapshot) => {
+    localStorage.setItem('vertactics-workspace-recovery', JSON.stringify({
+      version: 1, map: snapshot, strategy: {
+        schemaVersion: 1, id: 'legacy-plan', mapId: snapshot.id, title: '이전 전략', heroes: [],
+      },
+    }));
+  }, map);
+  await page.goto('./');
+  await page.getByRole('button', { name: '이전 작업 복구' }).click();
+  await expect(page.getByRole('heading', { name: '이전 전략 지도', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: '전장 변경', exact: true }).click();
+  const library = page.getByRole('dialog', { name: '전장 변경' });
+  await expect(library.getByRole('button', { name: '이전 전략 지도', exact: true })).toHaveCount(0);
+  await library.getByRole('button', { name: '왕의 길 열기' }).click();
+  await expect(page.getByRole('heading', { name: '왕의 길 A 거점 (근사 지도)' })).toBeVisible();
 });

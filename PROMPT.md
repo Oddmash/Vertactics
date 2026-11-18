@@ -8,8 +8,8 @@ Vertactics is an independent fan project for exploring Overwatch maps and planni
 
 - Use a shared world coordinate system with Y as elevation. Keep hero placements, routes, markers, and selected objects consistent when switching views.
 - Keep the renderer separate from validated, versioned map and strategy data. Capture transient input and camera state separately.
-- Start with a fictional elevation test map. After validating stairs, cover, high ground, and picking, model the first objective of King's Row from authorized references and record verification status.
-- Support terrain editing, layers, importing and exporting, and map validation as the map catalogue grows.
+- Use fictional layouts as test fixtures. Develop public map references from the Overwatch catalogue and record verification status.
+- Keep public terrain in the maintained catalogue. Support tactical editing, layer visibility and strategy import and export, including saved terrain snapshots.
 - Provide hero placement and team controls, tactical annotations, ability previews, visibility analysis, and distance and height measurements. Show which ability values are verified or approximate.
 - Support a strategy timeline, local persistence, validated imports, and read-only sharing. Make failures and recoverable edits visible.
 

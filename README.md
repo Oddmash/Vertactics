@@ -36,11 +36,11 @@ Use **Strategy files** to transfer the map and strategy together as JSON. **Save
 
 Create a share link under **Strategy files**. Anyone with the link can view the map or play the timeline. They can make an editable copy in their own browser. For strategies that exceed the link size limit, transfer the JSON file.
 
-## Build a map
+## Choose a map
 
-Choose a map or import a validated map JSON file. In **Map edit mode**, add, edit or duplicate terrain blocks and preview changes in the shared 2D and 3D views. Export the map as JSON to keep a copy.
+Open **Change map** to browse the Overwatch catalogue by mode. The King’s Row Point A schematic supports planning in 2D and 3D. The catalogue shows the verification status of other maps.
 
-The layer selector exposes independently walkable surfaces in the elevation lab. Use **Drag move** to preview a hero’s landing and commit the move when you release the pointer.
+Hold or drag a placed portrait to move it. Drop it on the trash target to remove it. Saved strategies with older map snapshots still reopen from their save or share link.
 
 [Development](development.md) · [Contribution](development.md#contribute) · [Verification](SPEC.md) · [MIT licence](LICENSE)
 

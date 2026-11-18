@@ -28,7 +28,9 @@ const MapCatalogue = ({ maps, selectedId, onSelect }: {
     dialog.current?.close();
   };
   const editorMaps = new Map(maps.map((map) => [map.id, map]));
-  const otherMaps = maps.filter(({ id }) => id !== 'kings-row-a' && !owkrCatalogue.maps.some((map) => map.id === id));
+  const testMaps = import.meta.env.MODE === 'e2e'
+    ? maps.filter(({ id }) => id !== 'kings-row-a' &&
+      !owkrCatalogue.maps.some((entry) => entry.id === id)) : [];
 
   return (
     <>
@@ -42,10 +44,10 @@ const MapCatalogue = ({ maps, selectedId, onSelect }: {
           <Button type="button" className="reset-button" onClick={() => dialog.current?.close()}>{t('닫기')}</Button>
         </div>
         <div className="map-library-body">
-          {otherMaps.length > 0 && <section aria-labelledby="other-maps-title">
-            <h3 id="other-maps-title">{t('연습 및 가져온 지도')}</h3>
+          {testMaps.length > 0 && <section aria-labelledby="other-maps-title">
+            <h3 id="other-maps-title">{t('테스트 전장')}</h3>
             <ul className="map-card-grid" role="list">
-              {otherMaps.map(({ id, name }) => (
+              {testMaps.map(({ id, name }) => (
                 <li key={id}>
                   <Button type="button" className="reset-button map-card-action" onClick={() => selectMap(id)}
                     aria-current={id === selectedId ? 'true' : undefined}>{t(name)}</Button>

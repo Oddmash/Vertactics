@@ -20,7 +20,7 @@ import type { Annotation } from '../domain/annotation';
 import { traceHeroSightline, traceTerrainSightline } from '../domain/spatial-analysis';
 import AnnotationTools from './annotation-tools';
 import type { SurfacePick } from './annotation-tools';
-import { terrainKinds, topElevation, visibleTerrainForLayer } from '../domain/map';
+import { topElevation, visibleTerrainForLayer } from '../domain/map';
 import type { TerrainKind, WorldPoint } from '../domain/map';
 import { heroEyeHeight } from '../domain/strategy';
 import type { Team } from '../domain/strategy';
@@ -639,14 +639,6 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
                 dispatch({ type: 'remove-annotation', id });
               }}
             />
-          <Disclosure className="legend">
-            <summary>{t('지형 범례')}</summary>
-            <ul>
-              {terrainKinds.map((kind) => (
-                <li key={kind}><span className={`terrain-swatch ${kind}`} aria-hidden="true" />{t(kindNames[kind])}</li>
-              ))}
-            </ul>
-          </Disclosure>
           <Disclosure className="legend">
             <summary id="workspace-help">{t('도움말')}</summary>
             <ul>
