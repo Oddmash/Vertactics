@@ -1,8 +1,7 @@
 import { useLayoutEffect, useRef } from 'react';
 import { useThree } from '@react-three/fiber';
-import { Raycaster, Vector2 } from 'three';
-import type { Terrain, TerrainBlock, WorldPoint } from '../domain/map';
-import { pickTerrainSurface } from '../domain/surface-height';
+import type { WorldPoint } from '../domain/map';
+import { terrainPicker } from './terrain-picker';
 
 type Props = {
   snap: boolean;
@@ -18,23 +17,7 @@ const SurfaceDrag = ({ snap, sampleStart, onPreview, onFinish, externalDrop }: P
 
   useLayoutEffect(() => {
     const canvas = gl.domElement;
-    const raycaster = new Raycaster();
-    const pointer = new Vector2();
-
-    const getPoint = (event: MouseEvent): WorldPoint | null => {
-      const rect = canvas.getBoundingClientRect();
-      if (event.clientX < rect.left || event.clientX >= rect.right ||
-        event.clientY < rect.top || event.clientY >= rect.bottom) return null;
-      pointer.set(2 * (event.clientX - rect.left) / rect.width - 1, 1 - 2 * (event.clientY - rect.top) / rect.height);
-      camera.updateMatrixWorld();
-      raycaster.setFromCamera(pointer, camera);
-      const group = scene.getObjectByName('walkable-terrain');
-      if (!group) return null;
-      const hit = raycaster.intersectObject(group, true)[0];
-      if (!hit) return null;
-      const { terrain, block } = hit.object.userData as { terrain: Terrain; block: TerrainBlock };
-      return pickTerrainSurface(terrain, block, [hit.point.x, hit.point.y, hit.point.z], snap);
-    };
+    const getPoint = terrainPicker(canvas, scene, camera, snap);
 
     const start = (event: PointerEvent) => {
       if (event.button !== 0 || pointerId.current !== null) return;

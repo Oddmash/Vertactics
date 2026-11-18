@@ -538,5 +538,7 @@
   "초당 자원 회복률": "Resource regenerated per second",
   "최대 각도": "Maximum angle",
   "사거리": "Range",
-  "충전 횟수": "Charges"
+  "충전 횟수": "Charges",
+  "휴지통": "Trash",
+  "놓아서 삭제": "Release to delete"
 }

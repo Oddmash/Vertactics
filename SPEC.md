@@ -58,6 +58,7 @@ See [the product brief](PROMPT.md), [repository instructions](AGENTS.md), and [t
 - [x] 3.12a Unit test undo and redo for placement, update and deletion
 - [x] 3.12b Verify undo and redo restores placement elevation in the editor
 - [x] 3.12c Verify that a continuous drag creates a single history entry
+- [x] 3.12d Move a placed hero directly by its portrait and drop it on an animated trash target. Undo restores the previous position or the removed hero. Test long press, touch release, and cancellation.
 - [x] 3.13 Verify that team, position and elevation survive switching to 3D
 
 ## Phase 4 · Map system

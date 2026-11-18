@@ -7,13 +7,17 @@ import { publicAsset } from '../ui/public-asset';
 const projected = new Vector3();
 
 type Props = {
+  id: string;
   heroId: string;
   label: string;
   color: string;
   selected: boolean;
+  draggable?: boolean;
+  dragging?: boolean;
+  overTrash?: boolean;
 };
 
-const HeroPortraitMarker = ({ heroId, label, color, selected }: Props) => {
+const HeroPortraitMarker = ({ id, heroId, label, color, selected, draggable, dragging, overTrash }: Props) => {
   const anchor = useRef<Group>(null);
   const portrait = useRef<HTMLSpanElement>(null);
   const canvas = useThree((state) => state.gl.domElement);
@@ -24,6 +28,7 @@ const HeroPortraitMarker = ({ heroId, label, color, selected }: Props) => {
     const badge = document.createElement('span');
     badge.className = 'map-hero-portrait';
     badge.dataset.hero = heroId;
+    badge.dataset.placement = id;
     badge.setAttribute('aria-hidden', 'true');
     badge.hidden = true;
     badge.textContent = label.slice(0, 2);
@@ -43,14 +48,17 @@ const HeroPortraitMarker = ({ heroId, label, color, selected }: Props) => {
     portrait.current = badge;
     host.append(badge);
     return () => { badge.remove(); portrait.current = null; };
-  }, [canvas, heroId, label]);
+  }, [canvas, id, heroId, label]);
 
   useLayoutEffect(() => {
     const badge = portrait.current;
     if (!badge) return;
     badge.style.setProperty('--portrait-team', color);
     badge.dataset.selected = String(selected);
-  }, [canvas, heroId, label, color, selected]);
+    badge.dataset.draggable = String(Boolean(draggable));
+    badge.dataset.dragging = String(Boolean(dragging));
+    badge.dataset.overTrash = String(Boolean(overTrash));
+  }, [canvas, id, heroId, label, color, selected, draggable, dragging, overTrash]);
 
   useFrame(({ camera, size }) => {
     const badge = portrait.current;

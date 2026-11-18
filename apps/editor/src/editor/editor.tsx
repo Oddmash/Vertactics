@@ -449,6 +449,15 @@ const Editor = ({ initialDraft }: { initialDraft?: StrategyDraft }) => {
               abilities={frame?.abilities ?? abilities}
               onSelect={(id) => { if (!frame) selectTerrain(id); }}
               onSelectHero={(id) => { if (!frame) selectHero(id); }}
+              onDropHero={!locked && !tool && !frame && showHeroes ? (id, drop) => {
+                if (drop === 'trash') {
+                  dispatch({ type: 'remove', id });
+                  setSelectedHeroId((selected) => selected === id ? null : selected);
+                  setSightTargetId((selected) => selected === id ? '' : selected);
+                } else {
+                  dispatch({ type: 'update', id, patch: { position: drop } });
+                }
+              } : undefined}
               annotations={[...(showAnnotations ? annotations : []), ...measurementOverlay, ...sightOverlay, ...penOverlay]}
               selectedAnnotationId={annotationId}
               onEditSurface={measuring || sightPicking || (!locked && tool && tool.kind !== 'drag' && tool.kind !== 'pen') ? editSurface : undefined}
