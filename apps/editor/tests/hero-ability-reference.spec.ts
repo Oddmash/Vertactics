@@ -18,6 +18,9 @@ test('selects heroes by portrait and reveals sourced skills in the right panel',
   await expect(tracer.locator('img')).toHaveAttribute('src', /\/images\/heroes\/tracer\.webp$/);
   await expect.poll(() => tracer.locator('img').evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0);
   await expect(tracer.locator('.hero-roster-name')).toHaveText('트레이서');
+  const anran = roster.getByRole('button', { name: '안란', exact: true }).locator('img');
+  await expect(anran).toHaveAttribute('src', /\/images\/heroes\/anran\.webp$/);
+  await expect.poll(() => anran.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0);
   const blink = panel.getByRole('button', { name: '점멸', exact: true });
   await expect(blink.locator('img')).toHaveAttribute('src', /\/images\/abilities\/[a-f0-9]+\.webp$/);
   await expect.poll(() => blink.locator('img').evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0);

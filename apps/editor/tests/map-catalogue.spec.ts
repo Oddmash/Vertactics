@@ -8,6 +8,7 @@ test('changes maps through mode cards and zooms the King’s Row reference', asy
   await expect(library.locator('.map-card')).toHaveCount(31);
   await expect(library.locator('.map-card img[src*="/images/maps/"]')).toHaveCount(31);
   const busan = library.locator('.map-card img[src$="/busan.webp"]');
+  await busan.scrollIntoViewIfNeeded();
   await expect.poll(() => busan.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0);
   const control = library.getByRole('region', { name: '쟁탈' });
   await expect(control.getByText('부산', { exact: true })).toBeVisible();
