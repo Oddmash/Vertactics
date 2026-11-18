@@ -1,5 +1,6 @@
 import { expect, it } from 'vitest';
 import { getAbilityIcon, getAbilityPatchReferences, getAbilitySummary, getKoreanAbilityName } from './ability-reference';
+import english from '../ui/english.json';
 import owkrCatalogue from './owkr-catalogue.json';
 import { getHero, heroCatalogue, heroName, heroRoles, isCatalogueHero } from './hero-catalogue';
 
@@ -47,4 +48,25 @@ it('keeps sourced range and hotfix values tied to their own patch dates', () => 
   expect(breather.map(({ patch }) => patch)).toEqual(['2026-10-13', '2026-10-06']);
   expect(breather[0]?.values).toContainEqual(['최대 지속시간', 2.5, 's']);
   expect(getAbilityPatchReferences('toString', 'constructor')).toEqual([]);
+});
+
+it('keeps the latest published change for each skill statistic localized and dated', () => {
+  for (const [heroId, hero] of Object.entries(heroCatalogue)) {
+    for (const { id } of hero.abilities) {
+      const references = getAbilityPatchReferences(heroId, id);
+      const labels = references.flatMap(({ values }) => values.map(([label]) => label));
+      expect(new Set(labels).size, `${heroId}:${id}`).toBe(labels.length);
+      for (const label of labels) expect(english).toHaveProperty(label);
+      for (const { patch, source } of references) {
+        expect(patch).toMatch(/^2026-\d{2}-\d{2}$/);
+        expect(source).toContain(patch.slice(0, 7).replace('-', '/'));
+      }
+    }
+  }
+  const suzu = getAbilityPatchReferences('kiriko', 'protection-suzu');
+  expect(suzu).toEqual([{
+    patch: '2026-09-08',
+    source: 'https://overwatch.blizzard.com/en-us/news/patch-notes/live/2026/09/',
+    values: [['무적 지속시간', 0.5, 's'], ['폭발 반경', 4, 'm']],
+  }]);
 });
