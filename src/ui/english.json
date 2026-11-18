@@ -493,5 +493,18 @@
   "서쪽 방벽": "West screen",
   "동쪽 펌프실": "East pump house",
   "서쪽 장비 상자": "West equipment crate",
-  "동쪽 장비 상자": "East equipment crate"
+  "동쪽 장비 상자": "East equipment crate",
+  "최소 생명력 비율": "Minimum health threshold",
+  "장치 생명력": "Device health",
+  "탄 퍼짐": "Spread",
+  "변신 시간": "Transformation time",
+  "초당 발사 수": "Shots per second",
+  "투사체 속도": "Projectile speed",
+  "최대 추적 거리": "Maximum seeking range",
+  "무적 지속시간": "Invulnerability duration",
+  "폭발 반경": "Explosion radius",
+  "설치 거리": "Placement range",
+  "순간이동 재사용 대기시간": "Teleport reuse cooldown",
+  "수평 베기 지속시간": "Horizontal swing duration",
+  "시야 이탈 유예 시간": "Line-of-sight timeout"
 }

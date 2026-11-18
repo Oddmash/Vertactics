@@ -54,6 +54,8 @@ type PatchReference = { patch: string; values: Stat[] };
 
 const november = (...values: Stat[]): PatchReference => ({ patch: '2026-11-03', values });
 const october = (...values: Stat[]): PatchReference => ({ patch: '2026-10-06', values });
+const september = (...values: Stat[]): PatchReference => ({ patch: '2026-09-08', values });
+const septemberHotfix = (...values: Stat[]): PatchReference => ({ patch: '2026-09-17', values });
 const octoberHotfix = (...values: Stat[]): PatchReference => ({ patch: '2026-10-13', values });
 
 const patchReferences: Record<string, Record<string, PatchReference | PatchReference[]>> = {
@@ -62,8 +64,17 @@ const patchReferences: Record<string, Record<string, PatchReference | PatchRefer
     'zhuque-fans': november(['피해량', 24]),
     'vermillion-ascent': november(['시전 시간', 1, 's']),
   },
+  baptiste: {
+    'immortality-field': september(['최소 생명력 비율', 25, '%'], ['재사용 대기시간', 20, 's'], ['장치 생명력', 150]),
+  },
+  bastion: { reconfigure: october(['지속시간', 5, 's']) },
+  brigitte: { inspire: november(['내부 재사용 대기시간', 1, 's'], ['즉시 치유', 15]) },
   dmon: {
-    'power-barrier': november(['회복 시간', 0.3, 's'], ['최소 전개 시간', 0.25, 's']),
+    'plasma-saber': september(['피해량', 60]),
+    'portable-fusion-repeater': september(['탄 퍼짐', 1.75, '°'], ['피해 감소 시작 거리', 20, 'm']),
+    'fusion-repeater': septemberHotfix(['피해량', 15], ['재사용 대기시간', 5, 's']),
+    'call-mech': september(['변신 시간', 0.95, 's']),
+    'power-barrier': [november(['회복 시간', 0.3, 's'], ['최소 전개 시간', 0.25, 's']), september(['시전 시간', 0.016, 's'])],
     propulsors: november(['충돌 피해', 0]),
   },
   doctrine: {
@@ -72,8 +83,10 @@ const patchReferences: Record<string, Record<string, PatchReference | PatchRefer
     'shrouded-momentum': november(['재사용 대기시간', 10, 's']),
     infuse: november(['재사용 대기시간', 9, 's']),
   },
-  brigitte: { inspire: november(['내부 재사용 대기시간', 1, 's'], ['즉시 치유', 15]) },
+  domina: { 'crystal-charge': october(['재사용 대기시간', 7, 's']) },
+  dva: { 'micro-missiles': october(['초당 발사 수', 14]) },
   emre: { 'cyber-frag': [november(['폭발까지 걸리는 시간', 0.5, 's']), october(['재사용 대기시간', 9, 's'])] },
+  freja: { 'take-aim': september(['폭발 피해', 75]) },
   genji: {
     deflect: november(['지속시간', 1.5, 's']),
     'swift-strike': october(['피해량', 60]),
@@ -83,7 +96,14 @@ const patchReferences: Record<string, Record<string, PatchReference | PatchRefer
     'solar-rifle': november(['최대 충전 시간', 0.575, 's']),
     'healing-pylon': november(['투사체당 치유', 50]),
   },
+  'jetpack-cat': { 'biotic-pawjectiles': september(['투사체당 피해', 4], ['투사체당 치유', 4]) },
   'junker-queen': { carnage: november(['재사용 대기시간', 7, 's']) },
+  junkrat: { 'concussion-mine': september(['재사용 대기시간', 7, 's']) },
+  kiriko: {
+    'healing-ofuda': september(['투사체 속도', 18, 'm/s'], ['최대 추적 거리', 30, 'm']),
+    'protection-suzu': september(['무적 지속시간', 0.5, 's'], ['폭발 반경', 4, 'm']),
+  },
+  lucio: { 'sound-barrier': october(['지속시간', 6, 's']) },
   ramattra: {
     'void-accelerator-omnic-form': november(['탄창', 125]),
     'void-barrier-omnic-form': { patch: '2026-07-30', values: [['재사용 대기시간', 13, 's']] },
@@ -102,6 +122,11 @@ const patchReferences: Record<string, Record<string, PatchReference | PatchRefer
     execution: november(['초기 탄 퍼짐', 5.7, '°']),
     'satsuriku-spree': november(['회차별 시전·이동 시간', 0.5, 's']),
   },
+  sierra: {
+    'helix-rifle': september(['피해량', 8.5], ['투사체 속도', 120, 'm/s']),
+    'tracking-shot': september(['피해량', 8.5]),
+    'tremor-charge': september(['재사용 대기시간', 7, 's']),
+  },
   sombra: {
     'machine-pistol': [octoberHotfix(['투사체당 피해', 6.5]), october(['피해 감소 시작 거리', 20, 'm'])],
     hotfix: november(['지속시간', 10, 's']),
@@ -109,7 +134,16 @@ const patchReferences: Record<string, Record<string, PatchReference | PatchRefer
     cyberspace: [november(['약화 효과', 40, '%']), octoberHotfix(['폭발 피해', 20], ['재사용 대기시간', 13, 's']),
       october(['구역 반경', 5, 'm'], ['구역 지속시간', 3, 's'], ['구역 초당 피해', 25], ['구역 초당 치유', 30])],
   },
-  vendetta: { 'palatine-fang': november(['첫 공격 준비 시간', 0.2, 's']) },
+  symmetra: { teleporter: september(['설치 거리', 25, 'm'], ['순간이동 재사용 대기시간', 1.25, 's']) },
+  vendetta: {
+    'palatine-fang': [november(['첫 공격 준비 시간', 0.2, 's']), september(['수평 베기 지속시간', 0.2, 's'])],
+    'whirlwind-dash': september(['회복 시간', 0.75, 's']),
+    'sundering-blade': september(['회복 시간', 0.5, 's']),
+  },
+  winston: { 'barrier-projector': september(['5대5 재사용 대기시간', 10, 's'], ['지속시간', 7, 's']) },
+  wuyang: { 'restorative-stream': september(['시야 이탈 유예 시간', 3, 's']) },
+  zarya: { 'particle-barrier': september(['5대5 재사용 대기시간', 12, 's']) },
+  zenyatta: { 'orb-of-harmony': september(['시야 이탈 유예 시간', 3, 's']) },
 };
 
 export const getAbilityPatchReferences = (heroId: string, abilityId: string) => {
