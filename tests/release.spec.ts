@@ -35,7 +35,7 @@ test('serves the editor, favicon, preview metadata and static recovery page', as
   expect((await page.request.get(new URL(shareImage).pathname.split('/').at(-1)!)).ok()).toBe(true);
   await expect(page.getByRole('heading', { level: 1 })).toContainText('다음 교전을');
   await expect(page.getByRole('heading', { name: '전술은 이렇게 만드세요.' })).toBeVisible();
-  await expect(page.locator('.hero-map')).toHaveCSS('position', 'absolute');
+  await expect(page.locator('.hero')).toHaveCSS('display', 'grid');
   await expect(page.locator('.hero-map img')).toHaveJSProperty('naturalWidth', 1440);
   await expect(page.locator('.workflow-list img')).toHaveCount(3);
   await expect(page.getByRole('heading', { name: '지금 열 수 있는 지도' })).toBeVisible();
