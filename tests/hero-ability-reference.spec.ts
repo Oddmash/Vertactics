@@ -58,6 +58,12 @@ test('selects heroes by portrait and reveals sourced skills in the right panel',
   await expect(details.getByText('6.5', { exact: true })).toBeVisible();
   await expect(details.getByText('20 m', { exact: true })).toBeVisible();
   await expect(panel.getByRole('link', { name: '2026-10-13 패치 노트' })).toBeVisible();
+  await roles.getByRole('button', { name: '돌격', exact: true }).click();
+  await roster.getByRole('button', { name: '로드호그', exact: true }).click();
+  await panel.getByRole('button', { name: '쓰레기 압축기', exact: true }).focus();
+  await expect(details.getByText('75–200', { exact: true })).toBeVisible();
+  await expect(details.getByText('6 m', { exact: true })).toBeVisible();
+  await expect(details.getByText('10 s', { exact: true })).toBeVisible();
   expect(apiRequests).toEqual([]);
 });
 

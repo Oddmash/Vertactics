@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { getAbilityIcon, getAbilitySummary, getKoreanAbilityName } from './ability-reference';
+import { getAbilityIcon, getAbilityPatchReferences, getAbilitySummary, getKoreanAbilityName } from './ability-reference';
 import owkrCatalogue from './owkr-catalogue.json';
 import { getHero, heroCatalogue, heroName, heroRoles, isCatalogueHero } from './hero-catalogue';
 
@@ -36,4 +36,15 @@ it('covers each catalogue ability with bilingual text and its official icon', ()
       expect(getAbilityIcon(heroId, id)).toMatch(/^https:\/\/d15f34w2p8l1cc\.cloudfront\.net\/overwatch\/[a-f0-9]+\.png$/);
     }
   }
+});
+
+it('keeps sourced range and hotfix values tied to their own patch dates', () => {
+  const [compactor] = getAbilityPatchReferences('roadhog', 'trash-compactor');
+  expect(compactor?.values).toEqual(expect.arrayContaining([
+    ['폭발 피해', '75–200'], ['최대 피해 반경', 2, 'm'], ['최대 폭발 반경', 6, 'm'],
+  ]));
+  const breather = getAbilityPatchReferences('roadhog', 'take-a-breather');
+  expect(breather.map(({ patch }) => patch)).toEqual(['2026-10-13', '2026-10-06']);
+  expect(breather[0]?.values).toContainEqual(['최대 지속시간', 2.5, 's']);
+  expect(getAbilityPatchReferences('toString', 'constructor')).toEqual([]);
 });
