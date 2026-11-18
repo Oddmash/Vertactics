@@ -748,7 +748,7 @@ ul { padding: 0; list-style: none; }
 .hero-ability-stat { display: grid; gap: var(--space-xs); }
 .hero-ability-stat > div { display: flex; justify-content: space-between; gap: var(--space-sm); }
 .hero-ability-stat small { display: block; color: var(--color-muted); }
-.hero-ability-stat dd { color: var(--color-action); }
+.hero-ability-stat dd { color: var(--color-action); white-space: nowrap; }
 
 .location-picker {
   display: flex;

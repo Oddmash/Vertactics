@@ -75,7 +75,7 @@ it('keeps the latest published change for each skill statistic localized and dat
   const suzu = getAbilityPatchReferences('kiriko', 'protection-suzu');
   expect(suzu).toEqual([{
     patch: '2026-09-08',
-    source: 'https://overwatch.blizzard.com/en-us/news/patch-notes/live/2026/09/',
+    source: 'https://overwatch.blizzard.com/en-us/news/patch-notes/live/2026/09/#patch-2026-09-08',
     values: [['무적 지속시간', 0.5, 's'], ['폭발 반경', 4, 'm']],
   }]);
 });
