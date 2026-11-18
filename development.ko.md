@@ -102,4 +102,14 @@ Playwright는 `dist`의 프로덕션 빌드를 프리뷰 서버로 실행합니�
 
 `node scripts/check-map-survey.mjs apps/editor/src/map/kings-row-point-a.json <survey.json>`으로 게임 단위에서 수평 거리와 높이차를 비교합니다. 측정 JSON에는 `mapId`, `gameBuild`, `variant`, `scaleReference`, `gameUnitsPerEditorUnit`, `tolerance`, `segments`를 넣습니다. 각 구간은 `id`와 시작점·끝점 `[X, Y, Z]` 쌍을 담은 `editor`, `game` 필드로 구성합니다. 별도로 실측한 거리에서 축척을 구합니다. A 거점은 `main-arch-width`, `main-arch-height`, `hotel-entry-width`, `hotel-bypass-length`, `attack-balcony-rise`, `defense-balcony-rise`를 비교합니다. 누락과 오차 초과가 출력되며, 영웅별 통과 여부와 시야 차단은 별도로 실측 기록에 남깁니다.
 
+### 추출한 거점과 지형 좌표 대조
+
+```sh
+python3 scripts/audit-owmap-catalogue.py "$MAPS_ROOT" \
+  --game-build 2.25.1.0.155284 --objectives "$OBJECTIVES_ROOT/MapObjectives/Areas.json" \
+  --check-objective-centers kings-row --output /tmp/owmap-audit.json
+```
+
+전장 이름과 변형이 정확히 일치한 거점을 찾고, 모드별 일치 건수를 집계합니다. 지정한 전장의 거점 중심이 해석한 모델의 X·Y·Z 범위 안에 들어오는지도 확인합니다. 다른 전장을 검사하려면 옵션을 반복합니다. 빠진 전장이 있으면 보고서를 기록한 뒤 종료 코드 1을 반환합니다. 축척과 통행 판정에는 별도 인게임 실측이 필요합니다.
+
 OWLib 도구는 MIT 라이선스를 명시합니다. 공개 빌드에 지형이나 그림을 넣을 때는 해당 데이터의 사용 권한을 함께 확인합니다. [OWLib](https://github.com/overtools/OWLib) · [Blizzard 이용 약관](https://www.blizzard.com/en-us/legal/bfbbb648-bcc6-4b78-a5c7-e2fe20c135df/blizzard-end-user-license-agreement)
