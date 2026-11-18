@@ -13,7 +13,7 @@ const run = (args) => {
   if (result.status !== 0) process.exit(result.status ?? 1);
 };
 
-run(['exec', 'vite', 'build', '--base', base]);
+run(['--filter', '@vertactics/editor', 'build', '--base', base]);
 run(['--filter', '@vertactics/landing', 'build']);
 
 const out = 'apps/landing/out';
