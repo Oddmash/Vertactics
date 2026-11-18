@@ -1,4 +1,4 @@
-export const siteUrl = new URL('https://qtaghdi.github.io/Vertactics/');
+export const siteUrl = new URL('https://oddmash.github.io/Vertactics/');
 export const landingUrl = new URL('about/', siteUrl);
 export const socialImage = new URL('social-card.png', siteUrl);
 export const title = 'Vertactics — 오버워치 전술 플래너';

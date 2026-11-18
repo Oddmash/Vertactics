@@ -6,7 +6,7 @@
 
 Vertactics는 진입로, 엄폐물, 고지대를 살펴보고 전술을 구상하는 지도 도구입니다. **조수 중계소**에서 중앙 교량, 배수로 우회로, 상층 정비 교량을 이용한 전술을 계획할 수 있습니다.
 
-[Vertactics 열기](https://qtaghdi.github.io/Vertactics/)
+[Vertactics 열기](https://oddmash.github.io/Vertactics/)
 
 ![고지대와 계단이 보이는 Vertactics 3D 편집기](docs/screenshots/workspace-3d.jpg)
 

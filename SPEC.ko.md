@@ -8,7 +8,7 @@
 
 ## Phase 1 · 프로젝트 초기화
 
-- [x] 1.01 Vertactics 이름과 개인 GitHub 저장소 `qtaghdi/Vertactics` 확인
+- [x] 1.01 Vertactics 이름과 Oddmash 조직 저장소 `Oddmash/Vertactics` 확인
 - [x] 1.02 OW2Plant, StatBanana, OWScouter, Overwatch Tactical Board, Sightline 공개 기능 비교
 - [x] 1.03 React, TypeScript, Vite, Three.js, R3F 의존성과 스크립트 정의
 - [x] 1.04 도메인·맵·렌더러·편집기·토큰·테스트 디렉터리 구성
@@ -169,46 +169,46 @@
 | 전체 검증 | npm 레지스트리 DNS 및 오프라인 캐시 누락으로 설치 차단. 로컬 포트 바인딩도 제한됨. 전체 타입·린트·빌드·브라우저·캡처는 미확인. |
 | Phase 2 원격 CI #1 | 설치·전체 타입 검사 통과. 의도적으로 만든 sparse 배열 테스트 리터럴에서 ESLint 실패. |
 | Phase 3 전략 문서 | 총 19개 Vitest 통과. 전략 도메인 타입 검사 통과. 편집기 연결은 대기 중. |
-| CI #4, Chromium 158 · 1440 × 900 | 설치·전체 타입·린트·Vitest 19개·Vite 빌드·브라우저 시나리오 1개 통과. 2D와 3D의 실제 캡처를 저장. [실행과 캡처](https://github.com/qtaghdi/Vertactics/actions/runs/44027542773) |
+| CI #4, Chromium 158 · 1440 × 900 | 설치·전체 타입·린트·Vitest 19개·Vite 빌드·브라우저 시나리오 1개 통과. 2D와 3D의 실제 캡처를 저장. [실행과 캡처](https://github.com/Oddmash/Vertactics/actions/runs/44027542773) |
 | Phase 3 히스토리 | Vitest 총 22개 통과. 추가·수정·삭제·Undo/Redo 및 무효 변경을 검증. |
 | CI #5 | 커밋한 lockfile로 frozen 설치, 타입·린트·테스트·빌드와 Chromium 통과. |
 | 확장 지형 클릭 검증 | 정확히 디딤면 경계에 있던 좌표에서 계단 클릭 검증 실패. 다음 검증은 디딤면 중앙을 사용. |
 | CI #11 | Chromium에서 바닥 배치, 벽 배치 거부, Y=4 고지대로 이동, 3D 전환, Undo/Redo, 회전·팀 전환·삭제 통과. 지형 윤곽선이 계단 클릭을 가로챈 문제는 별도 수정. |
-| CI #13, Chromium 158 · 1440 × 900 | frozen 설치, 전체 타입·린트, Vitest 22개, 프로덕션 빌드 및 Chromium 2개 통과. 네 지형 선택, 영웅의 팀·좌표·높이 유지, Undo/Redo 확인. [실제 화면 3개](https://github.com/qtaghdi/Vertactics/actions/runs/44028807455/artifacts/14304237794) |
-| 이동 경로와 마커 | 단위 테스트 24개, Chromium 시나리오 4개 통과. 웨이포인트 편집·Undo, 마커 추가, 메모 수정과 보기 전환 검증. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44030502710) |
-| 편집 설정 | 단위 테스트 26개, Chromium 시나리오 5개 통과. 고지대·계단 스냅, 편집 잠금, 키보드 단축키와 레이어 표시 검증. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44031144923) |
-| Phase 3 및 지도 편집 | 단위 테스트 28개와 Chromium 시나리오 9개 통과. 겹친 지형 선택, 2D/3D 영웅 편집, 드래그 단일 이력, 지도 전환·JSON 입출력, 블록 편집과 실행 취소·다시 실행을 검증. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44032978306) |
-| 층 관리 및 다중 선택 | 단위 테스트 30개, Chromium 시나리오 11개 통과. 층 추가·이름 변경·삭제, 회전·스냅, 다중 복제와 실행 취소 검증. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44033821083) |
-| 지형 유형 확장 | 단위 테스트 31개, Chromium 시나리오 11개 통과. 열린 출입구의 형상과 지도 JSON 지형 속성 검증. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44034026109) |
-| 경사로와 지도 스키마 | 단위 테스트 37개, Chromium 시나리오 12개 통과. 경사로 배치·드래그·스냅 높이와 기존 v1 지도의 v2 내보내기 검증. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44034705436) |
-| Phase 1~4 점검 | 단위 테스트 39개와 Chromium 시나리오 14개 통과. A 거점 배치, 층 전환과 영웅 간 차단 검증. 이슈·PR 템플릿, 릴리스 절차, 라이선스와 선택적 GLB 로딩 경계 정리. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44035786865) |
-| 지형 측정 | 단위 테스트 40개, Chromium 시나리오 15개 통과. 두 지점의 수평 거리·높이 차·직선 거리를 지도 단위로 표시하고 보기 전환 후에도 유지. 실게임 대조는 미완료. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44036751794) |
-| 초기 영웅 목록 | 단위 테스트 42개와 Chromium 시나리오 16개 통과. 역할 그룹, 영웅 배치, 정보 패널의 능력 이름과 출처 확인. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44037981117) |
-| 영웅 능력 미리보기 | 단위 테스트 45개, Chromium 시나리오 17개 통과. 영웅 기준 부채꼴로 사용자 설정 범위와 2D·3D 전환을 검증. 타입 검사, 린트, 프로덕션 빌드 통과. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44039103823) · [2D·3D 캡처](https://github.com/qtaghdi/Vertactics/actions/runs/44039103823/artifacts/14309061041) |
-| 독립 능력 배치 | 단위 테스트 47개, Chromium 시나리오 18개 통과. 고지대 배치, 이동, 회전, 보기 전환, 숨기기, 삭제와 실행 취소를 검증. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44040575157) · [2D·3D 캡처](https://github.com/qtaghdi/Vertactics/actions/runs/44040575157/artifacts/14308738616) |
-| 사용자 설정 영역 지속 시간 | 지속 시간 검증, 배치, 편집, 뷰 전환, 값 지우기, 실행 취소를 확인. 전략 재생 시간 처리의 범위는 Phase 7에 포함. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44041404112) · [캡처](https://github.com/qtaghdi/Vertactics/actions/runs/44041404112/artifacts/14309283253) |
-| 능력 거리 참고값 | 단위 테스트 49개, Chromium 시나리오 20개 통과. 출처·게임 버전·실측과 추정 표시, 미터와 지도 단위 구분, 뷰 전환, 지우기와 실행 취소를 검증. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44042312699) · [캡처](https://github.com/qtaghdi/Vertactics/actions/runs/44042312699/artifacts/14310001845) |
-| 로컬 전략 초안 | 수동 저장, 새로고침, 능력과 참고값 복원 및 재편집 검증. 저장본이 없거나 손상돼도 편집 가능. 여러 전략 관리와 자동 저장은 Phase 7에 남음. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44043379399) · [복원 화면](https://github.com/qtaghdi/Vertactics/actions/runs/44043379399/artifacts/14310311989) |
-| 영웅 간 시야선 | 단위 테스트 50개와 Chromium 시나리오 21개 통과. 첫 차단면, 높은 위치의 개방 시야, 2D·3D 차단선과 대상 해제 검증. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44044442148) · [2D·3D 캡처](https://github.com/qtaghdi/Vertactics/actions/runs/44044442148/artifacts/14311166558) |
-| 지점 간 시야선 | 단위 테스트 50개와 Chromium 시나리오 22개 통과. 벽과 낮은 엄폐물 차단, 고저차에서 개방, 보기 전환과 결과 지우기를 검증. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44045214843) · [브라우저 캡처](https://github.com/qtaghdi/Vertactics/actions/runs/44045214843/artifacts/14311187263) |
-| 영웅 부분 노출 | 세 높이 샘플, 엄폐물 뒤 부분 노출, 편집기의 고정 높이 안내 검증. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44045878353) · [캡처](https://github.com/qtaghdi/Vertactics/actions/runs/44045878353/artifacts/14312225037) |
-| 경로 길이와 지점 높이 | 단위 테스트 52개와 Chromium 시나리오 23개 통과. 경로 길이 합계와 두 지점 높이, 보기 전환, 실행 취소 검증. 경로 길이는 표시한 구간 길이의 합. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44046212660) · [캡처](https://github.com/qtaghdi/Vertactics/actions/runs/44046212660/artifacts/14310374904) |
-| 영웅 눈높이 시점 | 영웅 배치 방향, Esc 종료, 조정한 2D·3D 카메라의 화면 일치 검증. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44047235106) · [영웅 시점 캡처](https://github.com/qtaghdi/Vertactics/actions/runs/44047235106/artifacts/14312660585) |
-| 시야 경계 | 단위 테스트 55개와 Chromium 시나리오 25개 통과. 벽 경계, 출입구의 빈 공간, 계단 접점과 훈련 지도 계단의 차단·개방 구간 검증. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44047549788) |
+| CI #13, Chromium 158 · 1440 × 900 | frozen 설치, 전체 타입·린트, Vitest 22개, 프로덕션 빌드 및 Chromium 2개 통과. 네 지형 선택, 영웅의 팀·좌표·높이 유지, Undo/Redo 확인. [실제 화면 3개](https://github.com/Oddmash/Vertactics/actions/runs/44028807455/artifacts/14304237794) |
+| 이동 경로와 마커 | 단위 테스트 24개, Chromium 시나리오 4개 통과. 웨이포인트 편집·Undo, 마커 추가, 메모 수정과 보기 전환 검증. [CI](https://github.com/Oddmash/Vertactics/actions/runs/44030502710) |
+| 편집 설정 | 단위 테스트 26개, Chromium 시나리오 5개 통과. 고지대·계단 스냅, 편집 잠금, 키보드 단축키와 레이어 표시 검증. [CI](https://github.com/Oddmash/Vertactics/actions/runs/44031144923) |
+| Phase 3 및 지도 편집 | 단위 테스트 28개와 Chromium 시나리오 9개 통과. 겹친 지형 선택, 2D/3D 영웅 편집, 드래그 단일 이력, 지도 전환·JSON 입출력, 블록 편집과 실행 취소·다시 실행을 검증. [CI](https://github.com/Oddmash/Vertactics/actions/runs/44032978306) |
+| 층 관리 및 다중 선택 | 단위 테스트 30개, Chromium 시나리오 11개 통과. 층 추가·이름 변경·삭제, 회전·스냅, 다중 복제와 실행 취소 검증. [CI](https://github.com/Oddmash/Vertactics/actions/runs/44033821083) |
+| 지형 유형 확장 | 단위 테스트 31개, Chromium 시나리오 11개 통과. 열린 출입구의 형상과 지도 JSON 지형 속성 검증. [CI](https://github.com/Oddmash/Vertactics/actions/runs/44034026109) |
+| 경사로와 지도 스키마 | 단위 테스트 37개, Chromium 시나리오 12개 통과. 경사로 배치·드래그·스냅 높이와 기존 v1 지도의 v2 내보내기 검증. [CI](https://github.com/Oddmash/Vertactics/actions/runs/44034705436) |
+| Phase 1~4 점검 | 단위 테스트 39개와 Chromium 시나리오 14개 통과. A 거점 배치, 층 전환과 영웅 간 차단 검증. 이슈·PR 템플릿, 릴리스 절차, 라이선스와 선택적 GLB 로딩 경계 정리. [CI](https://github.com/Oddmash/Vertactics/actions/runs/44035786865) |
+| 지형 측정 | 단위 테스트 40개, Chromium 시나리오 15개 통과. 두 지점의 수평 거리·높이 차·직선 거리를 지도 단위로 표시하고 보기 전환 후에도 유지. 실게임 대조는 미완료. [CI](https://github.com/Oddmash/Vertactics/actions/runs/44036751794) |
+| 초기 영웅 목록 | 단위 테스트 42개와 Chromium 시나리오 16개 통과. 역할 그룹, 영웅 배치, 정보 패널의 능력 이름과 출처 확인. [CI](https://github.com/Oddmash/Vertactics/actions/runs/44037981117) |
+| 영웅 능력 미리보기 | 단위 테스트 45개, Chromium 시나리오 17개 통과. 영웅 기준 부채꼴로 사용자 설정 범위와 2D·3D 전환을 검증. 타입 검사, 린트, 프로덕션 빌드 통과. [CI](https://github.com/Oddmash/Vertactics/actions/runs/44039103823) · [2D·3D 캡처](https://github.com/Oddmash/Vertactics/actions/runs/44039103823/artifacts/14309061041) |
+| 독립 능력 배치 | 단위 테스트 47개, Chromium 시나리오 18개 통과. 고지대 배치, 이동, 회전, 보기 전환, 숨기기, 삭제와 실행 취소를 검증. [CI](https://github.com/Oddmash/Vertactics/actions/runs/44040575157) · [2D·3D 캡처](https://github.com/Oddmash/Vertactics/actions/runs/44040575157/artifacts/14308738616) |
+| 사용자 설정 영역 지속 시간 | 지속 시간 검증, 배치, 편집, 뷰 전환, 값 지우기, 실행 취소를 확인. 전략 재생 시간 처리의 범위는 Phase 7에 포함. [CI](https://github.com/Oddmash/Vertactics/actions/runs/44041404112) · [캡처](https://github.com/Oddmash/Vertactics/actions/runs/44041404112/artifacts/14309283253) |
+| 능력 거리 참고값 | 단위 테스트 49개, Chromium 시나리오 20개 통과. 출처·게임 버전·실측과 추정 표시, 미터와 지도 단위 구분, 뷰 전환, 지우기와 실행 취소를 검증. [CI](https://github.com/Oddmash/Vertactics/actions/runs/44042312699) · [캡처](https://github.com/Oddmash/Vertactics/actions/runs/44042312699/artifacts/14310001845) |
+| 로컬 전략 초안 | 수동 저장, 새로고침, 능력과 참고값 복원 및 재편집 검증. 저장본이 없거나 손상돼도 편집 가능. 여러 전략 관리와 자동 저장은 Phase 7에 남음. [CI](https://github.com/Oddmash/Vertactics/actions/runs/44043379399) · [복원 화면](https://github.com/Oddmash/Vertactics/actions/runs/44043379399/artifacts/14310311989) |
+| 영웅 간 시야선 | 단위 테스트 50개와 Chromium 시나리오 21개 통과. 첫 차단면, 높은 위치의 개방 시야, 2D·3D 차단선과 대상 해제 검증. [CI](https://github.com/Oddmash/Vertactics/actions/runs/44044442148) · [2D·3D 캡처](https://github.com/Oddmash/Vertactics/actions/runs/44044442148/artifacts/14311166558) |
+| 지점 간 시야선 | 단위 테스트 50개와 Chromium 시나리오 22개 통과. 벽과 낮은 엄폐물 차단, 고저차에서 개방, 보기 전환과 결과 지우기를 검증. [CI](https://github.com/Oddmash/Vertactics/actions/runs/44045214843) · [브라우저 캡처](https://github.com/Oddmash/Vertactics/actions/runs/44045214843/artifacts/14311187263) |
+| 영웅 부분 노출 | 세 높이 샘플, 엄폐물 뒤 부분 노출, 편집기의 고정 높이 안내 검증. [CI](https://github.com/Oddmash/Vertactics/actions/runs/44045878353) · [캡처](https://github.com/Oddmash/Vertactics/actions/runs/44045878353/artifacts/14312225037) |
+| 경로 길이와 지점 높이 | 단위 테스트 52개와 Chromium 시나리오 23개 통과. 경로 길이 합계와 두 지점 높이, 보기 전환, 실행 취소 검증. 경로 길이는 표시한 구간 길이의 합. [CI](https://github.com/Oddmash/Vertactics/actions/runs/44046212660) · [캡처](https://github.com/Oddmash/Vertactics/actions/runs/44046212660/artifacts/14310374904) |
+| 영웅 눈높이 시점 | 영웅 배치 방향, Esc 종료, 조정한 2D·3D 카메라의 화면 일치 검증. [CI](https://github.com/Oddmash/Vertactics/actions/runs/44047235106) · [영웅 시점 캡처](https://github.com/Oddmash/Vertactics/actions/runs/44047235106/artifacts/14312660585) |
+| 시야 경계 | 단위 테스트 55개와 Chromium 시나리오 25개 통과. 벽 경계, 출입구의 빈 공간, 계단 접점과 훈련 지도 계단의 차단·개방 구간 검증. [CI](https://github.com/Oddmash/Vertactics/actions/runs/44047549788) |
 | 시야 계산 비용 | 눈높이 시야선 1개와 노출 시야선 3개를 한 번의 판정으로 측정. 로컬 arm64·Node.js 24.14.0에서 지도별 예열 1,000회 후 난수 시드를 고정한 지점 쌍 5,000개 사용. p95는 안뜰(4블록) 0.002ms, 고저차 테스트 맵(21블록) 0.008ms, 왕의 길 A(39블록) 0.011ms, 왕의 길 A 32개 합성 지도(1,248블록) 0.318ms. 도메인 CPU 시간 기준으로 현재 지도에는 BVH 도입을 보류하고 실시간 갱신이나 더 큰 지도를 추가하면 다시 측정. |
-| 시야 입력과 층 표시 | 단위 테스트 56개와 Chromium 시나리오 26개 통과. 영웅 배치는 눈높이 끝점을 제공합니다. 선분 교차는 화면에 숨겨진 층을 포함한 전체 지형에 시야·충돌 플래그를 각각 적용합니다. 화면 선택에는 Three.js, 시야 분석에는 검증된 지형 형상을 사용합니다. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44048791767) · [캡처](https://github.com/qtaghdi/Vertactics/actions/runs/44048791767/artifacts/14312971060) |
-| 전술 타임라인 편집 | 단위 테스트 58개와 Chromium 시나리오 27개 통과. 이벤트 시간과 ID, 배치 참조, 단계 편집, 실행 취소와 브라우저 저장본 복원을 검증. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44049905226) |
-| 전술 타임라인 재생 | 단위 테스트 60개와 Chromium 시나리오 27개 통과. 위치와 방향 보간, 단계와 이벤트 경계, 탐색한 중간 지점의 2D·3D 표시, 편집 상태 복귀 검증. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44051109069) |
-| 로컬 전략 목록 | 단위 테스트 60개, Chromium 시나리오 29개 통과. 이름별 저장, 최근 저장 순서, 갱신, 복제, 삭제 확인, 복원, 기존 단일 저장본의 갱신 검증. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44052203062) |
-| 작업 자동 저장·복구 | 단위 테스트 60개, Chromium 시나리오 31개 통과. 자동 저장, 페이지 숨김 시 저장, 새로고침과 명시적 복구, 손상된 복구 데이터와 쓰기 실패, 이름별 저장본 보존을 검증. 기존 단일 저장본의 마이그레이션은 로컬 전략 목록 항목에서 검증. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44053504783) |
-| 전략 파일 전송과 이미지 내보내기 | 단위 테스트 60개, Chromium 시나리오 33개 통과. 잘못된 파일 처리, 지도와 타임라인의 저장·새로고침·복원·내보내기·재가져오기 검증. 두 PNG를 디코딩해 2D와 3D 화면이 정상적으로 저장되는지 확인. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44054863071) |
-| 전략 공유 링크 | 단위 테스트 62개, Chromium 시나리오 35개 통과. 읽기 전용 보기, 재생, JSON 내보내기, 편집용 복제, 잘못된 링크와 데이터 크기 한도 검증. 링크에는 압축 저장본을 담으며 한도를 넘는 전략은 JSON 파일로 전달. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44055871444) |
+| 시야 입력과 층 표시 | 단위 테스트 56개와 Chromium 시나리오 26개 통과. 영웅 배치는 눈높이 끝점을 제공합니다. 선분 교차는 화면에 숨겨진 층을 포함한 전체 지형에 시야·충돌 플래그를 각각 적용합니다. 화면 선택에는 Three.js, 시야 분석에는 검증된 지형 형상을 사용합니다. [CI](https://github.com/Oddmash/Vertactics/actions/runs/44048791767) · [캡처](https://github.com/Oddmash/Vertactics/actions/runs/44048791767/artifacts/14312971060) |
+| 전술 타임라인 편집 | 단위 테스트 58개와 Chromium 시나리오 27개 통과. 이벤트 시간과 ID, 배치 참조, 단계 편집, 실행 취소와 브라우저 저장본 복원을 검증. [CI](https://github.com/Oddmash/Vertactics/actions/runs/44049905226) |
+| 전술 타임라인 재생 | 단위 테스트 60개와 Chromium 시나리오 27개 통과. 위치와 방향 보간, 단계와 이벤트 경계, 탐색한 중간 지점의 2D·3D 표시, 편집 상태 복귀 검증. [CI](https://github.com/Oddmash/Vertactics/actions/runs/44051109069) |
+| 로컬 전략 목록 | 단위 테스트 60개, Chromium 시나리오 29개 통과. 이름별 저장, 최근 저장 순서, 갱신, 복제, 삭제 확인, 복원, 기존 단일 저장본의 갱신 검증. [CI](https://github.com/Oddmash/Vertactics/actions/runs/44052203062) |
+| 작업 자동 저장·복구 | 단위 테스트 60개, Chromium 시나리오 31개 통과. 자동 저장, 페이지 숨김 시 저장, 새로고침과 명시적 복구, 손상된 복구 데이터와 쓰기 실패, 이름별 저장본 보존을 검증. 기존 단일 저장본의 마이그레이션은 로컬 전략 목록 항목에서 검증. [CI](https://github.com/Oddmash/Vertactics/actions/runs/44053504783) |
+| 전략 파일 전송과 이미지 내보내기 | 단위 테스트 60개, Chromium 시나리오 33개 통과. 잘못된 파일 처리, 지도와 타임라인의 저장·새로고침·복원·내보내기·재가져오기 검증. 두 PNG를 디코딩해 2D와 3D 화면이 정상적으로 저장되는지 확인. [CI](https://github.com/Oddmash/Vertactics/actions/runs/44054863071) |
+| 전략 공유 링크 | 단위 테스트 62개, Chromium 시나리오 35개 통과. 읽기 전용 보기, 재생, JSON 내보내기, 편집용 복제, 잘못된 링크와 데이터 크기 한도 검증. 링크에는 압축 저장본을 담으며 한도를 넘는 전략은 JSON 파일로 전달. [CI](https://github.com/Oddmash/Vertactics/actions/runs/44055871444) |
 | 지도 중심 작업공간 | 작업공간 이동 링크, 지도 도구 모음, 터치 영역과 좁은 화면 시나리오를 추가했다. npm DNS 조회 실패와 오프라인 패키지 누락으로 로컬 설치가 차단됐다. 브라우저 확인과 CI 결과는 별도로 기록한다. |
-| 작업공간 기준과 좁은 화면 재배치 | Chromium 1440 × 900과 390 × 844 캡처를 확인했다. 도구를 접기 전에는 좁은 화면의 캔버스가 y=635 아래에서 시작했다. 수정 후 테스트는 y=430 위에서 시작하는지와 터치 영역을 확인하고 두 보기를 캡처한다. [기준 화면](https://github.com/qtaghdi/Vertactics/actions/runs/44066432574/artifacts/14321390541) · [수정 화면](https://github.com/qtaghdi/Vertactics/actions/runs/44070388892/artifacts/14321698791) |
-| 한·영 작업공간과 문서 구조 | 언어 변경, 접근성 이름, 좌표와 저장 시각, 보기 전환, 새로고침 및 복원을 확인했다. 별도 PR에서 문서 관리를 분리하고 편집·재생·가져오기·공유·복구 흐름을 재검증했다. [언어 CI](https://github.com/qtaghdi/Vertactics/actions/runs/44066432574) · [구조 CI](https://github.com/qtaghdi/Vertactics/actions/runs/44067153900) |
-| OWKR 카탈로그 | 영웅 54명의 ID, 한국어 이름과 역할을 OWKR Match와 대조했다. 전장 31개를 두 언어로 열람하며, 왕의 길은 기존 `kings-row-a` ID의 A 거점 지형을 연다. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44072435978) |
-| 브라우저 호환성 | Chromium 전체 시나리오와 Firefox·WebKit 기본 흐름을 실행했다. 두 모드의 지형 선택과 강제 WebGL 미지원 시 대체 화면을 확인했다. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44067292922) |
-| 렌더링 기준과 외곽선 배치 | Linux x64, Chromium 158.0.8127.18, ANGLE SwiftShader, 1440 × 900. 2D·3D 모두 안뜰 9→6회, 고저차 테스트 맵 43→23회, 왕의 길 79→41회로 감소했다. 첫 드로우는 Intel Xeon 8573C에서 504.5 ms, AMD EPYC 9V74에서 307.1 ms였다. 선택 이벤트부터 드로우까지 각각 5.9–18.3 ms와 4.8–20.4 ms, JS 힙은 11.36과 10.88 MiB였다. 시간과 메모리는 서로 다른 러너에서 측정했다. [기준](https://github.com/qtaghdi/Vertactics/actions/runs/44066787788) · [최적화](https://github.com/qtaghdi/Vertactics/actions/runs/44069847978) |
-| 공개 프리뷰 | 실제 공개 경로에서 파비콘, 메타데이터, WebGL, 404, 전략 공유 및 로컬 저장과 복원 검증을 통과했다. [배포 CI](https://github.com/qtaghdi/Vertactics/actions/runs/44071463018) · [공개 편집기](https://qtaghdi.github.io/Vertactics/) |
-| 오렌지·민트 공용 컨트롤 | 타입 검사, 린트, 단위 테스트, 빌드, Chromium 2D·3D 및 좁은 화면 시나리오, Firefox·WebKit 호환성 검사를 통과했다. Chromium에서 Select 메뉴 열기, Escape 닫기와 키보드 포커스를 확인했다. [CI](https://github.com/qtaghdi/Vertactics/actions/runs/44079651733) · [편집기 캡처](https://github.com/qtaghdi/Vertactics/actions/runs/44079651733/artifacts/14327260355) |
+| 작업공간 기준과 좁은 화면 재배치 | Chromium 1440 × 900과 390 × 844 캡처를 확인했다. 도구를 접기 전에는 좁은 화면의 캔버스가 y=635 아래에서 시작했다. 수정 후 테스트는 y=430 위에서 시작하는지와 터치 영역을 확인하고 두 보기를 캡처한다. [기준 화면](https://github.com/Oddmash/Vertactics/actions/runs/44066432574/artifacts/14321390541) · [수정 화면](https://github.com/Oddmash/Vertactics/actions/runs/44070388892/artifacts/14321698791) |
+| 한·영 작업공간과 문서 구조 | 언어 변경, 접근성 이름, 좌표와 저장 시각, 보기 전환, 새로고침 및 복원을 확인했다. 별도 PR에서 문서 관리를 분리하고 편집·재생·가져오기·공유·복구 흐름을 재검증했다. [언어 CI](https://github.com/Oddmash/Vertactics/actions/runs/44066432574) · [구조 CI](https://github.com/Oddmash/Vertactics/actions/runs/44067153900) |
+| OWKR 카탈로그 | 영웅 54명의 ID, 한국어 이름과 역할을 OWKR Match와 대조했다. 전장 31개를 두 언어로 열람하며, 왕의 길은 기존 `kings-row-a` ID의 A 거점 지형을 연다. [CI](https://github.com/Oddmash/Vertactics/actions/runs/44072435978) |
+| 브라우저 호환성 | Chromium 전체 시나리오와 Firefox·WebKit 기본 흐름을 실행했다. 두 모드의 지형 선택과 강제 WebGL 미지원 시 대체 화면을 확인했다. [CI](https://github.com/Oddmash/Vertactics/actions/runs/44067292922) |
+| 렌더링 기준과 외곽선 배치 | Linux x64, Chromium 158.0.8127.18, ANGLE SwiftShader, 1440 × 900. 2D·3D 모두 안뜰 9→6회, 고저차 테스트 맵 43→23회, 왕의 길 79→41회로 감소했다. 첫 드로우는 Intel Xeon 8573C에서 504.5 ms, AMD EPYC 9V74에서 307.1 ms였다. 선택 이벤트부터 드로우까지 각각 5.9–18.3 ms와 4.8–20.4 ms, JS 힙은 11.36과 10.88 MiB였다. 시간과 메모리는 서로 다른 러너에서 측정했다. [기준](https://github.com/Oddmash/Vertactics/actions/runs/44066787788) · [최적화](https://github.com/Oddmash/Vertactics/actions/runs/44069847978) |
+| 공개 프리뷰 | 실제 공개 경로에서 파비콘, 메타데이터, WebGL, 404, 전략 공유 및 로컬 저장과 복원 검증을 통과했다. [배포 CI](https://github.com/Oddmash/Vertactics/actions/runs/44071463018) · [공개 편집기](https://oddmash.github.io/Vertactics/) |
+| 오렌지·민트 공용 컨트롤 | 타입 검사, 린트, 단위 테스트, 빌드, Chromium 2D·3D 및 좁은 화면 시나리오, Firefox·WebKit 호환성 검사를 통과했다. Chromium에서 Select 메뉴 열기, Escape 닫기와 키보드 포커스를 확인했다. [CI](https://github.com/Oddmash/Vertactics/actions/runs/44079651733) · [편집기 캡처](https://github.com/Oddmash/Vertactics/actions/runs/44079651733/artifacts/14327260355) |
 | 경쟁전 실지형 추출 인수인계 | 카탈로그의 경쟁전 전장 31개를 확인했다. 2026-11-17 검증 환경에서 인수인계의 추출 루트, 왕의 길 D4 디렉터리, 추출 후 자동 점검 JSON이 모두 없었다. 이번 확인에서는 31개 전장의 기본판 선별, 바이너리 파싱, 지형 참조, 2D 변환, 자료 대조와 브라우저 검증이 대기 중이다. 인수인계에 기록된 빌드는 2.25.1.0.155284다. |

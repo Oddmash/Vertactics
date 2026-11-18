@@ -95,7 +95,7 @@ const LandingPage = () => (
     </main>
     <footer className="site-footer shell">
       <p>Vertactics는 Blizzard Entertainment와 제휴하지 않은 독립 오버워치 팬 프로젝트입니다. 영웅 이미지 © Blizzard Entertainment.</p>
-      <a href="https://github.com/qtaghdi/Vertactics">GitHub <span className="external-arrow" aria-hidden="true" /></a>
+      <a href="https://github.com/Oddmash/Vertactics">GitHub <span className="external-arrow" aria-hidden="true" /></a>
     </footer>
   </>
 );

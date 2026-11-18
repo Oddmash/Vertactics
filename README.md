@@ -6,7 +6,7 @@
 
 Vertactics is a map tool for planning approaches, cover, and high-ground positions. Open **Tidal Relay** to plan around a central bridge, a lower drainage route and an elevated maintenance crossing. The catalogue also includes the training maps.
 
-[Open Vertactics](https://qtaghdi.github.io/Vertactics/)
+[Open Vertactics](https://oddmash.github.io/Vertactics/)
 
 ![Vertactics in 3D with an elevated platform and stairs](docs/screenshots/workspace-3d.jpg)
 

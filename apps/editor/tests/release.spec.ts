@@ -15,7 +15,7 @@ test('serves the editor, favicon, preview metadata and static recovery page', as
   await expect(page.getByTestId('viewport').locator('canvas')).toBeVisible();
   expect(errors).toEqual([]);
 
-  const canonicalLanding = 'https://qtaghdi.github.io/Vertactics/about/';
+  const canonicalLanding = 'https://oddmash.github.io/Vertactics/about/';
   const about = await page.goto('./about/');
   expect(about?.ok()).toBe(true);
   await expect(page.locator('html')).toHaveAttribute('lang', 'ko');
@@ -27,7 +27,7 @@ test('serves the editor, favicon, preview metadata and static recovery page', as
   expect(schema).toMatchObject({ '@type': 'WebApplication', url: canonicalLanding });
   const robots = await page.request.get('./robots.txt');
   expect(robots.ok()).toBe(true);
-  expect(await robots.text()).toContain('Sitemap: https://qtaghdi.github.io/Vertactics/sitemap.xml');
+  expect(await robots.text()).toContain('Sitemap: https://oddmash.github.io/Vertactics/sitemap.xml');
   const sitemap = await page.request.get('./sitemap.xml');
   expect(sitemap.ok()).toBe(true);
   expect(await sitemap.text()).toContain(`<loc>${canonicalLanding}</loc>`);
