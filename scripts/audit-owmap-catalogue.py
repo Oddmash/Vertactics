@@ -141,7 +141,7 @@ def main():
     args = parser.parse_args()
     maps_root = args.maps.resolve()
     folders = {normalized_name(path.name): path for path in sorted(maps_root.iterdir()) if path.is_dir()}
-    catalogue = json.loads((ROOT / 'src/domain/owkr-catalogue.json').read_text())['maps']
+    catalogue = json.loads((ROOT / 'apps/editor/src/domain/owkr-catalogue.json').read_text())['maps']
     maps = [audit_map(maps_root, folders, entry) for entry in catalogue]
     ready = sum(bool(entry.get('directModels')) and not entry['missingDirectModels'] for entry in maps)
     data = {'schemaVersion': 1, 'gameBuild': args.game_build, 'completeDirectModelSets': ready, 'maps': maps}

@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
-import { isWorldPoint, parseMap } from '../src/domain/map.ts';
-import { measureSegment } from '../src/domain/measurement.ts';
+import { isWorldPoint, parseMap } from '../apps/editor/src/domain/map.ts';
+import { measureSegment } from '../apps/editor/src/domain/measurement.ts';
 
 const requiredKingRowsChecks = [
   'main-arch-width', 'main-arch-height', 'hotel-entry-width', 'hotel-bypass-length',

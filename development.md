@@ -15,9 +15,11 @@ Open the local address printed by Vite. The map needs a browser with WebGL 2 sup
 
 Run `pnpm dev:landing` in a separate terminal and open `http://localhost:3000/about/` to develop the landing page. The landing uses the editor dev server for shared images and the editor link.
 
-The pnpm workspace keeps the Vite editor at the root and the Next.js landing in `apps/landing`. They share a lockfile and release, and keeping the editor root preserves its current URLs and tools. Add a shared package when both apps need a stable API. Split deployments or introduce a task orchestrator when independent releases or build caching justify the extra setup.
+The pnpm workspace keeps the Vite editor in `apps/editor` and the Next.js landing in `apps/landing`. They share a lockfile and release, and the shared build preserves public editor URLs and tools. Add a shared package when both apps need a stable API. Split deployments or introduce a task orchestrator when independent releases or build caching justify the extra setup.
 
 `pnpm build` assembles the two apps in `dist`. GitHub Pages serves the editor from the project root and the static landing from `/about/`. The legacy `about.html` navigates to the canonical landing. The sitemap is published at the project root. Domain-wide crawler directives come from the host’s root `robots.txt`, so submit the project sitemap directly when using a search console.
+
+Hero portraits and map thumbnails are reused from the OWKR balance project. Ability icons are WebP conversions of the images already referenced in the official catalogue. The editor serves all three sets from `apps/editor/public/images`. The original attribution applies.
 
 ## Run checks
 
@@ -26,20 +28,20 @@ pnpm typecheck
 pnpm lint
 pnpm test
 pnpm build
-pnpm exec playwright install chromium
+pnpm --filter @vertactics/editor exec playwright install chromium
 pnpm test:e2e
 ```
 
-Playwright serves the production build from `dist`. Screenshots appear in `test-results` locally and as the `editor-screenshots` artifact on the GitHub Actions run.
+Playwright serves the production build from `dist`. Screenshots appear in `apps/editor/test-results` locally and as the `editor-screenshots` artifact on the GitHub Actions run.
 
 | Path | Purpose |
 | --- | --- |
-| `src/domain` | Map and strategy validation, coordinates, terrain geometry, and history |
-| `src/map` | Demo map data |
-| `src/render` | Terrain scene, cameras, and map picking |
-| `src/editor` | Editor UI and interaction state |
-| `src/theme` | JSON design tokens and styles |
-| `tests` | Chromium scenarios |
+| `apps/editor/src/domain` | Map and strategy validation, coordinates, terrain geometry, and history |
+| `apps/editor/src/map` | Demo map data |
+| `apps/editor/src/render` | Terrain scene, cameras, and map picking |
+| `apps/editor/src/editor` | Editor UI and interaction state |
+| `apps/editor/src/theme` | JSON design tokens and styles |
+| `apps/editor/tests` | Chromium scenarios |
 
 Map JSON is validated on import. The editor opens v1 and v2 files and exports v2. Strategy documents use their own version.
 
@@ -86,7 +88,7 @@ Keep the map status unverified until geometric measurements, physical passage, a
 
 In a private custom match, record matching endpoints with Workshop’s `Position Of (Event Player)` HUD or the ray-hit position when a surface cannot be stood on. Keep Y as elevation. Record the hero and whether each route passes, and capture the game build, map variant, and screenshot references. [Workshop coordinate capture](https://us.forums.blizzard.com/en/overwatch/t/how-can-i-record-my-spots-coordinates/614247)
 
-Run `node scripts/check-map-survey.mjs src/map/kings-row-point-a.json <survey.json>` to compare horizontal distances and signed rises in game units. The survey contains `mapId`, `gameBuild`, `variant`, `scaleReference`, `gameUnitsPerEditorUnit`, `tolerance`, and `segments`. Each segment contains `id`, `editor`, and `game`, with two ordered `[X, Y, Z]` points in each pair. Calibrate the scale using a separate measured distance. Use `main-arch-width`, `main-arch-height`, `hotel-entry-width`, `hotel-bypass-length`, `attack-balcony-rise`, and `defense-balcony-rise` for the Point A checks. The tool reports missing checkpoints and excess error. Record clearance and obstruction observations alongside its output.
+Run `node scripts/check-map-survey.mjs apps/editor/src/map/kings-row-point-a.json <survey.json>` to compare horizontal distances and signed rises in game units. The survey contains `mapId`, `gameBuild`, `variant`, `scaleReference`, `gameUnitsPerEditorUnit`, `tolerance`, and `segments`. Each segment contains `id`, `editor`, and `game`, with two ordered `[X, Y, Z]` points in each pair. Calibrate the scale using a separate measured distance. Use `main-arch-width`, `main-arch-height`, `hotel-entry-width`, `hotel-bypass-length`, `attack-balcony-rise`, and `defense-balcony-rise` for the Point A checks. The tool reports missing checkpoints and excess error. Record clearance and obstruction observations alongside its output.
 
 OWLib documents an MIT licence for its tooling. Track the rights for any geometry or artwork separately before including it in a public build. [OWLib](https://github.com/overtools/OWLib) · [Blizzard EULA](https://www.blizzard.com/en-us/legal/bfbbb648-bcc6-4b78-a5c7-e2fe20c135df/blizzard-end-user-license-agreement)
 

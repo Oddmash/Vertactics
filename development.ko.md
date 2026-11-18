@@ -15,9 +15,11 @@ Vite가 터미널에 출력한 로컬 주소를 엽니다. 지도 렌더링에�
 
 랜딩을 개발할 때는 별도 터미널에서 `pnpm dev:landing`을 실행한 뒤 `http://localhost:3000/about/`을 엽니다. 랜딩의 공용 이미지와 편집기 링크는 Vite 개발 서버를 사용합니다.
 
-pnpm 워크스페이스에서 루트의 Vite 편집기와 `apps/landing`의 Next.js 랜딩을 관리합니다. 잠금 파일과 배포는 함께 관리하며, 편집기의 경로와 개발 도구를 유지합니다. 두 앱에 안정적인 공통 API가 필요해질 때 공유 패키지를 추가하고, 독립 배포나 빌드 캐싱이 필요해지면 배포 분리나 빌드 도구 도입을 검토합니다.
+pnpm 워크스페이스에서 `apps/editor`의 Vite 편집기와 `apps/landing`의 Next.js 랜딩을 관리합니다. 잠금 파일과 배포는 함께 관리하며, 편집기의 경로와 개발 도구를 유지합니다. 두 앱에 안정적인 공통 API가 필요해질 때 공유 패키지를 추가하고, 독립 배포나 빌드 캐싱이 필요해지면 배포 분리나 빌드 도구 도입을 검토합니다.
 
 `pnpm build`는 두 앱을 `dist`에 모읍니다. GitHub Pages의 프로젝트 루트에서 편집기를, `/about/`에서 정적 랜딩을 제공합니다. 이전 `about.html` 주소는 랜딩의 대표 주소로 이동합니다. 사이트맵은 프로젝트 루트에 배포합니다. 크롤러는 도메인 루트의 `robots.txt`를 사용하므로 검색 콘솔에서는 프로젝트 사이트맵을 직접 제출합니다.
+
+영웅 초상화와 전장 썸네일은 OWKR 밸런스 프로젝트의 파일을 사용합니다. 스킬 아이콘은 기존 공식 카탈로그가 참조하던 이미지를 WebP로 변환했습니다. 세 종류 모두 `apps/editor/public/images`에서 제공하며 원본 이미지의 저작권 표기를 유지합니다.
 
 ## 검증하기
 
@@ -26,22 +28,22 @@ pnpm typecheck
 pnpm lint
 pnpm test
 pnpm build
-pnpm exec playwright install chromium
+pnpm --filter @vertactics/editor exec playwright install chromium
 pnpm test:e2e
 ```
 
-Playwright는 `dist`의 프로덕션 빌드를 프리뷰 서버로 실행합니다. 화면 파일은 `test-results` 아래에 저장되며, GitHub Actions 실행 페이지에서는 `editor-screenshots` 아티팩트로 받을 수 있습니다.
+Playwright는 `dist`의 프로덕션 빌드를 프리뷰 서버로 실행합니다. 화면 파일은 `apps/editor/test-results` 아래에 저장되며, GitHub Actions 실행 페이지에서는 `editor-screenshots` 아티팩트로 받을 수 있습니다.
 
 ## 코드 둘러보기
 
 | 경로 | 역할 |
 | --- | --- |
-| `src/domain` | 맵·전략 검증, 월드 좌표·지형 기하, 전략 히스토리 |
-| `src/map` | 테스트 맵 JSON |
-| `src/render` | 지형 장면, 카메라, 선택 판정 |
-| `src/editor` | 편집기 UI와 상호작용 상태 |
-| `src/theme` | JSON 디자인 토큰과 스타일 |
-| `tests` | Chromium 사용 흐름 검증 |
+| `apps/editor/src/domain` | 맵·전략 검증, 월드 좌표·지형 기하, 전략 히스토리 |
+| `apps/editor/src/map` | 테스트 맵 JSON |
+| `apps/editor/src/render` | 지형 장면, 카메라, 선택 판정 |
+| `apps/editor/src/editor` | 편집기 UI와 상호작용 상태 |
+| `apps/editor/src/theme` | JSON 디자인 토큰과 스타일 |
+| `apps/editor/tests` | Chromium 사용 흐름 검증 |
 
 지도 JSON을 가져올 때 유효성을 검사합니다. 편집기는 v1과 v2를 열 수 있으며 v2로 내보냅니다. 전략 문서 버전은 별도로 관리됩니다.
 
@@ -98,6 +100,6 @@ Playwright는 `dist`의 프로덕션 빌드를 프리뷰 서버로 실행합니�
 
 비공개 사용자 지정 게임에서 Workshop의 `Position Of (Event Player)` HUD로 좌표를 기록합니다. 서 있을 수 없는 표면은 광선이 처음 닿은 위치를 기록합니다. Y는 높이입니다. 게임 빌드, 전장 변형, 영웅, 통과 여부, 시야와 캡처 출처를 함께 기록합니다. [Workshop 좌표 기록](https://us.forums.blizzard.com/en/overwatch/t/how-can-i-record-my-spots-coordinates/614247)
 
-`node scripts/check-map-survey.mjs src/map/kings-row-point-a.json <survey.json>`으로 게임 단위에서 수평 거리와 높이차를 비교합니다. 측정 JSON에는 `mapId`, `gameBuild`, `variant`, `scaleReference`, `gameUnitsPerEditorUnit`, `tolerance`, `segments`를 넣습니다. 각 구간은 `id`와 시작점·끝점 `[X, Y, Z]` 쌍을 담은 `editor`, `game` 필드로 구성합니다. 별도로 실측한 거리에서 축척을 구합니다. A 거점은 `main-arch-width`, `main-arch-height`, `hotel-entry-width`, `hotel-bypass-length`, `attack-balcony-rise`, `defense-balcony-rise`를 비교합니다. 누락과 오차 초과가 출력되며, 영웅별 통과 여부와 시야 차단은 별도로 실측 기록에 남깁니다.
+`node scripts/check-map-survey.mjs apps/editor/src/map/kings-row-point-a.json <survey.json>`으로 게임 단위에서 수평 거리와 높이차를 비교합니다. 측정 JSON에는 `mapId`, `gameBuild`, `variant`, `scaleReference`, `gameUnitsPerEditorUnit`, `tolerance`, `segments`를 넣습니다. 각 구간은 `id`와 시작점·끝점 `[X, Y, Z]` 쌍을 담은 `editor`, `game` 필드로 구성합니다. 별도로 실측한 거리에서 축척을 구합니다. A 거점은 `main-arch-width`, `main-arch-height`, `hotel-entry-width`, `hotel-bypass-length`, `attack-balcony-rise`, `defense-balcony-rise`를 비교합니다. 누락과 오차 초과가 출력되며, 영웅별 통과 여부와 시야 차단은 별도로 실측 기록에 남깁니다.
 
 OWLib 도구는 MIT 라이선스를 명시합니다. 공개 빌드에 지형이나 그림을 넣을 때는 해당 데이터의 사용 권한을 함께 확인합니다. [OWLib](https://github.com/overtools/OWLib) · [Blizzard 이용 약관](https://www.blizzard.com/en-us/legal/bfbbb648-bcc6-4b78-a5c7-e2fe20c135df/blizzard-end-user-license-agreement)

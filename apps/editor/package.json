@@ -1,0 +1,31 @@
+{
+  "name": "@vertactics/editor",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run src",
+    "test:e2e": "playwright test",
+    "build": "vite build --outDir ../../dist --emptyOutDir",
+    "preview": "vite preview --outDir ../../dist"
+  },
+  "dependencies": {
+    "@react-three/fiber": "9.8.2",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "three": "0.184.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.0",
+    "@types/node": "^24.0.0",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.7",
+    "@types/three": "0.184.0",
+    "@vitejs/plugin-react": "6.3.0",
+    "typescript": "5.9.3",
+    "vite": "8.3.8",
+    "vitest": "4.1.12"
+  }
+}
