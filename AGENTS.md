@@ -32,3 +32,4 @@
 | Coordinate systems, terrain, cameras and assets | [map-rendering](skills/map-rendering/SKILL.md) |
 | Browser verification, screenshots and CI | [browser-verification](skills/browser-verification/SKILL.md) |
 | Editor layout, controls, design tokens and accessibility | [editor-design](skills/editor-design/SKILL.md) |
+| Landing, product visuals, visual identity and design QA | [vertactics-design](skills/vertactics-design/SKILL.md) |

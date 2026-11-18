@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
+import tokens from './landing-tokens.json';
 import { description, landingUrl, siteUrl, socialImage, title } from './site';
 import './landing.css';
 
@@ -17,10 +18,12 @@ export const metadata: Metadata = {
   twitter: { card: 'summary_large_image', title, description, images: [image] },
 };
 
-export const viewport: Viewport = { themeColor: '#11121c', colorScheme: 'dark' };
+export const viewport: Viewport = { themeColor: tokens.surface, colorScheme: 'dark' };
+
+const theme = Object.fromEntries(Object.entries(tokens).map(([name, value]) => [`--${name}`, value])) as CSSProperties;
 
 const RootLayout = ({ children }: { children: ReactNode }) => (
-  <html lang="ko">
+  <html lang="ko" style={theme}>
     <body>{children}</body>
   </html>
 );
