@@ -1,0 +1,12 @@
+{
+  "surface": "#10111a",
+  "raised": "#171b24",
+  "text": "#f7f5ed",
+  "muted": "#b2b3c8",
+  "line": "#353c4a",
+  "grid": "#252b39",
+  "action": "#d6f477",
+  "actionHover": "#e6fa9e",
+  "actionText": "#1b240d",
+  "focus": "#81eee5"
+}
