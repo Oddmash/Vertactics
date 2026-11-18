@@ -52,7 +52,7 @@ test('plans across both views of the original Tidal Relay map', async ({ page },
   const locations = page.getByRole('combobox', { name: '주요 위치' });
   const wholeMap = await canvas.screenshot();
   await locations.click();
-  await page.getByRole('option', { name: '정비 교량 상층', exact: true }).click();
+  await page.getByRole('listbox').getByRole('option', { name: '정비 교량 상층', exact: true }).click();
   await expect.poll(async () => (await canvas.screenshot()).equals(wholeMap)).toBe(false);
   await locations.press('Home');
   await locations.press('Enter');
