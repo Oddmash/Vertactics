@@ -24,7 +24,7 @@ const TerrainPreview = ({ assetRoot }: { assetRoot: string }) => {
   return (
     <figure className="terrain-preview">
       <div className="preview-toolbar">
-        <span>고저차 테스트 맵</span>
+        <span>왕의 길 A 거점 · 근사 지도</span>
         <div className="preview-switch" role="group" aria-label="전장 미리보기 모드">
           {(['2D', '3D'] as const).map((mode) => (
             <button key={mode} type="button" aria-pressed={view === mode} onClick={() => setView(mode)}>
@@ -33,7 +33,7 @@ const TerrainPreview = ({ assetRoot }: { assetRoot: string }) => {
           ))}
         </div>
       </div>
-      <img src={assetRoot + selected.image} alt={selected.alt} width={840} height={491} fetchPriority={view === '3D' ? 'high' : 'auto'} />
+      <img src={assetRoot + selected.image} alt={selected.alt} width={1440} height={900} fetchPriority={view === '3D' ? 'high' : 'auto'} />
       <figcaption className="preview-caption">
         <span role="status">{selected.caption}</span>
         <span className="preview-source">실제 편집기 화면</span>

@@ -4,4 +4,6 @@ import courtyard from './courtyard.json';
 import elevationLab from './elevation-lab.json';
 import tidalRelay from './tidal-relay.json';
 
-export const maps = [parseMap(elevationLab), parseMap(courtyard), parseMap(kingsRowPointA), parseMap(tidalRelay)];
+export const maps = import.meta.env.MODE === 'e2e'
+  ? [parseMap(elevationLab), parseMap(courtyard), parseMap(kingsRowPointA), parseMap(tidalRelay)]
+  : [parseMap(kingsRowPointA)];

@@ -30,7 +30,8 @@ test('shares a strategy as read-only, plays it across views and duplicates it fo
   await expect(seek).toHaveValue('5000');
   const json = recipient.waitForEvent('download');
   await recipient.getByRole('button', { name: '전략 JSON 내보내기' }).click();
-  expect((await json).suggestedFilename()).toBe('elevation-lab-strategy.json');
+  expect((await json).suggestedFilename()).toBe(process.env.VERTACTICS_PUBLIC_URL
+    ? 'kings-row-a-strategy.json' : 'elevation-lab-strategy.json');
 
   await recipient.getByRole('button', { name: '편집용 복제' }).click();
   await expect(recipient).toHaveURL((location) => location.hash === '');

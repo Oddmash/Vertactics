@@ -85,11 +85,9 @@ const LandingPage = () => (
         <div className="map-layout shell">
           <div className="section-heading">
             <h2 id="maps-title">지금 열 수 있는 지도</h2>
-            <p>카탈로그에는 OWKR 내전 전장 31개가 있습니다. 편집 가능한 지형이 준비 중인 전장은 카탈로그에 상태를 표시합니다.</p>
+            <p>카탈로그에는 OWKR 내전 전장 31개가 있습니다. 편집 가능한 지형이 준비 중인 전장은 모드별 목록에서 상태를 확인할 수 있습니다.</p>
           </div>
           <dl className="map-list">
-            <div><dt>조수 중계소</dt><dd>지상 교량, 하층 배수로, 상층 정비 교량을 배치한 자작 전장</dd></div>
-            <div><dt>가상 훈련 지도</dt><dd>고지대, 계단, 엄폐물과 시야를 확인하는 연습 지도</dd></div>
             <div><dt>왕의 길 A 거점 근사 지도</dt><dd>A 거점 주변 진입로와 엄폐물을 단순화한 지도</dd></div>
           </dl>
         </div>
